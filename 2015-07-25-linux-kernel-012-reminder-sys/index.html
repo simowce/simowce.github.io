@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.4.1">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.4.1" color="#222">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"right","display":"hide","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: 'Copy',
+      copy_success: 'Copied',
+      copy_failure: 'Copy failed'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="比较仔细地看完了这一部分的内容，收获还是蛮大的，知道了很多不知道的知识，理解了很多已经知道的知识，例如：为什么 fork 子进程的时候会有多个输出？ 信号究竟是什么？ 等等。下面我主要说一说几个方面：系统调用 system_call，signal 机制以及其原理，进程调度函数 schedule， 退出函数 exit，等待子进程结束函数 wait_pid ， 增加子进程函数 fork ，这一些在平常">
+<meta name="keywords" content="Linux kernel">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux 0.12 备忘录 -- 第八章">
+<meta property="og:url" content="https://simowce.github.io/2015-07-25-linux-kernel-012-reminder-sys/index.html">
+<meta property="og:site_name" content="Silence.Slow.Simple">
+<meta property="og:description" content="比较仔细地看完了这一部分的内容，收获还是蛮大的，知道了很多不知道的知识，理解了很多已经知道的知识，例如：为什么 fork 子进程的时候会有多个输出？ 信号究竟是什么？ 等等。下面我主要说一说几个方面：系统调用 system_call，signal 机制以及其原理，进程调度函数 schedule， 退出函数 exit，等待子进程结束函数 wait_pid ， 增加子进程函数 fork ，这一些在平常">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:updated_time" content="2019-10-06T11:10:28.868Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux 0.12 备忘录 -- 第八章">
+<meta name="twitter:description" content="比较仔细地看完了这一部分的内容，收获还是蛮大的，知道了很多不知道的知识，理解了很多已经知道的知识，例如：为什么 fork 子进程的时候会有多个输出？ 信号究竟是什么？ 等等。下面我主要说一说几个方面：系统调用 system_call，signal 机制以及其原理，进程调度函数 schedule， 退出函数 exit，等待子进程结束函数 wait_pid ， 增加子进程函数 fork ，这一些在平常">
+  <link rel="canonical" href="https://simowce.github.io/2015-07-25-linux-kernel-012-reminder-sys/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Linux 0.12 备忘录 -- 第八章 | Silence.Slow.Simple</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Silence.Slow.Simple</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">a simowce's blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section">Home</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section">Tags</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section">Categories</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section">Archives</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section">About</a>
+
+  </li>
+  </ul>
+
+    
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-cn">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2015-07-25-linux-kernel-012-reminder-sys/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">Linux 0.12 备忘录 -- 第八章
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              
+                
+              
+
+              <time title="Created: 2015-07-25 00:00:00" itemprop="dateCreated datePublished" datetime="2015-07-25T00:00:00+08:00">2015-07-25</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux-kernel/" itemprop="url" rel="index"><span itemprop="name">Linux kernel</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>比较仔细地看完了这一部分的内容，收获还是蛮大的，知道了很多不知道的知识，理解了很多已经知道的知识，例如：<strong>为什么 fork 子进程的时候会有多个输出？ 信号究竟是什么？</strong> 等等。下面我主要说一说几个方面：<strong>系统调用 system_call，signal 机制以及其原理，进程调度函数 schedule， 退出函数 exit，等待子进程结束函数 wait_pid ， 增加子进程函数 fork</strong> ，这一些在平常的系统编程里面都是非常常用的东西，理解其实现过程能够更加清楚地明白自己究竟在干什么～</p><a id="more"></a>
+<h1 id="system-call"><a href="#system-call" class="headerlink" title="system_call"></a>system_call</h1><p>首先要说明一点，系统调用其实就是通过 int 0x80 中断实现的，eax 存储的是功能号。而且，我们用户进程是以特权级 3 中运行，int 0x80 中断的特权级是 0 ，所以调用会产生特权级转换，堆栈会切换，并且将当前的 <strong>ss esp eflags cs eip</strong> 等寄存器的值依次压入进程的内核栈 （关于内核栈和用户栈的区别我后边会说到 :-) ）。然后就是将所有通用寄存器都压入栈中，设置 ds 和 es 分别指向内核段，fs 指向本地段，然后调用相关的系统调用函数，完成后将返回值 （放在 eax 寄存器）也压入栈。<strong>接下来 line 101 ～ line 106 由于还没有读到相关方面的内容，所以暂时不理解，先留个坑。 ** 接下来主要就是处理进程的信号了。这里处理的是进程信号位图已被标记并且没有被屏蔽的信号。找到第一个符合条件的信号，调用 do_signal 进行 处理。这里要说明一下的是，在获取了信号位图号之后（放在 ecx），之所以要 +1 ，是因为在 Linux 实际的信号值定义都是从 1 开始的，信号位图（就是一个 int 变量）是从 0 开始的。之后，判断是否需要继续处理信号还是结束系统调用。具体我们放到下面具体讲，然后恢复之前保存的寄存器的值，恢复。</strong>注意，最后的一句 iret 实际上不是回到调用系统调用的进程，而是进行了一些有趣的事。** 具体我们下面讲。</p>
+<p>从上面的描述中我们可以了解到一些什么呢？那就是系统是在什么时候处理信号的。答案就是在进行系统调用，或者是在进程切换（_timer_interrupt 最后会跳转到 ret_from_sys_call ）的时候。</p>
+<h1 id="signal"><a href="#signal" class="headerlink" title="signal"></a>signal</h1><p>通过这个部分，我们可以了解到很多原理的东西，以及之前的很多问号：“ ×× 为什么是这样，为什么要这样？” 为了说明这一点，我将通过我们之前在 signal 编程一些说法或者是一些限制要求来进行详细说明：</p>
+<p><strong><em>1. 使用 signal 函数或者 sigaction 函数进行信号处理句柄的修改，不过，signal 函数的修改是一次性的，sigaction 函数是永久的</em></strong></p>
+<p>首先说明一下，信号处理句柄，或者说 handler 的修改，其实是系统进程结构体 <code>struct task_struct</code> 里面的一个成员 <code>sigaction</code> ，这个成员是一个 <code>struct sigaction</code> 数组，数组总共有 32  项，代表了 32 个信号。signal 函数或者是 sigaction 函数就是修改这个数组里面对应项的来修改信号处理句柄的～</p>
+<p>然后，之所以 signal 函数是临时赋值，sigaction 是永久赋值，是因为 signal 在对 sigaction 数组进行赋值的时候，打上了 <code>SA_ONESHOT</code> 的标志（signal.c  line 93），而 sigaction 函数没有，在真正处理信号的 do_signal 函数中，如果发现了 <code>SA_ONESHOT</code> 的标志，则将信号处理句柄清空。</p>
+<p><strong><em>2. 信号处理句柄是在什么时候执行的？</em></strong></p>
+<p>要解决这个问题，我们就必须知道整个信号从发出到执行的全过程，简单地说明下：</p>
+<p>用户进程调用 signal 函数或者是 sigaction 函数对相应的信号进行捕获（即处理句柄的赋值，不过 <strong>SIGKILL 和 SIGSTOP 不可捕获！！！</strong>）；<br>对当前进程发送一个信号，被进程捕获到，加入到其进程结构的信号位图中；<br>当进程调用系统调用或者是或者是发生进程切换的时候，找到第一个接收到且没有被屏蔽的信号值，进入 do_signal 函数进行处理；<br>do_signal 的主要功能是：如果要处理的信号的处理句柄是 SIG_IGN （忽略该信号），直接返回 1 ；如果处理句柄是 SIG_DEF （默认处理） ，则在进行相应的处理之后（其中有一些默认处理需要我们的注意，具体我们放到 wait_pid 函数那里细讲），也返回 1；这两个都会导致在 ret_from_call 继续处理剩余的信号。否则，检查是否有 SA_ONESHOT 的标志（即是否是 signal 函数处理的信号句柄），如果有则清空。接下来，就是最重要的，也是最精彩的部分了。函数在一开始就把原来压入内核中的 eip 另存为 old_eip ，然后把 eip 赋值为相应信号的处理句柄，之所以这么做是为了<strong>在 ret_from_sys_call 返回了之后，不是恢复到原来的进程，而是去执行信号处理句柄</strong>。然后将保存的用户栈顶指针上移（这里的上移对应这栈顶指针的减少，因为栈是逆增长的～），手动将一些要恢复用户进程的值压入用户栈中，这里重点注意的是压入后用户栈的栈顶元素是一个叫做 sa_restorer 的系统库函数，这个函数在信号处理句柄结束后被调用。就是这一个函数，最终恢复用户进程。<br>然后，do_signal 函数返回 0 ，ret_from_sys_call 结束，恢复之前压入内核栈的通用寄存器的值。<strong>注意，最后的 iret 中恢复的 eip 实际上以及被 do_signal 修改成信号处理句柄的地址了。</strong>于是，从这里结束后，接着运行的就是信号处理句柄了。<strong>再次注意，在执行信号处理句柄的时候已经是用户态了，堆栈也都是用户栈了</strong>。句柄结束后，由于 ret 会将用户栈顶的值作为接下来的执行值，而我们在上面说过，用户栈已经被我们手动压入了一些值，而且栈顶元素就是 sa_restorer 。所以，接下来运行的就是 sa_restorer 函数。而这个函数实际上就是将我们手动压入的一些值进行恢复，完完全全地恢复成原来的用户进程，old_eip 就是在这里被恢复的。</p>
+<p>至此，比较完整地描述了一遍信号处理的这一个过程。具体请看书中代码！！！</p>
+<h1 id="schedule"><a href="#schedule" class="headerlink" title="schedule"></a>schedule</h1><p>对于这个函数，具体的调度算法细节我就不细说了，因为这个算法本身并不高明，而且在 Linux 内核 2.6 以后这个东东已经被替换成了 CFS 了，这也是我以后要钻研的东东！这里我想把重点放在这个函数最后的 <code>switch_to</code> 这个宏。这也是进程切换的一个重点所在。他的具体内容如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> switch_to(n) &#123;\</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span><span class="keyword">long</span> a,b;&#125; __tmp; \</span><br><span class="line">__asm__(<span class="string">"cmpl %%ecx,_current\n\t"</span> \</span><br><span class="line">	<span class="string">"je 1f\n\t"</span> \</span><br><span class="line">	<span class="string">"movw %%dx,%1\n\t"</span> \</span><br><span class="line">	<span class="string">"xchgl %%ecx,_current\n\t"</span> \</span><br><span class="line">	<span class="string">"ljmp %0\n\t"</span> \</span><br><span class="line">	<span class="string">"cmpl %%ecx,_last_task_used_math\n\t"</span> \</span><br><span class="line">	<span class="string">"jne 1f\n\t"</span> \</span><br><span class="line">	<span class="string">"clts\n"</span> \</span><br><span class="line">	<span class="string">"1:"</span> \</span><br><span class="line">	::<span class="string">"m"</span> (*&amp;__tmp.a),<span class="string">"m"</span> (*&amp;__tmp.b), \</span><br><span class="line">	<span class="string">"d"</span> (_TSS(n)),<span class="string">"c"</span> ((<span class="keyword">long</span>) task[n])); \</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>具体就是将要跳转的进程数组下标（<strong>注意进程数组下标和进程号的区别，后面会提到这一点</strong>）对应的 TSS 赋给一个临时结构体的成员 b 的低 16 位（其他的无用），然后 ljmp 跳转到这个 TSS 。可别小看这个跳转，其实在背后做了很多的工作，（具体请看书中第四章），例如将当前的通用寄存器等硬环境保存到当前进程的 TSS 中，然后切换到指定的 TSS ，并且将该 TSS 中的保存的内容赋值到相应的位置，实现任务的切换。不过这个任务切换的全过程确实值得说道说道：</p>
+<p>时钟中断发生，调用处理该中断的程序 <code>_timer_interrupt</code> 并且最终调用 <code>do_timer</code> 里面的 <code>schedule 函数</code> ，<code>schedule 函数</code> 在选择了下一个要执行的进程 b 之后，调用 <code>switch_to 宏</code> ，在执行完 <code>ljmp %0\n\t</code> 这一句之后，将当前进程 a 的硬环境保存在当前进程的 TSS （利用 TR 寄存器，因为此时 TR 寄存器的内容还是进程 a 的）中并且将 b 的 TSS 的内容恢复到相应的位置中，实现进程切换。当下一次使用 <code>switch_to 宏</code> 恢复到原来的进程 a 的时候，在 <code>ljmp %0\n\t</code> 这一句执行完了之后，原来的进程 a 恢复，继续执行的是 <code>ljmp %0\n\t</code> 的下一句。然后必须要记住的是 <code>switch_to</code> 是一个宏，编译的时候是直接展开在原来的位置的，所以不需要 <code>ret</code> ，所以，当 <code>switch_to</code> 执行完毕了之后，<code>schedule 函数</code> 也执行完毕，回到进程 a 在时钟中断发生时接下去的代码继续运行。</p>
+<p>这就是这个进程切换的全过程，相当地清晰！</p>
+<h1 id="exit"><a href="#exit" class="headerlink" title="exit"></a>exit</h1><p>这部分的内容的难点在于对于孤儿进程组的理解与处理。下面说说我的理解：</p>
+<p>对于孤儿进程组的判断使用的是 <code>is_orphaned_pgrp</code> 这个函数，在这个函数里面，给出了一个<strong>不是孤儿进程组</strong>的条件：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">((*p)-&gt;p_pptr-&gt;pgrp != pgrp) &amp;&amp; ((*p)-&gt;p_pptr-&gt;session == (*p)-&gt;session)</span><br></pre></td></tr></table></figure>
+
+<p>其实这还是比较好理解，如果该进程组里面的所有进程的父进程都是该进程组的，那说明整个进程组与外界就没有联系了，所以肯定就是孤儿进程组了。</p>
+<p>然后，<code>do_exit</code> 这个函数里面有一个比较难以理解的就是：<strong>如何判断要退出的进程是该进程组与外界的唯一联系？</strong> 其实只要注意到几个点就可以比较清晰地理解了。首先注意到在 line 281 已经将当前进程的状态改成了 <code>TASK_ZOMBIE</code> 僵死状态了，而在 line 291 还有 line 292 这两句：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ((current-&gt;p_pptr-&gt;pgrp != current-&gt;pgrp) &amp;&amp;</span><br><span class="line">     (curent-&gt;p_pptr-&gt;session == current-&gt;session) &amp;&amp; </span><br><span class="line">      ..... )</span><br></pre></td></tr></table></figure>
+
+<p>这两句代码就是在判断当前进程不是孤儿进程。然后接下来调用 <code>is_orphaned_pgrp 函数</code> 来判断当前进程所在的进程的组是否为孤儿进程组。<strong>注意，在 <code>is_orphaned_pgrp</code> 这个函数中，如果扫描到的进程的状态是 <code>TASK_ZOMBIE</code> 僵死状态是直接跳过的，而当前进程的状态恰好就是 <code>TASK_ZOMBIE</code> ，所以，如果此时当前进程所在的进程组依然将是孤儿进程组，那么说明当前进程就是与外界唯一的联系。</strong></p>
+<p>然后呢，如果判断当前进程所在进程组将成为孤儿进程组，那么将向整个进程组发送 SIGHUP 还有 SIGCONT 这两个信号，具体为什么还值得深究，暂时就理解成是 POSIX 的规定～</p>
+<p>接下来，给当前进程的父进程发送 SIGCHILD 这个信号，告诉父进程我已经退出了。<strong>请注意，这一点很重要，这个在后面的 wait_pid 函数中理解的一个关键点。</strong></p>
+<p>最后，让 init 进程成为当前进程子进程的新父亲。同时这里出现了第二个判断孤儿进程组的 case 2,。有了上面的基础，理解这一个就比较简单了，我们只需要知道一点就是：<strong>在 case 2 中，当前进程相当于 case 1 中当前进程的父进程，即当前进程的某一个子进程是其所在进程组与外界的唯一联系</strong>，理解了这一点，就能够很好地理解 case 2 了。</p>
+<p>最后的最后，就是连接 init 进程的子进程的双向链表还有当前进程的子进程的双向链表～</p>
+<h1 id="waitpid"><a href="#waitpid" class="headerlink" title="waitpid"></a>waitpid</h1><p>这个函数主要是将当前进程挂起，并且根据 pid 找到符合条件的子进程，</p>
+<h1 id="fork"><a href="#fork" class="headerlink" title="fork"></a>fork</h1><p>如果你有过 Linux 系统编程的经验，你就会知道，在使用 fork() 创建新进程的时候，要根据 fork 的返回值来判断是当前进程还是新的子进程。通过这个 fork 函数源码的学习，我们就可以清晰的了解为什么是这样的～</p>
+<p>首先我们得先说一下前面提到过的 <strong>进程号和进程结构数组下标的不同</strong>：</p>
+<p>函数 <code>find_empty_process</code> 就是为新进程取得新进程号，并且返回数组项的，从这个函数我们可以了解到，进程号其实就是一个 int 数，而在 Linux 0.12 中，进程结构数组的大小 —— NR_TASKS —— 其实只有 64 个。所以我们可以得出这样的结论，至少在 Linux 0.12 ，进程号是一个递增的数，而数组号是可以回滚的～</p>
+<p>然后我们来解释 “双返回” ：</p>
+<p>首先我们在实际编程的时候一般都是这么写的：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> pid = fork();</span><br><span class="line"></span><br><span class="line">....</span><br></pre></td></tr></table></figure>
+
+<p>这里的 fork 其实是一个系统调用，最终运行的是 <code>copy_process 函数</code>，这个函数就是为我们的新进程准备各种硬环境，其中包括 TSS 的各项赋值，其中就有两句是重点：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">p-&gt;tss.eip = eip;</span><br><span class="line">....</span><br><span class="line">p-&gt;tss.eax = <span class="number">0</span>;</span><br><span class="line">....</span><br></pre></td></tr></table></figure>
+
+<p>所以，新进程的开始就是父进程接下去要运行的语句，即 fork 函数返回值的赋值，而 fork 函数的返回值是放在 eax 寄存器的，所以父进程 fork 函数的返回值是子进程的进程号，而子进程的返回值是 0 ！而双返回的原因也就在这里了～</p>
+
+    </div>
+
+    
+    
+    
+        
+      
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>simowce</li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://simowce.github.io/2015-07-25-linux-kernel-012-reminder-sys/" title="Linux 0.12 备忘录 -- 第八章">https://simowce.github.io/2015-07-25-linux-kernel-012-reminder-sys/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-ND</a> unless stating additionally.</li>
+</ul>
+</div>
+
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/Linux-kernel/" rel="tag"># Linux kernel</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/2015-06-09-thinking-in-data-structure----red-black-treethinking/" rel="next" title="Thinking in Data Structure -- 红黑树（思考）">
+                  <i class="fa fa-chevron-left"></i> Thinking in Data Structure -- 红黑树（思考）
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/2015-09-08-how-to-understand-b-and-b-in-regular-expression/" rel="prev" title="正则表达式 \b 和 \B 辨析">
+                  正则表达式 \b 和 \B 辨析 <i class="fa fa-chevron-right"></i>
+                </a>
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#system-call"><span class="nav-number">1.</span> <span class="nav-text">system_call</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#signal"><span class="nav-number">2.</span> <span class="nav-text">signal</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#schedule"><span class="nav-number">3.</span> <span class="nav-text">schedule</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#exit"><span class="nav-number">4.</span> <span class="nav-text">exit</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#waitpid"><span class="nav-number">5.</span> <span class="nav-text">waitpid</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#fork"><span class="nav-number">6.</span> <span class="nav-text">fork</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">simowce</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">categories</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">tags</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">simowce</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.4.1</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/muse.js?v=7.4.1"></script>
+
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

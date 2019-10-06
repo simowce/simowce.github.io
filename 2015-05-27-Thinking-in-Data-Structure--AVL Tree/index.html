@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.4.1">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.4.1" color="#222">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"right","display":"hide","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: 'Copy',
+      copy_success: 'Copied',
+      copy_failure: 'Copy failed'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="AVL 树， 是在二叉搜索树的基础上，在插入操作上加入了旋转的操作，从而避免了一棵树退化成一个链表或者树的深度过长导致搜索的时候效率太低的坏处，而旋转也是 AVL 树 中最重要的操作，也是本博文的重点内容。AVL 树 在普通二叉搜索树节点的基础上加入了一个 buf 值，意思是左孩子的高度减去右孩子的高度，而 buf 值的合法范围是 -1， 0， 1，如果不是这几个值，那么说明树不平衡，就要进行旋转">
+<meta name="keywords" content="数据结构,AVL Tree">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Thinking in Data Structure -- AVL Tree">
+<meta property="og:url" content="https://simowce.github.io/2015-05-27-Thinking-in-Data-Structure--AVL Tree/index.html">
+<meta property="og:site_name" content="Silence.Slow.Simple">
+<meta property="og:description" content="AVL 树， 是在二叉搜索树的基础上，在插入操作上加入了旋转的操作，从而避免了一棵树退化成一个链表或者树的深度过长导致搜索的时候效率太低的坏处，而旋转也是 AVL 树 中最重要的操作，也是本博文的重点内容。AVL 树 在普通二叉搜索树节点的基础上加入了一个 buf 值，意思是左孩子的高度减去右孩子的高度，而 buf 值的合法范围是 -1， 0， 1，如果不是这几个值，那么说明树不平衡，就要进行旋转">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://simowce.github.io/assets/ll.jpg">
+<meta property="og:image" content="https://simowce.github.io/assets/lr.jpg">
+<meta property="og:updated_time" content="2019-10-06T11:10:28.868Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Thinking in Data Structure -- AVL Tree">
+<meta name="twitter:description" content="AVL 树， 是在二叉搜索树的基础上，在插入操作上加入了旋转的操作，从而避免了一棵树退化成一个链表或者树的深度过长导致搜索的时候效率太低的坏处，而旋转也是 AVL 树 中最重要的操作，也是本博文的重点内容。AVL 树 在普通二叉搜索树节点的基础上加入了一个 buf 值，意思是左孩子的高度减去右孩子的高度，而 buf 值的合法范围是 -1， 0， 1，如果不是这几个值，那么说明树不平衡，就要进行旋转">
+<meta name="twitter:image" content="https://simowce.github.io/assets/ll.jpg">
+  <link rel="canonical" href="https://simowce.github.io/2015-05-27-Thinking-in-Data-Structure--AVL Tree/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Thinking in Data Structure -- AVL Tree | Silence.Slow.Simple</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Silence.Slow.Simple</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">a simowce's blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section">Home</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section">Tags</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section">Categories</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section">Archives</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section">About</a>
+
+  </li>
+  </ul>
+
+    
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-cn">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2015-05-27-Thinking-in-Data-Structure--AVL Tree/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">Thinking in Data Structure -- AVL Tree
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              
+                
+              
+
+              <time title="Created: 2015-05-27 00:00:00" itemprop="dateCreated datePublished" datetime="2015-05-27T00:00:00+08:00">2015-05-27</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Data-Structure/" itemprop="url" rel="index"><span itemprop="name">Data Structure</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><code>AVL 树</code>， 是在二叉搜索树的基础上，在插入操作上加入了<strong>旋转</strong>的操作，从而避免了一棵树退化成一个链表或者树的深度过长导致搜索的时候效率太低的坏处，而旋转也是 <code>AVL 树</code> 中最重要的操作，也是本博文的重点内容。</p><p><code>AVL 树</code> 在普通二叉搜索树节点的基础上加入了一个 <code>buf</code> 值，意思是左孩子的高度减去右孩子的高度，而 <code>buf</code> 值的合法范围是 -1， 0， 1，如果不是这几个值，那么说明树不平衡，就要进行旋转。</p><a id="more"></a>
+
+<p>接下来我们重点说说旋转操作。</p>
+<p>首先，要注意的是，在实现中并不是等到节点的 bf 值变为 +2 或者 -2 的时候才进行旋转。相反，当父节点的 bf 为 +1 或者 -1 时，就认为下一次插入的是必将导致不平衡，所以就进行旋转了。</p>
+<p>以左失衡为例，分为 LL 和 LR，即在父节点的左子树的左节点插入或者是父节点的左子树的右节点插入。究竟在插入的时候是如何判断这两种情况的，我们来看一张图</p>
+<p><img src="/assets/ll.jpg" alt></p>
+<p>从图中我们可以看到，当父节点的左儿子的 bf 是 +1 时，属于 LL 的情况， -1 的时候，属于 LR 的情况。那么继续分析下去， bf 等于 0 的时候是属于那种情况？稍加思考便可发现，<strong>这一种情况不存在</strong>，<strong>因为我们这里讨论的父节点的左儿子的 bf 值是在插入新节点之后导致失衡的前提下，如果左节点的左儿子在插入新节点之后导致失衡而且 bf 为 0，也就是在插入新节点之前以及之后父节点的左子树的高度没有发生变化，那么在插入新节点之后树发生了失衡，那么说明在插入之前树也是失衡的</strong>。</p>
+<p>有了上面的思考，接下来我们来分析一下旋转之后各节点的 bf 值如何调整，LL 的比较简单，重点来看 LR 的，还是来看一个图：</p>
+<p><img src="/assets/lr.jpg" alt></p>
+<p>从图中我们可以看到，LR 分为三种情况，这三种情况分别是通过父节点左子树的右节点或者说是 “孙子节点” <strong>插入后</strong>的 bf 值来区分的。</p>
+<p>而右失衡的操作，跟左失衡类似，在这里就不再赘述了。</p>
+<p>下面是代码的实现：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"avl.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">insert</span><span class="params">(p_avl *t, <span class="keyword">int</span> data)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (*t != <span class="literal">NULL</span>) &#123;</span><br><span class="line">		<span class="keyword">if</span> (data &lt; (*t)-&gt;data) &#123;</span><br><span class="line">			insert(&amp;(*t)-&gt;l_child, data);</span><br><span class="line">			<span class="keyword">if</span> (unblance) &#123;</span><br><span class="line">				<span class="keyword">switch</span> ((*t)-&gt;buf) &#123;</span><br><span class="line">				<span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">					(*t)-&gt;buf = <span class="number">1</span>;</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				<span class="keyword">case</span> <span class="number">-1</span>:</span><br><span class="line">					(*t)-&gt;buf = <span class="number">0</span>;</span><br><span class="line">					unblance = <span class="literal">false</span>;</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				<span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">					left_rotation(t);</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (data &gt; (*t)-&gt;data) &#123;</span><br><span class="line">			insert(&amp;(*t)-&gt;r_child, data);</span><br><span class="line">			<span class="keyword">if</span> (unblance) &#123;</span><br><span class="line">				<span class="keyword">switch</span> ((*t)-&gt;buf) &#123;</span><br><span class="line">				<span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">					(*t)-&gt;buf = <span class="number">-1</span>;</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				<span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">					(*t)-&gt;buf = <span class="number">0</span>;</span><br><span class="line">					unblance = <span class="literal">false</span>;</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				<span class="keyword">case</span> <span class="number">-1</span>:</span><br><span class="line">					right_rotation(t);</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			unblance = <span class="literal">false</span>;</span><br><span class="line">			<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"The key has already in the tree"</span>);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		unblance = <span class="literal">true</span>;</span><br><span class="line">		</span><br><span class="line">		*t = (p_avl)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(avl));</span><br><span class="line">		<span class="keyword">if</span> (*t == <span class="literal">NULL</span>) &#123;</span><br><span class="line">			<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Out of memory!\n"</span>);</span><br><span class="line">			<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		(*t)-&gt;data = data;</span><br><span class="line">		(*t)-&gt;buf = <span class="number">0</span>;</span><br><span class="line">		(*t)-&gt;l_child = (*t)-&gt;r_child = <span class="literal">NULL</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">right_rotation</span><span class="params">(p_avl *parent)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	p_avl child;</span><br><span class="line"></span><br><span class="line">	child = (*parent)-&gt;r_child;</span><br><span class="line">	<span class="keyword">if</span> (child-&gt;buf == <span class="number">-1</span>) &#123;</span><br><span class="line">		p_avl child_left;</span><br><span class="line"></span><br><span class="line">		child_left = child-&gt;l_child;</span><br><span class="line">		(*parent)-&gt;r_child = child_left;</span><br><span class="line">		child-&gt;l_child = (*parent);</span><br><span class="line">		(*parent)-&gt;buf = <span class="number">0</span>;</span><br><span class="line">		(*parent) = child;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		p_avl grandchild = child-&gt;l_child;</span><br><span class="line">		p_avl grandchild_right = grandchild-&gt;r_child;</span><br><span class="line">		</span><br><span class="line">		child-&gt;l_child = grandchild_right;</span><br><span class="line">		grandchild-&gt;r_child = child;</span><br><span class="line">		(*parent)-&gt;r_child = grandchild-&gt;l_child;</span><br><span class="line">		grandchild-&gt;l_child = (*parent);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">switch</span> (grandchild-&gt;buf) &#123;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">			(*parent)-&gt;buf = child-&gt;buf = <span class="number">0</span>;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">			(*parent)-&gt;buf = <span class="number">0</span>;</span><br><span class="line">			child-&gt;buf = <span class="number">-1</span>;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">-1</span>:</span><br><span class="line">			(*parent)-&gt;buf = <span class="number">1</span>;</span><br><span class="line">			child-&gt;buf = <span class="number">0</span>;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		(*parent) = grandchild;</span><br><span class="line">	&#125;</span><br><span class="line">	(*parent)-&gt;buf = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">left_rotation</span><span class="params">(p_avl *parent)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	p_avl child;</span><br><span class="line"></span><br><span class="line">	child = (*parent)-&gt;l_child;</span><br><span class="line">	<span class="keyword">if</span> (child-&gt;buf == <span class="number">1</span>) &#123;</span><br><span class="line">		p_avl child_right;</span><br><span class="line"></span><br><span class="line">		child_right = child-&gt;r_child;</span><br><span class="line">		(*parent)-&gt;l_child = child_right;</span><br><span class="line">		child-&gt;r_child = (*parent);</span><br><span class="line">		(*parent)-&gt;buf = <span class="number">0</span>;</span><br><span class="line">		(*parent) = child;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		p_avl grandchild = child-&gt;r_child;</span><br><span class="line">		p_avl grandchild_left = grandchild-&gt;l_child;</span><br><span class="line"></span><br><span class="line">		child-&gt;r_child = grandchild_left;</span><br><span class="line">		grandchild-&gt;l_child = child;</span><br><span class="line">		(*parent)-&gt;l_child = grandchild-&gt;r_child;</span><br><span class="line">		grandchild-&gt;r_child = (*parent);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">switch</span> (grandchild-&gt;buf) &#123;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">			child-&gt;buf = (*parent)-&gt;buf = <span class="number">0</span>;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">			child-&gt;buf = <span class="number">0</span>;</span><br><span class="line">			(*parent)-&gt;buf = <span class="number">-1</span>;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">-1</span>:</span><br><span class="line">			child-&gt;buf = <span class="number">1</span>;</span><br><span class="line">			(*parent)-&gt;buf = <span class="number">0</span>;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		(*parent) = grandchild;</span><br><span class="line">	&#125;</span><br><span class="line">	(*parent)-&gt;buf = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">pre_order</span><span class="params">(p_avl t)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (t) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"%d "</span>, t-&gt;data);</span><br><span class="line">		pre_order(t-&gt;l_child);</span><br><span class="line">		pre_order(t-&gt;r_child);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	p_avl root = <span class="literal">NULL</span>;</span><br><span class="line">	<span class="keyword">int</span> key;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span> ((<span class="built_in">scanf</span>(<span class="string">"%d"</span>, &amp;key)) &amp;&amp; key != <span class="string">'#'</span>) &#123;</span><br><span class="line">		insert(&amp;root, key);</span><br><span class="line">	&#125;</span><br><span class="line">	pre_order(root);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+        
+      
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>simowce</li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://simowce.github.io/2015-05-27-Thinking-in-Data-Structure--AVL Tree/" title="Thinking in Data Structure -- AVL Tree">https://simowce.github.io/2015-05-27-Thinking-in-Data-Structure--AVL Tree/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-ND</a> unless stating additionally.</li>
+</ul>
+</div>
+
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/数据结构/" rel="tag"># 数据结构</a>
+            
+              <a href="/tags/AVL-Tree/" rel="tag"># AVL Tree</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/2015-05-17-i-dont-know-c/" rel="next" title="其实我根本不懂 C ">
+                  <i class="fa fa-chevron-left"></i> 其实我根本不懂 C 
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/2015-05-31-compile-code-to-so-library/" rel="prev" title="动态链接库 .so 的编译和使用">
+                  动态链接库 .so 的编译和使用 <i class="fa fa-chevron-right"></i>
+                </a>
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">simowce</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">categories</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">tags</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">simowce</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.4.1</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/muse.js?v=7.4.1"></script>
+
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

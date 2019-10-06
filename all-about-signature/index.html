@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.4.1">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.4.1" color="#222">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"right","display":"hide","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: 'Copy',
+      copy_success: 'Copied',
+      copy_failure: 'Copy failed'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="作为一名 Android 系统工程师，替换系统应用是常事。但是刚入门的时候总会遇到这样的情况：把自己修改过的 App push 到手机以后发现无法运行，一问老鸟他会跟你说：你是不是下载了带签名的 ROM 了？去下个不带签名的就可以。可行自然是可行，但是终究不知其所以然，索性系统化学习了一番，总结成文，造福后人。">
+<meta name="keywords" content="Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代码之外——Andriod 签名">
+<meta property="og:url" content="https://simowce.github.io/all-about-signature/index.html">
+<meta property="og:site_name" content="Silence.Slow.Simple">
+<meta property="og:description" content="作为一名 Android 系统工程师，替换系统应用是常事。但是刚入门的时候总会遇到这样的情况：把自己修改过的 App push 到手机以后发现无法运行，一问老鸟他会跟你说：你是不是下载了带签名的 ROM 了？去下个不带签名的就可以。可行自然是可行，但是终究不知其所以然，索性系统化学习了一番，总结成文，造福后人。">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Digital_Signature_diagram_zh-CN.svg/1280px-Digital_Signature_diagram_zh-CN.svg.png">
+<meta property="og:image" content="http://static.zybuluo.com/simowce/3lqpq57w7kx9ndpqjsols08c/Screenshot%20from%202018-09-11%2021-30-56.png">
+<meta property="og:image" content="http://static.zybuluo.com/simowce/mvnnqsa65ovu31s2bln213ig/Screenshot%20from%202018-09-11%2021-54-34.png">
+<meta property="og:updated_time" content="2019-10-06T11:10:28.868Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="代码之外——Andriod 签名">
+<meta name="twitter:description" content="作为一名 Android 系统工程师，替换系统应用是常事。但是刚入门的时候总会遇到这样的情况：把自己修改过的 App push 到手机以后发现无法运行，一问老鸟他会跟你说：你是不是下载了带签名的 ROM 了？去下个不带签名的就可以。可行自然是可行，但是终究不知其所以然，索性系统化学习了一番，总结成文，造福后人。">
+<meta name="twitter:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Digital_Signature_diagram_zh-CN.svg/1280px-Digital_Signature_diagram_zh-CN.svg.png">
+  <link rel="canonical" href="https://simowce.github.io/all-about-signature/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>代码之外——Andriod 签名 | Silence.Slow.Simple</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Silence.Slow.Simple</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">a simowce's blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section">Home</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section">Tags</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section">Categories</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section">Archives</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section">About</a>
+
+  </li>
+  </ul>
+
+    
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-cn">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/all-about-signature/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">代码之外——Andriod 签名
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              
+                
+              
+
+              <time title="Created: 2018-08-11 14:18:40" itemprop="dateCreated datePublished" datetime="2018-08-11T14:18:40+08:00">2018-08-11</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/代码之外/" itemprop="url" rel="index"><span itemprop="name">代码之外</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>作为一名 Android 系统工程师，替换系统应用是常事。但是刚入门的时候总会遇到这样的情况：把自己修改过的 App push 到手机以后发现无法运行，一问老鸟他会跟你说：你是不是下载了带签名的 ROM 了？去下个不带签名的就可以。可行自然是可行，但是终究不知其所以然，索性系统化学习了一番，总结成文，造福后人。</p><a id="more"></a>
+<h2 id="非对称加密"><a href="#非对称加密" class="headerlink" title="非对称加密"></a>非对称加密</h2><p>在了解 Android 的签名机制之前，需要了解一些基础知识。非对称加密是整个 Android 签名机制的基石，又称为公开密钥加密。它需要两个密钥，一个是所有人的都可见的，称为<strong>公钥</strong>；另一个是仅能自己可见的，称为<strong>私钥</strong>。这两个密钥的关系在维基百科中的<a href="https://zh.wikipedia.org/wiki/%E5%85%AC%E5%BC%80%E5%AF%86%E9%92%A5%E5%8A%A0%E5%AF%86" target="_blank" rel="noopener">描述</a>是：</p>
+<blockquote>
+<p><strong>一个用于加密的时候，另一个则用于解密。使用其中一个密钥把明文加密后所得的密文，只能用相对应的另一个密钥才能解密得到原本的明文；甚至连最初用来加密的密钥也不能用作解密</strong>。由于加密和解密需要两个不同的密钥，故被称为非对称加密。</p>
+</blockquote>
+<p>至于公钥和私钥是如何产生，以及一个密钥加密的密文只能通过另一个密钥来解密背后的数学原理，可以参考阮一峰的科普文章：<a href="http://www.ruanyifeng.com/blog/2013/06/rsa_algorithm_part_one.html" target="_blank" rel="noopener">这个</a>还有<a href="http://www.ruanyifeng.com/blog/2013/07/rsa_algorithm_part_two.html" target="_blank" rel="noopener">这个</a>，这里就不详细说明。目前我们需要记住的第一个原则是：</p>
+<ul>
+<li><strong>原则一：</strong>使用其中一个密钥把明文加密后所得的密文，只能用相对应的另一个密钥才能解密得到原本的明文，也就是说，用私钥加密之后的密文私钥自己都解不开。</li>
+</ul>
+<h2 id="签名"><a href="#签名" class="headerlink" title="签名"></a>签名</h2><p>首先我们得理解签名的作用是什么？在很多场景里面，例如在银行办理业务，都需要我们本人的签名，作用是声明这个是我本人的行为。在加密学里面，称为<strong>数字签名</strong>，也是同样的道理，对一个东西进行签名，意思就是证明当你见到的这个东西跟我想要给你看的是一个东西。这样可能说可能有点虚，用一个例子来说明：</p>
+<ol start="2">
+<li>我有两把钥匙，公钥和私钥。私钥我自己留着，公钥可以给任何人，例如我把公钥给了周杰伦</li>
+<li>周杰伦想要跟我进行过加密通信，他把要跟我说的话写完之后，<strong>使用公钥进行加密</strong></li>
+<li>我收到加密后的内容，根据<strong>原则一</strong>，我可以用我的私钥去解密内容，得到原来的内容</li>
+<li>这个时候我想要回信，为了保证周杰伦看到的内容没有被修改，我决定使用<strong>数字签名</strong>。这里得说明一下，数字签名是<strong>对非对称加密的反应用</strong>，在非对称加密的日常应用中，<strong>公钥是用来加密，私钥是用来解密的</strong>。而在数字签名中，是反过来的，具体流程是这样的：<ul>
+<li>我写完信之后，使用一个 Hash 函数生成信件的<strong>摘要</strong>（注意，信件其实可以理解成一个字符串）</li>
+<li>然后我使用我的<strong>私钥</strong>对摘要进行加密，并且附在信件的后面</li>
+<li>当周杰伦收到我的信件之后，为了验证内容<strong>没有被篡改</strong>，先把附在信件后面的<strong>加密后的摘要</strong>取下，使用自己的公钥进行解密，得到了<strong>信件的摘要</strong> a。然后<strong>使用相同的 Hash 函数</strong>对信件进行哈希得到 b，如果 a 和 b 完全一致，那么说明信件没有被篡改，反之则反。</li>
+</ul>
+</li>
+</ol>
+<p>但是，上面的流程有一个问题就是。周杰伦手中的公钥其实不能够确定是不是我给他的。也就是说，坏人出现了。如果有坏人替换了周杰伦手中的公钥成坏人自己的公钥，那么周杰伦发出的公钥加密之后的信件坏人是可以直接使用自己私钥进行解密的。也就是说，上面的流程的关键是确认周杰伦手中的公钥是我的公钥。<strong>TODO</strong></p>
+<p>上面的例子参考了阮一峰的一篇<a href="http://www.ruanyifeng.com/blog/2011/08/what_is_a_digital_signature.html" target="_blank" rel="noopener">博客</a>。维基百科有一张图很好地解释了数字签名里<strong>签名</strong>和<strong>验签</strong>的过程：</p>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Digital_Signature_diagram_zh-CN.svg/1280px-Digital_Signature_diagram_zh-CN.svg.png" alt="数字签名"></p>
+<p>因此我们得到了第二个原则：</p>
+<ul>
+<li><strong>原则二：</strong>签名的作用是为了验证文件的完整性，即是否被篡改</li>
+</ul>
+<p>有了上面的基础知识，就可以系统地阐述 Android 签名机制了。</p>
+<h2 id="Android-签名机制"><a href="#Android-签名机制" class="headerlink" title="Android 签名机制"></a>Android 签名机制</h2><p>在 Android 源码库 <code>build/target/product/security</code> 下面，有这么一些文件，有的是以 <code>.pk8</code> 为后缀，有的是以 <code>.x509.pem</code> 为后缀，并且会发现 <code>.pk8</code> 和 <code>.x509.pem</code> 是一一对应的。这两种文件的关系是：<code>.pk8</code> 文件是私钥，用来对包进行签名；<code>.x509.pem</code> 文件是证书，用来验证签名。原生 Android 使用了 4 类密钥：</p>
+<ul>
+<li>testkey</li>
+<li>platform</li>
+<li>shared</li>
+<li>media</li>
+</ul>
+<p>系统自带的应用通过在 <code>Android.mk</code> 文件中声明 <code>LOCAL_CERTIFICATE</code> 来指定用那个私钥进行签名，如果不声明那么默认使用 <code>testkey</code>。</p>
+<p>这里有个问题，上面说道这些 key 都是在源码中的，所有人都是可以访问的，那么这样其实是非常不安全的。任何人都可以使用这些 key 去对应用进行签名然后就可以通过系统的验证了。所以在实际的情况中，是会通过把原生的这一套 key 给替换掉。谷歌在<a href="https://source.android.com/devices/tech/ota/sign_builds" target="_blank" rel="noopener">这里</a>提供了替换的方法。并且，在实际外发的 ROM 包中，是不会有 <code>testkey</code> 这个签名文件的，默认的变成了 <code>releasekey</code></p>
+<p>如果我们对一个 apk 文件进行解包，那么会发现里面有一个 <code>META-INF</code> 的文件夹，里面的内容根据不同的应用会有不同，但是一定会有这三个文件：<code>MANIFEST.MF</code>，<code>CERT.SF</code> 和 <code>CERT.RSA</code>。这三个文件就是 Android 签名机制的核心了。系统如何判断一个 <code>apk</code> 是不是被修改过的，就是通过这三个文件进行一系列的校验。具体这三个文件是怎么生成的，可以参考<a href="https://blog.csdn.net/jiangwei0910410003/article/details/50402000" target="_blank" rel="noopener">这一篇文章</a>(下文也有很多内容是参考了这篇文章的描述，再次感谢作者)。现在我们以一个 apk 为例，简要说明这三个文件的内容和意义（<strong>注意，有一些 APK 可能 META-INF 下面的内容可能后缀名一样，但是文件名一样；又或者是不止这三个文件，这些都是正常现象</strong>）。</p>
+<ul>
+<li><p>MANIFEST.MF<br>这个文件的内容是当前 apk 里面所有文件的名字和文件的摘要值，例如在现在这个例子中，这个文件的内容大概长这样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Manifest-Version: 1.0</span><br><span class="line">Built-By: Generated-by-ADT</span><br><span class="line">Created-By: Android Gradle 3.0.1</span><br><span class="line"></span><br><span class="line">Name: AndroidManifest.xml</span><br><span class="line">SHA1-Digest: l5LrO+0CH4QwymZEEkgof6tKJKQ=</span><br><span class="line"></span><br><span class="line">Name: META-INF/INDEX.LIST</span><br><span class="line">SHA1-Digest: mV/vtpP5kHRZ0ZdWNzAWUorzn/M=</span><br><span class="line"></span><br><span class="line">Name: META-INF/io.netty.versions.properties</span><br><span class="line">SHA1-Digest: fHUsZp7XXjDcmXh7h88Qxku7PaQ=</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>这里我们可以来实战一下，验证这里面内容的意义。以第一个 <code>AndroidManifest.xml</code> 为例，首先把这个文件提取出来，然后计算一下它的 <strong>SHA-1</strong> 值，在 Linux 可以这样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">▶ sha1sum AndroidManifest.xml </span><br><span class="line">9792eb3bed021f8430ca66441248287fab4a24a4  AndroidManifest.xml</span><br></pre></td></tr></table></figure>
+
+<p>咦，值好像不一样，没事，因为上面的值是经过 <strong>Base64</strong> 编码的，我们可以在<a href="http://tomeko.net/online_tools/hex_to_base64.php?lang=en" target="_blank" rel="noopener">这里</a>进行转换：<br><img src="http://static.zybuluo.com/simowce/3lqpq57w7kx9ndpqjsols08c/Screenshot%20from%202018-09-11%2021-30-56.png" alt="Screenshot from 2018-09-11 21-30-56.png-40kB"><br>对比后就可以发现跟 <code>MANIFEST.MF</code> 的值是一毛一样的。</p>
+</li>
+<li><p>CERT.SF<br>我们初看这个文件的时候，会发现它的内容跟 <code>MANITEST.MF</code> 非常的接近：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Signature-Version: 1.0</span><br><span class="line">Created-By: 1.0 (Android)</span><br><span class="line">SHA1-Digest-Manifest: nezsP8TgzAKQ7BFky/chze3qmL0=</span><br><span class="line"></span><br><span class="line">Name: AndroidManifest.xml</span><br><span class="line">SHA1-Digest: mr/1kFRAFlcWQAo9hA69M29MAYs=</span><br><span class="line"></span><br><span class="line">Name: META-INF/INDEX.LIST</span><br><span class="line">SHA1-Digest: YFvH0U9NaeV1BDZUz5JkpfUm9aU=</span><br><span class="line"></span><br><span class="line">Name: META-INF/io.netty.versions.properties</span><br><span class="line">SHA1-Digest: rTBpHjFlmjueKQtX0IlpTl7X4uo=</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>这里面分为两部分内容：<code>SHA1-Digest-Manifest</code> 和 <code>SHA1-Digest</code>，这两部分分别是这么计算的。首先这个 <code>SHA1-Digest-Manifest</code> 就是对 <code>MANIFEST.MF</code> 计算 <strong>SHA-1</strong>之后再进行<strong>Base64</strong>编码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">▶ sha1sum META-INF/MANIFEST.MF </span><br><span class="line">9decec3fc4e0cc0290ec1164cbf721cdedea98bd  META-INF/MANIFEST.MF</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://static.zybuluo.com/simowce/mvnnqsa65ovu31s2bln213ig/Screenshot%20from%202018-09-11%2021-54-34.png" alt="Screenshot from 2018-09-11 21-54-34.png-39.7kB"></p>
+<p>然后 <code>SHA1-Digest</code> 是对 <code>MANIFEST.MF</code> 里面的<strong>每一个 \r\n 分割开来的项分别进行 SHA-1 之后在进行 Bash64 编码</strong>，例如上面的 <code>AndroidManifest.xml</code> 的 <code>SHA1-Digest</code> 是怎么算出来的呢？我们可以这么来：</p>
+<ul>
+<li><p>首先把 <strong>MANIFEST.MF</strong> 里面这个文件的内容保存一下（<strong>注意换行也要保存</strong>），例如咱们这里的是这个：</p>
+<blockquote>
+<p>Name: AndroidManifest.xml<br>SHA1-Digest: l5LrO+0CH4QwymZEEkgof6tKJKQ=</p>
+</blockquote>
+</li>
+<li><p>然后如果你是在 Linux 下，使用 <code>unix2dos</code> 进行转换一下</p>
+</li>
+<li><p>然后计算一下 sha1：</p>
+<blockquote>
+<p>▶ sha1sum 1<br>9abff5905440165716400a3d840ebd336f4c018b  1</p>
+</blockquote>
+</li>
+<li><p>最后计算一下 Base64 编码就可以了</p>
+</li>
+</ul>
+</li>
+<li><p>CERT.RSA<br>简单的说，这个文件是用私钥对 CERT.SF 进行签名，并且把公钥也附在这个文件里面。</p>
+<p>然后就需要说明，这种签名机制如何能够保证应用不被篡改呢？首先如果你修改了 APK 里面任何一个文件，那么相应的文件的 SHA1 摘要就会发生改变，那么就会跟 <code>MANIFEST.MF</code> 里面的值不一致；如果你不死心，修改 <code>MANIFEST.MF</code> 里面的内容，那么就会跟 <code>CERT.SF</code> 里面对应项的内容不一致；如果你还不死心，继续修改 <code>CERT.SF</code> 的内容，那么在 <code>CERT.RSA</code> 的验签那里不通过；如果依旧不死心，想要修改 <code>CERT.RSA</code> 的内容，能做到吗？不能，因为你没有私钥。从这里我们就可以看到，有了这三个文件的“保驾护航”，就可以达到一个效果就是，无论修改一个 Apk 里面的任何一个文件，都必须对其重新签名，否则会直接被系统识别出来，从而保证了安全性。 </p>
+</li>
+</ul>
+<h2 id="尾巴"><a href="#尾巴" class="headerlink" title="尾巴"></a>尾巴</h2><p>好了，Android 的签名机制也大概地说了一遍，感觉可以回答上面的问题了。每个手机公司的 ROM 肯定有两种，一种是内部版本，用的是咱们上面提到的 <code>build/target/product/security</code> 里面的 test key；另一种是外发版本，用的是另外的 key。所以呢，咱们自己本地编译的 App，在最后的签名阶段用的就是系统的 test key。那么导致的结果是，如果你用的是内部的 ROM，那么每次编译的使用用的都是系统 test key 的私钥进行签名，然后用的是 test key 的公钥进行验签，肯定能够通过。反之，如果你用的是外发的 ROM，外发的 ROM 用的是另一套 key，那么肯定会验签不通过，原因就是在这里啦。</p>
+<p>把一件事弄懂的感觉真好。</p>
+
+    </div>
+
+    
+    
+    
+        
+      
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>simowce</li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://simowce.github.io/all-about-signature/" title="代码之外——Andriod 签名">https://simowce.github.io/all-about-signature/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-ND</a> unless stating additionally.</li>
+</ul>
+</div>
+
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/Android/" rel="tag"># Android</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/2016-05-05-learning-by-creating--tasklist-using-listview/" rel="next" title="Learning By Creating  之使用 ListView 实现一个应用列表">
+                  <i class="fa fa-chevron-left"></i> Learning By Creating  之使用 ListView 实现一个应用列表
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/2019-03-22-Kernel-Magic-ARRAY-SIZE/" rel="prev" title="Kernel Magic——ARRAY_SIZE">
+                  Kernel Magic——ARRAY_SIZE <i class="fa fa-chevron-right"></i>
+                </a>
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#非对称加密"><span class="nav-number">1.</span> <span class="nav-text">非对称加密</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#签名"><span class="nav-number">2.</span> <span class="nav-text">签名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Android-签名机制"><span class="nav-number">3.</span> <span class="nav-text">Android 签名机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#尾巴"><span class="nav-number">4.</span> <span class="nav-text">尾巴</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">simowce</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">categories</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">tags</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">simowce</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.4.1</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/muse.js?v=7.4.1"></script>
+
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

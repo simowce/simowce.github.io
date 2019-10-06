@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.4.1">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.4.1" color="#222">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"right","display":"hide","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: 'Copy',
+      copy_success: 'Copied',
+      copy_failure: 'Copy failed'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="经过了一天的努力，在刚才，总算出现了下面的激动人心的画面了：真的很高兴，趁着还热乎，赶快记下来：综述第六章是 进程 。不过现在这一章的 进程 其实是有点取巧的，它是事先将一个进程需要的寄存器，栈，LDT，代码等准备好，弄成一个进程表，一切都准备完了之后，将 esp 指向进程表的顶部，然后一个一个地 pop ，然后一个跳转，我们的第一个进程就开始运行了。">
+<meta name="keywords" content="一个操作系统的实现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一个操作系统的实现 -- 单进程">
+<meta property="og:url" content="https://simowce.github.io/2014-11-24-chapter-6-single-process/index.html">
+<meta property="og:site_name" content="Silence.Slow.Simple">
+<meta property="og:description" content="经过了一天的努力，在刚才，总算出现了下面的激动人心的画面了：真的很高兴，趁着还热乎，赶快记下来：综述第六章是 进程 。不过现在这一章的 进程 其实是有点取巧的，它是事先将一个进程需要的寄存器，栈，LDT，代码等准备好，弄成一个进程表，一切都准备完了之后，将 esp 指向进程表的顶部，然后一个一个地 pop ，然后一个跳转，我们的第一个进程就开始运行了。">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://simowce.github.io/assets/process1.png">
+<meta property="og:updated_time" content="2019-10-06T11:10:28.868Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一个操作系统的实现 -- 单进程">
+<meta name="twitter:description" content="经过了一天的努力，在刚才，总算出现了下面的激动人心的画面了：真的很高兴，趁着还热乎，赶快记下来：综述第六章是 进程 。不过现在这一章的 进程 其实是有点取巧的，它是事先将一个进程需要的寄存器，栈，LDT，代码等准备好，弄成一个进程表，一切都准备完了之后，将 esp 指向进程表的顶部，然后一个一个地 pop ，然后一个跳转，我们的第一个进程就开始运行了。">
+<meta name="twitter:image" content="https://simowce.github.io/assets/process1.png">
+  <link rel="canonical" href="https://simowce.github.io/2014-11-24-chapter-6-single-process/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>一个操作系统的实现 -- 单进程 | Silence.Slow.Simple</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Silence.Slow.Simple</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">a simowce's blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section">Home</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section">Tags</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section">Categories</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section">Archives</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section">About</a>
+
+  </li>
+  </ul>
+
+    
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-cn">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014-11-24-chapter-6-single-process/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">一个操作系统的实现 -- 单进程
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              
+                
+              
+
+              <time title="Created: 2014-11-24 00:00:00" itemprop="dateCreated datePublished" datetime="2014-11-24T00:00:00+08:00">2014-11-24</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/一个操作系统的实现/" itemprop="url" rel="index"><span itemprop="name">一个操作系统的实现</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>经过了一天的努力，在刚才，总算出现了下面的激动人心的画面了：<br><img src="/assets/process1.png" alt></p><p>真的很高兴，趁着还热乎，赶快记下来：</p><h3 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h3><p>第六章是 <code>进程</code> 。不过现在这一章的 <code>进程</code> 其实是有点取巧的，它是事先将一个进程需要的寄存器，栈，LDT，代码等准备好，弄成一个进程表，一切都准备完了之后，将 <code>esp</code> 指向进程表的顶部，然后一个一个地 <code>pop</code> ，然后一个跳转，我们的第一个进程就开始运行了。</p><a id="more"></a>
+
+
+<p>由于涉及到特权级的转换，所以需要 <code>tss</code> 来记录每个特权级的 <code>ss</code> 和 <code>esp</code>，以便当低特权级到高特权级的切换时，堆栈也能够切换。</p>
+<p>由于现在我还没有实现中断，所以，这个进程是一直都在运行的，没有被打断的。不过这种情况将会改变，不过得明天吧。</p>
+<h3 id="代码解读"><a href="#代码解读" class="headerlink" title="代码解读"></a>代码解读</h3><p>一开始的这些代码没有什么难的，主要提一点：</p>
+<p>在 <code>/kernel/main.c</code> 的 line 27 和 line 29 这两行代码中，有一个我之前一直无法理解的，就是 <code>&gt;&gt; 3</code> 。现解释如下：</p>
+<blockquote>
+<p>每个描述符的大小是 8 字节，<code>&gt;&gt; 3</code> 就相当于 <code>除以8</code> ，这样就能够得到相应的描述符在 <code>gdt数组</code> 的具体位置了。</p>
+</blockquote>
+<h3 id="犯过的错误以及总结"><a href="#犯过的错误以及总结" class="headerlink" title="犯过的错误以及总结"></a>犯过的错误以及总结</h3><ol>
+<li><p><code>typedef</code> 之后忘记了一个最重要的 <code>;</code> . 导致出现了很多匪夷所思的错误，例如提示说 <code>#define EXTERN extern</code> 这一句有错等等。</p>
+</li>
+<li><p>每增加一个新的函数就要在 <code>inlcude/proto.h</code> 里面添加相应的声明。</p>
+</li>
+<li><p>有关字符串的函数声明在 <code>include/string.h</code> 里面</p>
+</li>
+<li><p>用汇编实现的函数如果要被其他文件调用，*<em>千万记得要用 <code>global</code> *</em>。不然肯定是会报 <code>undefined reference to xxx</code> 的！</p>
+</li>
+<li><p>一开始出现了 <code>#GP</code> 的错误，提示说在 <code>cs:0x8 eip:0x3059E</code> 这里出现了错误，反汇编了一下，发现这个位置对应的代码是：</p>
+<pre><code>lldt     [esp + P_LDT_SEL]</code></pre><p> 根据 <code>p_proc-&gt;regs.eflags = 0x1202</code> ，找到了 <code>restart()</code> 的位置：<code>0x30598</code> .</p>
+<p> 不过后来发现了，又是一个粗心导致的错误，<strong>我忘记填充 GDT 中的 LDT 的描述符了</strong>。不过，发生 <code>#GP</code> 的结果跟我查文档的结果是一样的。</p>
+</li>
+</ol>
+<h3 id="收获"><a href="#收获" class="headerlink" title="收获"></a>收获</h3><p>又是花了很多时间在 <code>Debugging</code> 上，不过这一次总算有所收获。</p>
+<ol>
+<li><code>bochs</code> 的 <code>sreg</code> 指令能够查看 <code>LDTR</code> 。</li>
+<li><code>print-stack</code> 后面加个数字能够控制输出的栈的长度</li>
+</ol>
+<p>最后，如果你们也想要体验一下 <code>Debug</code> 的话，我把我的 <code>Debug</code> 的过程公开出来：</p>
+<blockquote>
+<p>b 0x7d12 （找到 loader 之后的跳转）<br>c<br>b 0x9027e （跳入保护模式）<br>c<br>b 0x9039b （跳入内核）<br>c<br>b 0x310c9 （restart()）</p>
+</blockquote>
+<p><strong>声明，上面的地址只对于我的代码有效，你自己实现的代码与我的可能有出入</strong></p>
+<p>下面是原书代码的 <code>Debug</code> 过程：</p>
+<blockquote>
+<p>b 0x7d0a （找到 loader 之后的跳转）<br>c<br>b 0x9027f （跳入保护模式）<br>c<br>b 0x90393 （跳入内核）<br>c<br>b 0x3071c （这一句是根据 kernel/main.c 中很明显的 0x1202 找到的，下面几行就是 restart() 了）</p>
+</blockquote>
+<p>大概就是这些了。明天继续～</p>
+<p>EOF</p>
+
+    </div>
+
+    
+    
+    
+        
+      
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>simowce</li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://simowce.github.io/2014-11-24-chapter-6-single-process/" title="一个操作系统的实现 -- 单进程">https://simowce.github.io/2014-11-24-chapter-6-single-process/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-ND</a> unless stating additionally.</li>
+</ul>
+</div>
+
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/一个操作系统的实现/" rel="tag"># 一个操作系统的实现</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/2014-11-15-i-have-finished-reading-the-oranges/" rel="next" title="四个月整，我总算是看完了《一个操作系统的实现》">
+                  <i class="fa fa-chevron-left"></i> 四个月整，我总算是看完了《一个操作系统的实现》
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/2014-11-25-muti-process/" rel="prev" title="一个操作系统的实现 -- 多进程">
+                  一个操作系统的实现 -- 多进程 <i class="fa fa-chevron-right"></i>
+                </a>
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#综述"><span class="nav-number">1.</span> <span class="nav-text">综述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码解读"><span class="nav-number">2.</span> <span class="nav-text">代码解读</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#犯过的错误以及总结"><span class="nav-number">3.</span> <span class="nav-text">犯过的错误以及总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#收获"><span class="nav-number">4.</span> <span class="nav-text">收获</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">simowce</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">categories</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">tags</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">simowce</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.4.1</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/muse.js?v=7.4.1"></script>
+
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

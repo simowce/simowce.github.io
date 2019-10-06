@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.4.1">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.4.1" color="#222">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"right","display":"hide","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: 'Copy',
+      copy_success: 'Copied',
+      copy_failure: 'Copy failed'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="关于 vsprintf今天花了很长的时间去理解 vsprintf 这个函数并且自己把它实现了一遍。果然，比对着书打难多了。不过，确实是收获特别多，而且自己实现的话，能够加深理解，而不仅仅是从书上理解那么片面。先说一下 vsprintf() 这个函数的作用。它是 printf() 的一个处理函数，接受 3 个变量：buf 是用来存放处理完的字符串，或者是说，将 printf 的第一个参数里面的 %d">
+<meta name="keywords" content="一个操作系统的实现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一个操作系统的实现 -- printf">
+<meta property="og:url" content="https://simowce.github.io/2014-12-09-chapter-8-printf/index.html">
+<meta property="og:site_name" content="Silence.Slow.Simple">
+<meta property="og:description" content="关于 vsprintf今天花了很长的时间去理解 vsprintf 这个函数并且自己把它实现了一遍。果然，比对着书打难多了。不过，确实是收获特别多，而且自己实现的话，能够加深理解，而不仅仅是从书上理解那么片面。先说一下 vsprintf() 这个函数的作用。它是 printf() 的一个处理函数，接受 3 个变量：buf 是用来存放处理完的字符串，或者是说，将 printf 的第一个参数里面的 %d">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:updated_time" content="2019-10-06T11:10:28.868Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一个操作系统的实现 -- printf">
+<meta name="twitter:description" content="关于 vsprintf今天花了很长的时间去理解 vsprintf 这个函数并且自己把它实现了一遍。果然，比对着书打难多了。不过，确实是收获特别多，而且自己实现的话，能够加深理解，而不仅仅是从书上理解那么片面。先说一下 vsprintf() 这个函数的作用。它是 printf() 的一个处理函数，接受 3 个变量：buf 是用来存放处理完的字符串，或者是说，将 printf 的第一个参数里面的 %d">
+  <link rel="canonical" href="https://simowce.github.io/2014-12-09-chapter-8-printf/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>一个操作系统的实现 -- printf | Silence.Slow.Simple</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Silence.Slow.Simple</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">a simowce's blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section">Home</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section">Tags</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section">Categories</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section">Archives</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section">About</a>
+
+  </li>
+  </ul>
+
+    
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-cn">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014-12-09-chapter-8-printf/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">一个操作系统的实现 -- printf
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              
+                
+              
+
+              <time title="Created: 2014-12-09 00:00:00" itemprop="dateCreated datePublished" datetime="2014-12-09T00:00:00+08:00">2014-12-09</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/一个操作系统的实现/" itemprop="url" rel="index"><span itemprop="name">一个操作系统的实现</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="关于-vsprintf"><a href="#关于-vsprintf" class="headerlink" title="关于 vsprintf"></a>关于 vsprintf</h3><p>今天花了很长的时间去理解 <code>vsprintf</code> 这个函数并且自己把它实现了一遍。果然，比对着书打难多了。不过，确实是收获特别多，而且自己实现的话，能够加深理解，而不仅仅是从书上理解那么片面。</p><p>先说一下 <code>vsprintf()</code> 这个函数的作用。它是 <code>printf()</code> 的一个处理函数，接受 3 个变量：buf 是用来存放处理完的字符串，或者是说，将 <code>printf</code> 的第一个参数里面的 <code>%d</code> 啊， <code>%s</code> 等用后面对应的参数替换之后的字符串。<code>fmt</code> 很明显，就是 <code>printf()</code> 的第一个参数。<code>arg</code> 这个参数，是指向 <code>printf()</code> 第二个参数以及后面参数的一个指针。理解这一点很重要。</p><a id="more"></a>
+
+<p>然后这个函数的流程就是这样的，不断地扫描 <code>fmt</code> ，如果不是 <code>%</code> ，则直接赋给 <code>buf</code> ；如果是 <code>%</code> 的话，那么就看他的下一位是什么，是 <code>%</code> 的话，说明只是 <code>%</code> 的一个转义符，直接赋给 <code>buf</code> 。否知，如果是非零的数字，那么说明是一个 <strong>宽度说明</strong> ，就必须计算宽度的长度。之后肯定就是控制格式符号 <code>c</code>，<code>s</code>，<code>x</code> 等了。在这些控制格式符中，<code>d</code> 和 <code>x</code> 由于存在进制的转换，所以要有相应的函数来处理进制转换，<code>i2a()</code> 就实现了这一个功能。这个函数，不得不说，是一个十分优美的实现，采用了递归。相当于先从低位到高位依次入栈，然后在依次弹栈，并不难理解，不过，我想说一点的是，这个函数的第三个参数：char **ps, 这是一个二级指针。里面的一句</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*(*ps)++ = remain;</span><br></pre></td></tr></table></figure>
+
+<p>这一句一开始老是理解不了，高级次的指针真的有点难以理解。不过，最后总算是理解了：</p>
+<blockquote>
+<p>这一句的作用就是改变 <code>ps</code> 这个<strong>指针的指针指向的指针，或者说，指向的字符串</strong></p>
+</blockquote>
+<p>没错，指针真的十分的优美！不过，指针也十分的危险，所以，只有正确地理解并且运用，才能发挥指针的强大功能！</p>
+
+    </div>
+
+    
+    
+    
+        
+      
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>simowce</li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://simowce.github.io/2014-12-09-chapter-8-printf/" title="一个操作系统的实现 -- printf">https://simowce.github.io/2014-12-09-chapter-8-printf/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-ND</a> unless stating additionally.</li>
+</ul>
+</div>
+
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/一个操作系统的实现/" rel="tag"># 一个操作系统的实现</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/2014-11-29-chapter-7-input/" rel="next" title="一个操作系统的实现 -- IO">
+                  <i class="fa fa-chevron-left"></i> 一个操作系统的实现 -- IO
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/2014-12-18-chapter-8-IPC/" rel="prev" title="一个操作系统的实现 -- IPC">
+                  一个操作系统的实现 -- IPC <i class="fa fa-chevron-right"></i>
+                </a>
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#关于-vsprintf"><span class="nav-number">1.</span> <span class="nav-text">关于 vsprintf</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">simowce</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">categories</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">tags</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">simowce</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.4.1</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/muse.js?v=7.4.1"></script>
+
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
