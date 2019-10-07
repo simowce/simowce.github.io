@@ -45,7 +45,7 @@
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     },
-    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
     path: 'search.xml',
     motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     translation: {
@@ -206,37 +206,11 @@
     <a href="/about/" rel="section">关于</a>
 
   </li>
-      <li class="menu-item menu-item-search">
-        <a href="javascript:;" class="popup-trigger">
-        搜索</a>
-      </li>
-    
   </ul>
 
     
 
 </nav>
-  <div class="site-search">
-    <div class="popup search-popup">
-    <div class="search-header">
-  <span class="search-icon">
-    <i class="fa fa-search"></i>
-  </span>
-  <div class="search-input-container">
-    <input autocomplete="off" autocorrect="off" autocapitalize="none"
-           placeholder="搜索..." spellcheck="false"
-           type="text" id="search-input">
-  </div>
-  <span class="popup-btn-close">
-    <i class="fa fa-times-circle"></i>
-  </span>
-</div>
-<div id="search-result"></div>
-
-</div>
-<div class="search-pop-overlay"></div>
-
-  </div>
 </div>
     </header>
 
@@ -333,14 +307,14 @@
 </ul>
 <p>出现这个错误只要加上 -f / –file 就可以，意思是：<strong>treat FILE as regular source file</strong></p>
 <p><strong>如果是说编码错误的话，那么可以使用 vim 来进行转换。用 vim 打开源文件，然后使用这个命令：</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:set ff=unix</span><br></pre></td></tr></table></figure>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:<span class="builtin-name">set</span> <span class="attribute">ff</span>=unix</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>WARING: Prefer [subsystem eg: netdev]_dbg([subsystem]dev, … the dev_dbg(dev, … then pr_debug(… to printk(KERN_DEBUG …</li>
 </ul>
 <p>这个的话好像是说不要使用 printk , 目前我也没用到其他的子系统，所以都是使用 pr_debug 来代替 printk 的。</p>
 <p>还有，在那个脚本我一般都加了如下的几个选项：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./scipts/checkpatch.pl --file --terse --no-tree</span><br></pre></td></tr></table></figure>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">./scipts/checkpatch.pl</span> <span class="params">--file</span> <span class="params">--terse</span> <span class="params">--no-tree</span></span><br></pre></td></tr></table></figure>
 
 <p>差不多就是这样。</p>
 <p>EOF</p>
@@ -577,8 +551,6 @@
 
 
 
-
-  <script src="/js/local-search.js?v=7.4.1"></script>
 
 
 
