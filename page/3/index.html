@@ -4,21 +4,23 @@
 
 
 
-<html lang="zh-cn">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
 <meta name="generator" content="Hexo 3.9.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.4.1">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.4.1">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.4.1">
-  <link rel="mask-icon" href="/images/logo.svg?v=7.4.1" color="#222">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.4.1">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
 
 <link rel="stylesheet" href="/css/main.css?v=7.4.1">
 
 
 <link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
 
 
 <script id="hexo-configurations">
@@ -32,7 +34,7 @@
     copycode: {"enable":false,"show_result":false,"style":null},
     back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
     bookmark: {"enable":false,"color":"#222","save":"auto"},
-    fancybox: false,
+    fancybox: true,
     mediumzoom: false,
     lazyload: false,
     pangu: false,
@@ -43,13 +45,13 @@
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     },
-    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
-    path: '',
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
     motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     translation: {
-      copy_button: 'Copy',
-      copy_success: 'Copied',
-      copy_failure: 'Copy failed'
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
     },
     sidebarPadding: 40
   };
@@ -59,7 +61,7 @@
 <meta property="og:title" content="Silence.Slow.Simple">
 <meta property="og:url" content="https://simowce.github.io/page/3/index.html">
 <meta property="og:site_name" content="Silence.Slow.Simple">
-<meta property="og:locale" content="zh-cn">
+<meta property="og:locale" content="zh-CN">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Silence.Slow.Simple">
   <link rel="canonical" href="https://simowce.github.io/page/3/">
@@ -78,6 +80,16 @@
 
   <title>Silence.Slow.Simple</title>
   
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-56242445-1"></script>
+  <script>
+    var host = window.location.hostname;
+    if (host !== "localhost" || !true) {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-56242445-1');
+    }
+  </script>
 
 
 
@@ -132,7 +144,7 @@
   </div>
 
   <div class="site-nav-toggle">
-    <div class="toggle" aria-label="Toggle navigation bar">
+    <div class="toggle" aria-label="切换导航栏">
       <span class="toggle-line toggle-line-first"></span>
       <span class="toggle-line toggle-line-middle"></span>
       <span class="toggle-line toggle-line-last"></span>
@@ -150,7 +162,7 @@
         
         <li class="menu-item menu-item-home">
 
-    <a href="/" rel="section">Home</a>
+    <a href="/" rel="section">首页</a>
 
   </li>
       
@@ -159,7 +171,7 @@
         
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section">Tags</a>
+    <a href="/tags/" rel="section">标签</a>
 
   </li>
       
@@ -168,7 +180,7 @@
         
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section">Categories</a>
+    <a href="/categories/" rel="section">分类</a>
 
   </li>
       
@@ -177,7 +189,7 @@
         
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section">Archives</a>
+    <a href="/archives/" rel="section">归档</a>
 
   </li>
       
@@ -186,14 +198,40 @@
         
         <li class="menu-item menu-item-about">
 
-    <a href="/about/" rel="section">About</a>
+    <a href="/about/" rel="section">关于</a>
 
   </li>
+      <li class="menu-item menu-item-search">
+        <a href="javascript:;" class="popup-trigger">
+        搜索</a>
+      </li>
+    
   </ul>
 
     
 
 </nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
 </div>
     </header>
 
@@ -214,8 +252,8 @@
         
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-cn">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2015-05-27-Thinking-in-Data-Structure--AVL Tree/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2015/05/31/compile-code-to-so-library/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="simowce">
@@ -229,7 +267,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
             
-            <a href="/2015-05-27-Thinking-in-Data-Structure--AVL Tree/" class="post-title-link" itemprop="url">Thinking in Data Structure -- AVL Tree</a>
+            <a href="/2015/05/31/compile-code-to-so-library/" class="post-title-link" itemprop="url">动态链接库 .so 的编译和使用</a>
           
         </h1>
 
@@ -238,13 +276,13 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">发表于</span>
 
               
                 
               
 
-              <time title="Created: 2015-05-27 00:00:00" itemprop="dateCreated datePublished" datetime="2015-05-27T00:00:00+08:00">2015-05-27</time>
+              <time title="创建时间：2015-05-31 00:00:00" itemprop="dateCreated datePublished" datetime="2015-05-31T00:00:00+08:00">2015-05-31</time>
             </span>
           
             
@@ -254,8 +292,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
               </span>
             
           
@@ -263,9 +301,9 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Data-Structure/" itemprop="url" rel="index"><span itemprop="name">Data Structure</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/编程/" itemprop="url" rel="index"><span itemprop="name">编程</span></a></span>
 
                 
                 
@@ -284,12 +322,12 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p><code>AVL 树</code>， 是在二叉搜索树的基础上，在插入操作上加入了<strong>旋转</strong>的操作，从而避免了一棵树退化成一个链表或者树的深度过长导致搜索的时候效率太低的坏处，而旋转也是 <code>AVL 树</code> 中最重要的操作，也是本博文的重点内容。</p><p><code>AVL 树</code> 在普通二叉搜索树节点的基础上加入了一个 <code>buf</code> 值，意思是左孩子的高度减去右孩子的高度，而 <code>buf</code> 值的合法范围是 -1， 0， 1，如果不是这几个值，那么说明树不平衡，就要进行旋转。</p>
+          <p>今天写代码的时候，发现需要之前的一些实现，有不想直接将代码复制过来，于是就想把之前实现的代码编译成一个动态链接库，这样显得更加的优雅。几番摸索之后，终有所获，遂记之~</p><hr><p>首先，我们约定要编译的文件名是 code.c ,编译后的动态库名是 libcode.so (<strong>注意，共享库的命名一般都是 libxxx 的</strong>)，目标文件是 target.c 。于是，编译命令如下：</p>
           <!--noindex-->
           
             <div class="post-button">
-              <a class="btn" href="/2015-05-27-Thinking-in-Data-Structure--AVL Tree/#more" rel="contents">
-                Read more &raquo;
+              <a class="btn" href="/2015/05/31/compile-code-to-so-library/#more" rel="contents">
+                阅读全文 &raquo;
               </a>
             </div>
           
@@ -314,8 +352,8 @@
         
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-cn">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2015-05-17-i-dont-know-c/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2015/05/27/Thinking-in-Data-Structure--AVL Tree/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="simowce">
@@ -329,7 +367,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
             
-            <a href="/2015-05-17-i-dont-know-c/" class="post-title-link" itemprop="url">其实我根本不懂 C </a>
+            <a href="/2015/05/27/Thinking-in-Data-Structure--AVL Tree/" class="post-title-link" itemprop="url">Thinking in Data Structure -- AVL Tree</a>
           
         </h1>
 
@@ -338,13 +376,13 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">发表于</span>
 
               
                 
               
 
-              <time title="Created: 2015-05-17 00:00:00" itemprop="dateCreated datePublished" datetime="2015-05-17T00:00:00+08:00">2015-05-17</time>
+              <time title="创建时间：2015-05-27 00:00:00" itemprop="dateCreated datePublished" datetime="2015-05-27T00:00:00+08:00">2015-05-27</time>
             </span>
           
             
@@ -354,8 +392,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
               </span>
             
           
@@ -363,7 +401,107 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Data-Structure/" itemprop="url" rel="index"><span itemprop="name">Data Structure</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><code>AVL 树</code>， 是在二叉搜索树的基础上，在插入操作上加入了<strong>旋转</strong>的操作，从而避免了一棵树退化成一个链表或者树的深度过长导致搜索的时候效率太低的坏处，而旋转也是 <code>AVL 树</code> 中最重要的操作，也是本博文的重点内容。</p><p><code>AVL 树</code> 在普通二叉搜索树节点的基础上加入了一个 <code>buf</code> 值，意思是左孩子的高度减去右孩子的高度，而 <code>buf</code> 值的合法范围是 -1， 0， 1，如果不是这几个值，那么说明树不平衡，就要进行旋转。</p>
+          <!--noindex-->
+          
+            <div class="post-button">
+              <a class="btn" href="/2015/05/27/Thinking-in-Data-Structure--AVL Tree/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+          <div class="post-eof"></div>
+        
+      </footer>
+  </article>
+  
+  
+  
+
+    
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2015/05/17/i-dont-know-c/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+            
+            <a href="/2015/05/17/i-dont-know-c/" class="post-title-link" itemprop="url">其实我根本不懂 C </a>
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2015-05-17 00:00:00" itemprop="dateCreated datePublished" datetime="2015-05-17T00:00:00+08:00">2015-05-17</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/思/" itemprop="url" rel="index"><span itemprop="name">思</span></a></span>
 
@@ -390,8 +528,8 @@
           <!--noindex-->
           
             <div class="post-button">
-              <a class="btn" href="/2015-05-17-i-dont-know-c/#more" rel="contents">
-                Read more &raquo;
+              <a class="btn" href="/2015/05/17/i-dont-know-c/#more" rel="contents">
+                阅读全文 &raquo;
               </a>
             </div>
           
@@ -416,8 +554,8 @@
         
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-cn">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014-12-27-LCD-display/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014/12/27/LCD-display/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="simowce">
@@ -431,7 +569,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
             
-            <a href="/2014-12-27-LCD-display/" class="post-title-link" itemprop="url">POJ 1102 -- LC-Display</a>
+            <a href="/2014/12/27/LCD-display/" class="post-title-link" itemprop="url">POJ 1102 -- LC-Display</a>
           
         </h1>
 
@@ -440,13 +578,13 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">发表于</span>
 
               
                 
               
 
-              <time title="Created: 2014-12-27 00:00:00" itemprop="dateCreated datePublished" datetime="2014-12-27T00:00:00+08:00">2014-12-27</time>
+              <time title="创建时间：2014-12-27 00:00:00" itemprop="dateCreated datePublished" datetime="2014-12-27T00:00:00+08:00">2014-12-27</time>
             </span>
           
             
@@ -456,8 +594,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
               </span>
             
           
@@ -465,7 +603,7 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/ACM/" itemprop="url" rel="index"><span itemprop="name">ACM</span></a></span>
 
@@ -490,8 +628,8 @@
           <!--noindex-->
           
             <div class="post-button">
-              <a class="btn" href="/2014-12-27-LCD-display/#more" rel="contents">
-                Read more &raquo;
+              <a class="btn" href="/2014/12/27/LCD-display/#more" rel="contents">
+                阅读全文 &raquo;
               </a>
             </div>
           
@@ -516,8 +654,8 @@
         
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-cn">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014-12-18-chapter-8-IPC/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014/12/18/chapter-8-IPC/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="simowce">
@@ -531,7 +669,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
             
-            <a href="/2014-12-18-chapter-8-IPC/" class="post-title-link" itemprop="url">一个操作系统的实现 -- IPC</a>
+            <a href="/2014/12/18/chapter-8-IPC/" class="post-title-link" itemprop="url">一个操作系统的实现 -- IPC</a>
           
         </h1>
 
@@ -540,13 +678,13 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">发表于</span>
 
               
                 
               
 
-              <time title="Created: 2014-12-18 00:00:00" itemprop="dateCreated datePublished" datetime="2014-12-18T00:00:00+08:00">2014-12-18</time>
+              <time title="创建时间：2014-12-18 00:00:00" itemprop="dateCreated datePublished" datetime="2014-12-18T00:00:00+08:00">2014-12-18</time>
             </span>
           
             
@@ -556,8 +694,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
               </span>
             
           
@@ -565,7 +703,7 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/一个操作系统的实现/" itemprop="url" rel="index"><span itemprop="name">一个操作系统的实现</span></a></span>
 
@@ -590,8 +728,8 @@
           <!--noindex-->
           
             <div class="post-button">
-              <a class="btn" href="/2014-12-18-chapter-8-IPC/#more" rel="contents">
-                Read more &raquo;
+              <a class="btn" href="/2014/12/18/chapter-8-IPC/#more" rel="contents">
+                阅读全文 &raquo;
               </a>
             </div>
           
@@ -616,8 +754,8 @@
         
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-cn">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014-12-09-chapter-8-printf/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014/12/09/chapter-8-printf/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="simowce">
@@ -631,7 +769,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
             
-            <a href="/2014-12-09-chapter-8-printf/" class="post-title-link" itemprop="url">一个操作系统的实现 -- printf</a>
+            <a href="/2014/12/09/chapter-8-printf/" class="post-title-link" itemprop="url">一个操作系统的实现 -- printf</a>
           
         </h1>
 
@@ -640,13 +778,13 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">发表于</span>
 
               
                 
               
 
-              <time title="Created: 2014-12-09 00:00:00" itemprop="dateCreated datePublished" datetime="2014-12-09T00:00:00+08:00">2014-12-09</time>
+              <time title="创建时间：2014-12-09 00:00:00" itemprop="dateCreated datePublished" datetime="2014-12-09T00:00:00+08:00">2014-12-09</time>
             </span>
           
             
@@ -656,8 +794,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
               </span>
             
           
@@ -665,7 +803,7 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/一个操作系统的实现/" itemprop="url" rel="index"><span itemprop="name">一个操作系统的实现</span></a></span>
 
@@ -690,8 +828,8 @@
           <!--noindex-->
           
             <div class="post-button">
-              <a class="btn" href="/2014-12-09-chapter-8-printf/#more" rel="contents">
-                Read more &raquo;
+              <a class="btn" href="/2014/12/09/chapter-8-printf/#more" rel="contents">
+                阅读全文 &raquo;
               </a>
             </div>
           
@@ -716,8 +854,8 @@
         
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-cn">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014-11-29-chapter-7-input/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014/11/29/chapter-7-input/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="simowce">
@@ -731,7 +869,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
             
-            <a href="/2014-11-29-chapter-7-input/" class="post-title-link" itemprop="url">一个操作系统的实现 -- IO</a>
+            <a href="/2014/11/29/chapter-7-input/" class="post-title-link" itemprop="url">一个操作系统的实现 -- IO</a>
           
         </h1>
 
@@ -740,13 +878,13 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">发表于</span>
 
               
                 
               
 
-              <time title="Created: 2014-11-29 00:00:00" itemprop="dateCreated datePublished" datetime="2014-11-29T00:00:00+08:00">2014-11-29</time>
+              <time title="创建时间：2014-11-29 00:00:00" itemprop="dateCreated datePublished" datetime="2014-11-29T00:00:00+08:00">2014-11-29</time>
             </span>
           
             
@@ -756,8 +894,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
               </span>
             
           
@@ -765,7 +903,7 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/一个操作系统的实现/" itemprop="url" rel="index"><span itemprop="name">一个操作系统的实现</span></a></span>
 
@@ -790,8 +928,8 @@
           <!--noindex-->
           
             <div class="post-button">
-              <a class="btn" href="/2014-11-29-chapter-7-input/#more" rel="contents">
-                Read more &raquo;
+              <a class="btn" href="/2014/11/29/chapter-7-input/#more" rel="contents">
+                阅读全文 &raquo;
               </a>
             </div>
           
@@ -816,8 +954,8 @@
         
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-cn">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014-11-28-system-call/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014/11/28/system-call/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="simowce">
@@ -831,7 +969,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
             
-            <a href="/2014-11-28-system-call/" class="post-title-link" itemprop="url">一个操作系统的实现 -- 系统调用</a>
+            <a href="/2014/11/28/system-call/" class="post-title-link" itemprop="url">一个操作系统的实现 -- 系统调用</a>
           
         </h1>
 
@@ -840,13 +978,13 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">发表于</span>
 
               
                 
               
 
-              <time title="Created: 2014-11-28 00:00:00" itemprop="dateCreated datePublished" datetime="2014-11-28T00:00:00+08:00">2014-11-28</time>
+              <time title="创建时间：2014-11-28 00:00:00" itemprop="dateCreated datePublished" datetime="2014-11-28T00:00:00+08:00">2014-11-28</time>
             </span>
           
             
@@ -856,8 +994,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
               </span>
             
           
@@ -865,7 +1003,7 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/一个操作系统的实现/" itemprop="url" rel="index"><span itemprop="name">一个操作系统的实现</span></a></span>
 
@@ -890,8 +1028,8 @@
           <!--noindex-->
           
             <div class="post-button">
-              <a class="btn" href="/2014-11-28-system-call/#more" rel="contents">
-                Read more &raquo;
+              <a class="btn" href="/2014/11/28/system-call/#more" rel="contents">
+                阅读全文 &raquo;
               </a>
             </div>
           
@@ -916,8 +1054,8 @@
         
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-cn">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014-11-25-muti-process/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014/11/25/muti-process/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="simowce">
@@ -931,7 +1069,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
             
-            <a href="/2014-11-25-muti-process/" class="post-title-link" itemprop="url">一个操作系统的实现 -- 多进程</a>
+            <a href="/2014/11/25/muti-process/" class="post-title-link" itemprop="url">一个操作系统的实现 -- 多进程</a>
           
         </h1>
 
@@ -940,13 +1078,13 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">发表于</span>
 
               
                 
               
 
-              <time title="Created: 2014-11-25 00:00:00" itemprop="dateCreated datePublished" datetime="2014-11-25T00:00:00+08:00">2014-11-25</time>
+              <time title="创建时间：2014-11-25 00:00:00" itemprop="dateCreated datePublished" datetime="2014-11-25T00:00:00+08:00">2014-11-25</time>
             </span>
           
             
@@ -956,8 +1094,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
               </span>
             
           
@@ -965,7 +1103,7 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/一个操作系统的实现/" itemprop="url" rel="index"><span itemprop="name">一个操作系统的实现</span></a></span>
 
@@ -999,8 +1137,8 @@
           <!--noindex-->
           
             <div class="post-button">
-              <a class="btn" href="/2014-11-25-muti-process/#more" rel="contents">
-                Read more &raquo;
+              <a class="btn" href="/2014/11/25/muti-process/#more" rel="contents">
+                阅读全文 &raquo;
               </a>
             </div>
           
@@ -1025,8 +1163,8 @@
         
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-cn">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014-11-24-chapter-6-single-process/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014/11/24/chapter-6-single-process/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="simowce">
@@ -1040,7 +1178,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
             
-            <a href="/2014-11-24-chapter-6-single-process/" class="post-title-link" itemprop="url">一个操作系统的实现 -- 单进程</a>
+            <a href="/2014/11/24/chapter-6-single-process/" class="post-title-link" itemprop="url">一个操作系统的实现 -- 单进程</a>
           
         </h1>
 
@@ -1049,13 +1187,13 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">发表于</span>
 
               
                 
               
 
-              <time title="Created: 2014-11-24 00:00:00" itemprop="dateCreated datePublished" datetime="2014-11-24T00:00:00+08:00">2014-11-24</time>
+              <time title="创建时间：2014-11-24 00:00:00" itemprop="dateCreated datePublished" datetime="2014-11-24T00:00:00+08:00">2014-11-24</time>
             </span>
           
             
@@ -1065,8 +1203,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
               </span>
             
           
@@ -1074,7 +1212,7 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/一个操作系统的实现/" itemprop="url" rel="index"><span itemprop="name">一个操作系统的实现</span></a></span>
 
@@ -1099,108 +1237,8 @@
           <!--noindex-->
           
             <div class="post-button">
-              <a class="btn" href="/2014-11-24-chapter-6-single-process/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-          <div class="post-eof"></div>
-        
-      </footer>
-  </article>
-  
-  
-  
-
-    
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-cn">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2014-11-15-i-have-finished-reading-the-oranges/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="simowce">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Silence.Slow.Simple">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-            
-            <a href="/2014-11-15-i-have-finished-reading-the-oranges/" class="post-title-link" itemprop="url">四个月整，我总算是看完了《一个操作系统的实现》</a>
-          
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              
-                
-              
-
-              <time title="Created: 2014-11-15 00:00:00" itemprop="dateCreated datePublished" datetime="2014-11-15T00:00:00+08:00">2014-11-15</time>
-            </span>
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
-              </span>
-            
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/感/" itemprop="url" rel="index"><span itemprop="name">感</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><strong>2014年7月15日——2014年11月15日，4个月，123天，300个小时，11章，469页。</strong>这就是我这四个月所做的事。终于，在今天完结了。虽然我知道，这只是一小步，但这仍然值得我感到十分的高兴，并且有理由让我相信这也将是实现我的操作系统的梦想的重要的一步。</p><p>回想这四个月，真的有点感慨万千。用一句话来总结，那就是 Linus 的那句名言：</p>
-          <!--noindex-->
-          
-            <div class="post-button">
-              <a class="btn" href="/2014-11-15-i-have-finished-reading-the-oranges/#more" rel="contents">
-                Read more &raquo;
+              <a class="btn" href="/2014/11/24/chapter-6-single-process/#more" rel="contents">
+                阅读全文 &raquo;
               </a>
             </div>
           
@@ -1226,7 +1264,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1248,10 +1286,10 @@
 
       <ul class="sidebar-nav motion-element">
         <li class="sidebar-nav-toc">
-          Table of Contents
+          文章目录
         </li>
         <li class="sidebar-nav-overview">
-          Overview
+          站点概览
         </li>
       </ul>
 
@@ -1271,8 +1309,8 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">30</span>
-          <span class="site-state-item-name">posts</span>
+          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-name">日志</span>
         </a>
       </div>
     
@@ -1285,7 +1323,7 @@
           
         
         <span class="site-state-item-count">11</span>
-        <span class="site-state-item-name">categories</span>
+        <span class="site-state-item-name">分类</span>
         </a>
       </div>
     
@@ -1297,8 +1335,8 @@
             <a href="/tags/">
           
         
-        <span class="site-state-item-count">17</span>
-        <span class="site-state-item-name">tags</span>
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span>
         </a>
       </div>
     
@@ -1319,15 +1357,15 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2019</span>
   <span class="with-love" id="animate">
-    <i class="fa fa-user"></i>
+    <i class="fa fa-code"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">simowce</span>
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动</div>
   <span class="post-meta-divider">|</span>
-  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v7.4.1</div>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a></div>
 
         
 
@@ -1349,6 +1387,8 @@
 
   
   <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
   <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
   <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
 <script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
@@ -1366,6 +1406,8 @@
 
 
 
+
+  <script src="/js/local-search.js?v=7.4.1"></script>
 
 
 

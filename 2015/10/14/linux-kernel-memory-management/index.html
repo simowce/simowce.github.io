@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.4.1">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"right","display":"hide","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="自学操作系统一年多以来，遇到的最大的坎就是内存管理。最近捧着《深入Linux内核架构》还有《Understand the Linux Kernel》这两本大块头的书死命地吭，然后联系之前的已学的内容以及模糊的地方，总算是有点清晰的感觉了，赶紧记下来。各种地址内存管理一开始让人很困惑的一点就是有很多以“地址”结尾的术语，让人有点摸不着北，所以我想根据自己的理解总结一下让人困惑的“各种地址”：">
+<meta name="keywords" content="Linux kernel,内存管理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux Kernel 内存管理">
+<meta property="og:url" content="https://simowce.github.io/2015/10/14/linux-kernel-memory-management/index.html">
+<meta property="og:site_name" content="Silence.Slow.Simple">
+<meta property="og:description" content="自学操作系统一年多以来，遇到的最大的坎就是内存管理。最近捧着《深入Linux内核架构》还有《Understand the Linux Kernel》这两本大块头的书死命地吭，然后联系之前的已学的内容以及模糊的地方，总算是有点清晰的感觉了，赶紧记下来。各种地址内存管理一开始让人很困惑的一点就是有很多以“地址”结尾的术语，让人有点摸不着北，所以我想根据自己的理解总结一下让人困惑的“各种地址”：">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-10-06T11:10:28.868Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux Kernel 内存管理">
+<meta name="twitter:description" content="自学操作系统一年多以来，遇到的最大的坎就是内存管理。最近捧着《深入Linux内核架构》还有《Understand the Linux Kernel》这两本大块头的书死命地吭，然后联系之前的已学的内容以及模糊的地方，总算是有点清晰的感觉了，赶紧记下来。各种地址内存管理一开始让人很困惑的一点就是有很多以“地址”结尾的术语，让人有点摸不着北，所以我想根据自己的理解总结一下让人困惑的“各种地址”：">
+  <link rel="canonical" href="https://simowce.github.io/2015/10/14/linux-kernel-memory-management/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Linux Kernel 内存管理 | Silence.Slow.Simple</title>
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-56242445-1"></script>
+  <script>
+    var host = window.location.hostname;
+    if (host !== "localhost" || !true) {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-56242445-1');
+    }
+  </script>
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Silence.Slow.Simple</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">a simowce's blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section">首页</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section">标签</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section">分类</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section">归档</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section">关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a href="javascript:;" class="popup-trigger">
+        搜索</a>
+      </li>
+    
+  </ul>
+
+    
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/2015/10/14/linux-kernel-memory-management/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">Linux Kernel 内存管理
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2015-10-14 00:00:00" itemprop="dateCreated datePublished" datetime="2015-10-14T00:00:00+08:00">2015-10-14</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-06 19:10:28" itemprop="dateModified" datetime="2019-10-06T19:10:28+08:00">2019-10-06</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux-kernel/" itemprop="url" rel="index"><span itemprop="name">Linux kernel</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>自学操作系统一年多以来，遇到的最大的坎就是内存管理。最近捧着《深入Linux内核架构》还有《Understand the Linux Kernel》这两本大块头的书死命地吭，然后联系之前的已学的内容以及模糊的地方，总算是有点清晰的感觉了，赶紧记下来。</p><h3 id="各种地址"><a href="#各种地址" class="headerlink" title="各种地址"></a>各种地址</h3><p>内存管理一开始让人很困惑的一点就是有很多以“地址”结尾的术语，让人有点摸不着北，所以我想根据自己的理解总结一下让人困惑的“各种地址”：</p><a id="more"></a>
+
+<ul>
+<li><p>逻辑地址（Logical Address）<br>为了保证向后的兼容性，Intel 根据 8086 在 16bit 时代的寻址模式——段加偏移，设计出了<strong>分段模式</strong>，所有的段地址都保存在了 GDT 里（当然还有 LDT 和 IDT 等，不再详述），偏移地址则一般在通用寄存器，在开启了保护模式之后，由于所有的通用寄存器的字长都是 32 bit，所以可以寻址的地址区间增加到了 4G 。这里的<strong>段地址</strong>是 16bit，<strong>偏移地址</strong>是 32bit，所以最终这两个地址共 48bit 组成了<strong>逻辑地址</strong>。</p>
+</li>
+<li><p>虚拟地址/线性地址 (Virtual Address/Linear Address)<br>看了很多资料，既有说这两者是一样的，又有说这两者有些许的区别。不管，我个人是倾向于前者的。要理解这两个概念，我们得先来理解另外一个有点类似的概念：地址空间和线性地址空间(Address space/Linear Address)。关于这个概念，CSAPP 书中的解释十分的精彩，这里让我来重新表述一下：</p>
+</li>
+</ul>
+<blockquote>
+<p>地址空间，就是一个集合，集合的成员是说能够寻址的地址。如果成员是呈线性增长的，那么就成为线性地址空间。</p>
+</blockquote>
+<p>有了这个定义之后，我们以后遇到类似的说法就不怕不怕啦。例如后文会出现的<strong>内核线性地址空间(Kernel linear address space)</strong> 我们就可以清楚地知道它代表的就是内核说能够寻址的范围。</p>
+<p>在理解了上面的两个重要概念之后，虚拟地址与线性地址的含义也应该很清楚了。一般而言，在 32bit 的平台里，虚拟地址/线性地址也是 32bit 长的，同样的 64bit 的也是如此。</p>
+<p>然后再说一下，上面的逻辑地址的两个部分直接相加起来（没错，跟 8086 的先偏移在相加是不一样的）就是虚拟地址/线性地址。</p>
+<ul>
+<li>物理地址（Physical Address）<br>物理地址就是机器本身 RAM 的真实地址。也是我们寻址的最终意图。这里有一点要提一下，物理地址空间跟线性地址空间是没有关心的，如果你的机器是 32bit 的，那么无论你的 RAM 是多大，线性地址空间都是 0 ～ 0xffffffff 。</li>
+</ul>
+<h3 id="分段与分页"><a href="#分段与分页" class="headerlink" title="分段与分页"></a>分段与分页</h3><p>这两种模式其实都是为了满足日益增长的内存容量而提出的寻址模式。不过现在分页模式已经可以很好地满足需要了，但是为了保证兼容性，IA 平台还是保留了分段机制。不过，为了不与分页机制相冲突，Intel 提出了<strong>平坦内存模式（flat mode）</strong>，具体做法是将段地址全部置为零。不过这里有一个问题，为了保证内核线性地址都是在 3GB 以上（关于这个我下面会详细说明），在编译链接的时候，所有的符号都加上 3GB 的偏移（具体可以看一下内核的编译脚本 vmlinux.lds.S）。但是这就出现问题了：在开启分页模式之前，线性地址 = 物理地址，即段地址 + 偏移地址 = 物理地址，但是我们提到，在平坦模式下，段地址都是 0 ，所以这里偏移地址都是物理地址，从而导致了最终的物理地址都大了 3GB ，所以内核在未开启分页模式前，为了保证正确寻址，使用了一个宏 <code>pa</code> 来减去这多出来的 3GB。</p>
+<p>然后，开启了分页模式之后，便可以放心的使用虚拟地址了。在分页机制中使用页表来管理虚拟地址，一般页表大小为 4KB （也有 4MB 的大页表，不过这里不讨论），这样问题就来了，如果 RAM 有 4GB 的话，那么将需要一百万个页表，这样就造成了巨大的空间浪费。所以现行采用的是多级页表的方式。在 32bit 一般是 2 个页表，一个称作页目录（Page Directory），一个称作页表（Page Table Entry）；64 bit则是 4 个，其中三个页目录（Page Global Directory，简称 PGD，Page Upper Directory/PUD，Page Middle Directory/PMD），一个页表。多级页表和单个页表其实可以用乘法和加法来类比，前者相当于 1024x1024，后者则是 1048676 个 1 相加，这样前者只需 1024x2 = 2048 个页表，后者则需要 1048576 个页表！</p>
+<p>然后，一个虚拟地址就被分割成 n + 1 段了，n 是页表的个数，最后的那个 1 是偏移（offset ）。这样，各个页表的内容都指向了下一个页表的地址，当然，页表项指向的是物理页。哦，前面忘记说了，<strong>物理页我们成为页帧（frame ）。</strong></p>
+
+    </div>
+
+    
+    
+    
+        
+      
+        <div id="reward-container">
+  <div>您的支持虽然不是我更新的动力，但我还是会很开心</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/wechatpay.jpg" alt="simowce 微信支付">
+        <p>微信支付</p>
+      </div>
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/alipay.jpg" alt="simowce 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+      
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>simowce</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://simowce.github.io/2015/10/14/linux-kernel-memory-management/" title="Linux Kernel 内存管理">https://simowce.github.io/2015/10/14/linux-kernel-memory-management/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-ND</a> 许可协议。转载请注明出处！</li>
+</ul>
+</div>
+
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/Linux-kernel/" rel="tag"># Linux kernel</a>
+            
+              <a href="/tags/内存管理/" rel="tag"># 内存管理</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/2015/09/21/new-post/" rel="next" title="安装操作系统的最后一根救命稻草">
+                  <i class="fa fa-chevron-left"></i> 安装操作系统的最后一根救命稻草
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/2015/10/31/show-variable-in-the-makefile/" rel="prev" title="显示 Makefile 中的变量名">
+                  显示 Makefile 中的变量名 <i class="fa fa-chevron-right"></i>
+                </a>
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#各种地址"><span class="nav-number">1.</span> <span class="nav-text">各种地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分段与分页"><span class="nav-number">2.</span> <span class="nav-text">分段与分页</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">simowce</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-code"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">simowce</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a></div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/muse.js?v=7.4.1"></script>
+
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="/js/local-search.js?v=7.4.1"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
