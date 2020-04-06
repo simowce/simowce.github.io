@@ -309,7 +309,7 @@
 <p> 一开始的时候，一启动就会产生 <code>#GP</code> 的错误，之后才发现，我在 <code>init_decriptor()</code> 初始化 <code>sys_call</code> 的地方，习惯性地将 <code>attr</code> 弄成 <code>PRIVILEGE_KERL</code> ，其实应该是 <code>PRIVILEGE_USER</code> 。既然犯错误了，顺便复习一下 <code>DPL</code> 的知识。之所以会产生 <code>#GP</code> 的错误，主要是 <code>DPL</code> 在起作用。<strong>对于调用门来说，DPL 规定了当前执行的程序或任务可以访问此调用门的最低特权级</strong>，而调用这个中断的 —— 我们的进程 —— 特权级是 1，很明显是低于 0 的，所以才会产生这个错误。</p>
 <hr>
 <p>今天在实现的时候，发现有出现了很奇怪的 <code>#GP</code> 错误（这是我用 bochs 的 snapshot 截下来的）：</p>
-<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Exception! --&gt; #GP General Protection</span><br><span class="line">         ß</span><br><span class="line"><span class="symbol">EFLAGS:</span>0x11096CS:0x8EIP:0x306F4Error code:<span class="number">0xC</span></span><br><span class="line">BASEADDRL BASEADDRH LENGTHLOW LENGTHH TYPE</span><br><span class="line"><span class="number">00000000h</span> <span class="number">00000000h</span> <span class="number">0009F000h</span> <span class="number">00000000h</span> <span class="number">00000001h</span></span><br><span class="line"><span class="number">0009F000h</span> <span class="number">00000000h</span> <span class="number">00001000h</span> <span class="number">00000000h</span> <span class="number">00000002h</span></span><br><span class="line"><span class="number">000E8000h</span> <span class="number">00000000h</span> <span class="number">00018000h</span> <span class="number">00000000h</span> <span class="number">00000002h</span></span><br><span class="line"><span class="number">00100000h</span> <span class="number">00000000h</span> <span class="number">01EF0000h</span> <span class="number">00000000h</span> <span class="number">00000001h</span></span><br><span class="line"><span class="number">01FF0000h</span> <span class="number">00000000h</span> <span class="number">00010000h</span> <span class="number">00000000h</span> <span class="number">00000003h</span></span><br><span class="line"><span class="number">FFFC0000h</span> <span class="number">00000000h</span> <span class="number">00040000h</span> <span class="number">00000000h</span> <span class="number">00000002h</span></span><br><span class="line">RAM SIZE : <span class="number">01FF0000h</span></span><br><span class="line">-----<span class="string">"cstart"</span> begins-----</span><br><span class="line">-----<span class="string">"cstart"</span> ends-----</span><br><span class="line">~~~~~~~~~~~ kernel_main ~~~~~~~~~~~~</span><br><span class="line">B.</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Exception! --&gt; #GP General Protection</span><br><span class="line">         ß</span><br><span class="line">EFLAGS:0x11096CS:0x8EIP:0x306F4Error code:0xC</span><br><span class="line">BASEADDRL BASEADDRH LENGTHLOW LENGTHH TYPE</span><br><span class="line">00000000h 00000000h 0009F000h 00000000h 00000001h</span><br><span class="line">0009F000h 00000000h 00001000h 00000000h 00000002h</span><br><span class="line">000E8000h 00000000h 00018000h 00000000h 00000002h</span><br><span class="line">00100000h 00000000h 01EF0000h 00000000h 00000001h</span><br><span class="line">01FF0000h 00000000h 00010000h 00000000h 00000003h</span><br><span class="line">FFFC0000h 00000000h 00040000h 00000000h 00000002h</span><br><span class="line">RAM SIZE : 01FF0000h</span><br><span class="line">-----&quot;cstart&quot; begins-----</span><br><span class="line">-----&quot;cstart&quot; ends-----</span><br><span class="line">~~~~~~~~~~~ kernel_main ~~~~~~~~~~~~</span><br><span class="line">B.</span><br></pre></td></tr></table></figure>
 
 <p>一开始我一直不知道什么怎么解决。然后我就乱弄，然后错误就解决了。虽然我现在还是不知道究竟是什么错误，不过我说一下我的解决方法，用同样的问题可以参考一下。其实没有什么的，就是用 <code>bximage</code> 重新建立一个 <code>a.img</code> ,问题就解决了。</p>
 <hr>
@@ -414,6 +414,9 @@
 
           </div>
           
+    
+    <div class="comments" id="gitalk-container"></div>
+  
 
         </div>
           
@@ -507,7 +510,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-code"></i>
   </span>
@@ -575,6 +578,25 @@
   
 
   
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '64dccd465ffcc827c9ed',
+      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
+      repo: 'simowce.github.io/',
+      owner: 'simowce',
+      admin: ['simowce'],
+      id: 'a7894fc4d64a7fc898a99f02de1ae421',
+        language: 'zh-CN',
+      
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
 
 </body>
 </html>

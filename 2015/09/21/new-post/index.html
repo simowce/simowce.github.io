@@ -309,7 +309,7 @@
 <li><p>接下来修改 <code>Neo grub</code> 自动生成的 <code>menu.lst</code> ，进行修改：</p>
 </li>
 </ul>
-<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">root</span> (hda,<span class="keyword">b) </span>         //这里有两个注意点，第一是，那个 a 和 <span class="keyword">b </span>要根据具体情况，第二是，**逗号和<span class="keyword">b之间是没有空格的！！！**</span></span><br><span class="line"><span class="keyword"></span></span><br><span class="line"><span class="keyword">kernel </span>(hda,<span class="keyword">b)/vmlinuz </span><span class="keyword">boot=casper </span>iso-scan/filename=/你的镜像名 ro quiet splash nomodeset（注意，如果你使用的是 Nvidia 的显卡的话那么一定要加这一句，不然百分之百会花屏的！） locale<span class="symbol">=zh_CN</span>.UTF-<span class="number">8</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">initrd</span> (hda,<span class="number">0</span>)/initrd.lz</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root (hda,b)          //这里有两个注意点，第一是，那个 a 和 b 要根据具体情况，第二是，**逗号和b之间是没有空格的！！！**</span><br><span class="line"></span><br><span class="line">kernel (hda,b)/vmlinuz boot=casper iso-scan/filename=/你的镜像名 ro quiet splash nomodeset（注意，如果你使用的是 Nvidia 的显卡的话那么一定要加这一句，不然百分之百会花屏的！） locale=zh_CN.UTF-8</span><br><span class="line"></span><br><span class="line">initrd (hda,0)/initrd.lz</span><br></pre></td></tr></table></figure>
 
 <p>这样修改之后，重启，选择相应的启动项即可～</p>
 <p>最近被 <code>Grub</code> 这个神器迷住了，以后会深入地学习它的！</p>
@@ -398,6 +398,9 @@
 
           </div>
           
+    
+    <div class="comments" id="gitalk-container"></div>
+  
 
         </div>
           
@@ -489,7 +492,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-code"></i>
   </span>
@@ -557,6 +560,25 @@
   
 
   
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '64dccd465ffcc827c9ed',
+      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
+      repo: 'simowce.github.io/',
+      owner: 'simowce',
+      admin: ['simowce'],
+      id: '68dd97a208ba60762a759f6b5bf9a058',
+        language: 'zh-CN',
+      
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
 
 </body>
 </html>

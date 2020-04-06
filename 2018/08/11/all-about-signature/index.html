@@ -345,18 +345,18 @@
 <p>如果我们对一个 apk 文件进行解包，那么会发现里面有一个 <code>META-INF</code> 的文件夹，里面的内容根据不同的应用会有不同，但是一定会有这三个文件：<code>MANIFEST.MF</code>，<code>CERT.SF</code> 和 <code>CERT.RSA</code>。这三个文件就是 Android 签名机制的核心了。系统如何判断一个 <code>apk</code> 是不是被修改过的，就是通过这三个文件进行一系列的校验。具体这三个文件是怎么生成的，可以参考<a href="https://blog.csdn.net/jiangwei0910410003/article/details/50402000" target="_blank" rel="noopener">这一篇文章</a>(下文也有很多内容是参考了这篇文章的描述，再次感谢作者)。现在我们以一个 apk 为例，简要说明这三个文件的内容和意义（<strong>注意，有一些 APK 可能 META-INF 下面的内容可能后缀名一样，但是文件名一样；又或者是不止这三个文件，这些都是正常现象</strong>）。</p>
 <ul>
 <li><p>MANIFEST.MF<br>这个文件的内容是当前 apk 里面所有文件的名字和文件的摘要值，例如在现在这个例子中，这个文件的内容大概长这样：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Manifest-Version</span>: 1.0</span><br><span class="line"><span class="attribute">Built-By</span>: Generated-by-ADT</span><br><span class="line"><span class="attribute">Created-By</span>: Android Gradle 3.0.1</span><br><span class="line"></span><br><span class="line"><span class="attribute">Name</span>: AndroidManifest.xml</span><br><span class="line"><span class="attribute">SHA1-Digest</span>: l5LrO+0CH4QwymZEEkgof6tKJKQ=</span><br><span class="line"></span><br><span class="line"><span class="attribute">Name</span>: META-INF/INDEX.LIST</span><br><span class="line"><span class="attribute">SHA1-Digest</span>: mV/vtpP5kHRZ0ZdWNzAWUorzn/M=</span><br><span class="line"></span><br><span class="line"><span class="attribute">Name</span>: META-INF/io.netty.versions.properties</span><br><span class="line"><span class="attribute">SHA1-Digest</span>: fHUsZp7XXjDcmXh7h88Qxku7PaQ=</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Manifest-Version: 1.0</span><br><span class="line">Built-By: Generated-by-ADT</span><br><span class="line">Created-By: Android Gradle 3.0.1</span><br><span class="line"></span><br><span class="line">Name: AndroidManifest.xml</span><br><span class="line">SHA1-Digest: l5LrO+0CH4QwymZEEkgof6tKJKQ=</span><br><span class="line"></span><br><span class="line">Name: META-INF/INDEX.LIST</span><br><span class="line">SHA1-Digest: mV/vtpP5kHRZ0ZdWNzAWUorzn/M=</span><br><span class="line"></span><br><span class="line">Name: META-INF/io.netty.versions.properties</span><br><span class="line">SHA1-Digest: fHUsZp7XXjDcmXh7h88Qxku7PaQ=</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
 
 <p>这里我们可以来实战一下，验证这里面内容的意义。以第一个 <code>AndroidManifest.xml</code> 为例，首先把这个文件提取出来，然后计算一下它的 <strong>SHA-1</strong> 值，在 Linux 可以这样：</p>
-<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">▶ sha1sum AndroidManifest.<span class="keyword">xml</span> <span class="title"></span></span><br><span class="line"><span class="title">9792eb3bed021f8430ca66441248287fab4a24a4</span>  AndroidManifest.xml</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">▶ sha1sum AndroidManifest.xml </span><br><span class="line">9792eb3bed021f8430ca66441248287fab4a24a4  AndroidManifest.xml</span><br></pre></td></tr></table></figure>
 
 <p>咦，值好像不一样，没事，因为上面的值是经过 <strong>Base64</strong> 编码的，我们可以在<a href="http://tomeko.net/online_tools/hex_to_base64.php?lang=en" target="_blank" rel="noopener">这里</a>进行转换：<br><img src="http://static.zybuluo.com/simowce/3lqpq57w7kx9ndpqjsols08c/Screenshot%20from%202018-09-11%2021-30-56.png" alt="Screenshot from 2018-09-11 21-30-56.png-40kB"><br>对比后就可以发现跟 <code>MANIFEST.MF</code> 的值是一毛一样的。</p>
 </li>
 <li><p>CERT.SF<br>我们初看这个文件的时候，会发现它的内容跟 <code>MANITEST.MF</code> 非常的接近：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Signature-Version</span>: 1.0</span><br><span class="line"><span class="attribute">Created-By</span>: 1.0 (Android)</span><br><span class="line"><span class="attribute">SHA1-Digest-Manifest</span>: nezsP8TgzAKQ7BFky/chze3qmL0=</span><br><span class="line"></span><br><span class="line"><span class="attribute">Name</span>: AndroidManifest.xml</span><br><span class="line"><span class="attribute">SHA1-Digest</span>: mr/1kFRAFlcWQAo9hA69M29MAYs=</span><br><span class="line"></span><br><span class="line"><span class="attribute">Name</span>: META-INF/INDEX.LIST</span><br><span class="line"><span class="attribute">SHA1-Digest</span>: YFvH0U9NaeV1BDZUz5JkpfUm9aU=</span><br><span class="line"></span><br><span class="line"><span class="attribute">Name</span>: META-INF/io.netty.versions.properties</span><br><span class="line"><span class="attribute">SHA1-Digest</span>: rTBpHjFlmjueKQtX0IlpTl7X4uo=</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Signature-Version: 1.0</span><br><span class="line">Created-By: 1.0 (Android)</span><br><span class="line">SHA1-Digest-Manifest: nezsP8TgzAKQ7BFky/chze3qmL0=</span><br><span class="line"></span><br><span class="line">Name: AndroidManifest.xml</span><br><span class="line">SHA1-Digest: mr/1kFRAFlcWQAo9hA69M29MAYs=</span><br><span class="line"></span><br><span class="line">Name: META-INF/INDEX.LIST</span><br><span class="line">SHA1-Digest: YFvH0U9NaeV1BDZUz5JkpfUm9aU=</span><br><span class="line"></span><br><span class="line">Name: META-INF/io.netty.versions.properties</span><br><span class="line">SHA1-Digest: rTBpHjFlmjueKQtX0IlpTl7X4uo=</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
 
 <p>这里面分为两部分内容：<code>SHA1-Digest-Manifest</code> 和 <code>SHA1-Digest</code>，这两部分分别是这么计算的。首先这个 <code>SHA1-Digest-Manifest</code> 就是对 <code>MANIFEST.MF</code> 计算 <strong>SHA-1</strong>之后再进行<strong>Base64</strong>编码：</p>
-<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">▶ sha1sum <span class="keyword">META</span>-<span class="keyword">INF</span>/MANIFEST.MF </span><br><span class="line">9decec3fc4e0cc0290ec1164cbf721cdedea98bd  <span class="keyword">META</span>-<span class="keyword">INF</span>/MANIFEST.MF</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">▶ sha1sum META-INF/MANIFEST.MF </span><br><span class="line">9decec3fc4e0cc0290ec1164cbf721cdedea98bd  META-INF/MANIFEST.MF</span><br></pre></td></tr></table></figure>
 
 <p><img src="http://static.zybuluo.com/simowce/mvnnqsa65ovu31s2bln213ig/Screenshot%20from%202018-09-11%2021-54-34.png" alt="Screenshot from 2018-09-11 21-54-34.png-39.7kB"></p>
 <p>然后 <code>SHA1-Digest</code> 是对 <code>MANIFEST.MF</code> 里面的<strong>每一个 \r\n 分割开来的项分别进行 SHA-1 之后在进行 Bash64 编码</strong>，例如上面的 <code>AndroidManifest.xml</code> 的 <code>SHA1-Digest</code> 是怎么算出来的呢？我们可以这么来：</p>
@@ -476,6 +476,9 @@
 
           </div>
           
+    
+    <div class="comments" id="gitalk-container"></div>
+  
 
         </div>
           
@@ -569,7 +572,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-code"></i>
   </span>
@@ -637,6 +640,25 @@
   
 
   
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '64dccd465ffcc827c9ed',
+      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
+      repo: 'simowce.github.io/',
+      owner: 'simowce',
+      admin: ['simowce'],
+      id: '00d9c8c60e097f86e6b38b1fb81a984f',
+        language: 'zh-CN',
+      
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
 
 </body>
 </html>

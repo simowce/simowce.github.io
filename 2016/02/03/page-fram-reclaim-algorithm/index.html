@@ -315,7 +315,7 @@
 <li>PG_reclaim: 似乎是表明当前页是脏的，但是还没有进行回写操作。</li>
 </ul>
 <p><strong>注意：内核有专门的函数来检测这些标志位，例如 <code>PG_swapcache</code> 就是用 <code>PageSwapCache()</code>，<code>PG_reclaim</code> 就是用 <code>PageReclaim()</code> 。但是，如果你通过 <code>grep</code> 或者其他工具根据函数名去搜索这些函数的实现的时候，你会很神奇地发现你找不到。其实这是内核使用的一个技巧，因为这些函数大同小异，所以系统使用了宏（macro）来统一表达。所以你就会发现，这么一堆函数在内核的实现中只用了两行（具体在 <code>include/linux/page-flags</code>）:</strong></p>
-<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">static inline int Page##uname(const struct<span class="built_in"> page </span>*page)			\</span><br><span class="line">		&#123; return test_bit(PG_##lname, &amp;page-&gt;flags); &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">static inline int Page##uname(const struct page *page)			\</span><br><span class="line">		&#123; return test_bit(PG_##lname, &amp;page-&gt;flags); &#125;</span><br></pre></td></tr></table></figure>
 
 <p><strong>所以，这也给了我们一个提示，如果我们在搜索一些变量或者函数的时候找不到它的实现，那么很有可能内核使用了宏来实现，而解决方法页很简单，就是抽取出这些变量或者函数的共同处，然后使用这个共同处去搜索，会有意想不到的收获～</strong></p>
 </li>
@@ -345,7 +345,7 @@
 </li>
 <li><p>struct scan_control</p>
 <p>这是一个很重要的数据结构，扫描的调用者通过这个数据结构向执行回收扫描的函数来控制扫描行为，这里面有几个比较重要的成员变量要说明一下（只挑选了一部分）：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">scan_control</span> &#123;</span></span><br><span class="line">	<span class="comment">/*指明了 shrink_list() 应该回收多少内存页 */</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> nr_to_reclaim;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 这个是传给后续页面回收函数的 GFP 标志 */</span></span><br><span class="line">	<span class="keyword">gfp_t</span> gfp_mask;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 系统通过判断这个成员是否为 NULL 来判断 global reclaim 还是 target reclaim */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">mem_cgroup</span> *<span class="title">target_mem_cgroup</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 扫描的数目是整个 LRU 的大小 &gt;&gt; priority （具体在 get_scan_count() 体现）</span></span><br><span class="line"><span class="comment">  * 也就是说，priority 越大，扫描的数目就越少</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line">	<span class="keyword">int</span> priority;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 指定了内核是否允许将页面写出到后备设备上</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> may_writepage:<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 指定了已经映射的页面能否被回收 */</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> may_unmap:<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 指定了页面回收阶段是否允许页交换 */</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> may_swap:<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 到目前为止通过 shrink_zones() 释放掉的页面数目 */</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> nr_reclaimed;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">struct scan_control &#123;</span><br><span class="line">	/*指明了 shrink_list() 应该回收多少内存页 */</span><br><span class="line">	unsigned long nr_to_reclaim;</span><br><span class="line"></span><br><span class="line">	/* 这个是传给后续页面回收函数的 GFP 标志 */</span><br><span class="line">	gfp_t gfp_mask;</span><br><span class="line"></span><br><span class="line">	/* 系统通过判断这个成员是否为 NULL 来判断 global reclaim 还是 target reclaim */</span><br><span class="line">	struct mem_cgroup *target_mem_cgroup;</span><br><span class="line"></span><br><span class="line">	/* 扫描的数目是整个 LRU 的大小 &gt;&gt; priority （具体在 get_scan_count() 体现）</span><br><span class="line">  * 也就是说，priority 越大，扫描的数目就越少</span><br><span class="line">  */</span><br><span class="line">	int priority;</span><br><span class="line"></span><br><span class="line">// 指定了内核是否允许将页面写出到后备设备上</span><br><span class="line">	unsigned int may_writepage:1;</span><br><span class="line"></span><br><span class="line">	/* 指定了已经映射的页面能否被回收 */</span><br><span class="line">	unsigned int may_unmap:1;</span><br><span class="line"></span><br><span class="line">	/* 指定了页面回收阶段是否允许页交换 */</span><br><span class="line">	unsigned int may_swap:1;</span><br><span class="line"></span><br><span class="line">	/* 到目前为止通过 shrink_zones() 释放掉的页面数目 */</span><br><span class="line">	unsigned long nr_reclaimed;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>交换缓存（swap cache）</p>
 <p>交换缓存是个很重要的数据结构，不过由于它是属于页面回写部分的，而且，它是属于页缓存的一种。所以，比较详细的实现就暂且留个 TODO ，不过，大体上还是能够说明这个交换缓存的作用的。</p>
@@ -1041,6 +1041,9 @@ nr[lru] -= min(nr[lru], nr_scanned);</code></pre><p>在这里我想提一点，�
 
           </div>
           
+    
+    <div class="comments" id="gitalk-container"></div>
+  
 
         </div>
           
@@ -1134,7 +1137,7 @@ nr[lru] -= min(nr[lru], nr_scanned);</code></pre><p>在这里我想提一点，�
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-code"></i>
   </span>
@@ -1202,6 +1205,25 @@ nr[lru] -= min(nr[lru], nr_scanned);</code></pre><p>在这里我想提一点，�
   
 
   
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '64dccd465ffcc827c9ed',
+      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
+      repo: 'simowce.github.io/',
+      owner: 'simowce',
+      admin: ['simowce'],
+      id: '7e00405505aeb3682bb889deb5b5896e',
+        language: 'zh-CN',
+      
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
 
 </body>
 </html>

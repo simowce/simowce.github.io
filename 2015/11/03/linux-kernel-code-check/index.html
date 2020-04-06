@@ -307,14 +307,14 @@
 </ul>
 <p>出现这个错误只要加上 -f / –file 就可以，意思是：<strong>treat FILE as regular source file</strong></p>
 <p><strong>如果是说编码错误的话，那么可以使用 vim 来进行转换。用 vim 打开源文件，然后使用这个命令：</strong></p>
-<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:<span class="builtin-name">set</span> <span class="attribute">ff</span>=unix</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:set ff=unix</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>WARING: Prefer [subsystem eg: netdev]_dbg([subsystem]dev, … the dev_dbg(dev, … then pr_debug(… to printk(KERN_DEBUG …</li>
 </ul>
 <p>这个的话好像是说不要使用 printk , 目前我也没用到其他的子系统，所以都是使用 pr_debug 来代替 printk 的。</p>
 <p>还有，在那个脚本我一般都加了如下的几个选项：</p>
-<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">./scipts/checkpatch.pl</span> <span class="params">--file</span> <span class="params">--terse</span> <span class="params">--no-tree</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./scipts/checkpatch.pl --file --terse --no-tree</span><br></pre></td></tr></table></figure>
 
 <p>差不多就是这样。</p>
 <p>EOF</p>
@@ -411,6 +411,9 @@
 
           </div>
           
+    
+    <div class="comments" id="gitalk-container"></div>
+  
 
         </div>
           
@@ -502,7 +505,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-code"></i>
   </span>
@@ -570,6 +573,25 @@
   
 
   
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '64dccd465ffcc827c9ed',
+      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
+      repo: 'simowce.github.io/',
+      owner: 'simowce',
+      admin: ['simowce'],
+      id: 'faf02cefcafd7ba6a41001baf061e001',
+        language: 'zh-CN',
+      
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
 
 </body>
 </html>

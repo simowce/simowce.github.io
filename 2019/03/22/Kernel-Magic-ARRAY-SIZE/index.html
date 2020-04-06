@@ -300,18 +300,18 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>如果让你在 C 语言计算一个数组的长度，那么通常的写法是：</p><figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#define ARRAY_SIZE(<span class="name">a</span>) (<span class="name">sizeof</span>(<span class="name">a</span>)/sizeof(<span class="name">a</span>[<span class="number">0</span>]))</span><br></pre></td></tr></table></figure><p>这个确实是行之有效的，但是问题是什么呢？问题是<strong>ARRAY_SIZE 的参数必须是一个数组，不能是一个指针，否则就会出现问题</strong>。因为 sizeof(一个指向数组的指针) 它的值是固定的（64 位是 8,32 位是 4）。那么怎么避免这个问题的，Linux Kernel 给了一个很好的解决方法，来看 Kernel 版本的 <code>ARRAY_SIZE</code>:</p><a id="more"></a>
+        <p>如果让你在 C 语言计算一个数组的长度，那么通常的写法是：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))</span><br></pre></td></tr></table></figure><p>这个确实是行之有效的，但是问题是什么呢？问题是<strong>ARRAY_SIZE 的参数必须是一个数组，不能是一个指针，否则就会出现问题</strong>。因为 sizeof(一个指向数组的指针) 它的值是固定的（64 位是 8,32 位是 4）。那么怎么避免这个问题的，Linux Kernel 给了一个很好的解决方法，来看 Kernel 版本的 <code>ARRAY_SIZE</code>:</p><a id="more"></a>
 
 
 
-<figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#define ARRAY_SIZE(<span class="name">arr</span>) (<span class="name">sizeof</span>(<span class="name">arr</span>)/sizeof(<span class="name">arr</span>[<span class="number">0</span>]) + __must_be_array(<span class="name">arr</span>))</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]) + __must_be_array(arr))</span><br></pre></td></tr></table></figure>
 
 <p>后面多了一个对于传入参数的必须是数组的保证，来看看是如何实现的：</p>
-<figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/* &amp;a[0] degrades to a pointer: a different type from an<span class="built_in"> array </span>*/</span><br><span class="line"><span class="comment">#define __must_be_array(a)  BUILD_BUG_ON_ZERO(__same_type((a), &amp;(a)[0]))</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># define __same_type(a, b) __builtin_types_compatible_p(typeof(a), typeof(b))</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/* &amp;a[0] degrades to a pointer: a different type from an array */</span><br><span class="line">#define __must_be_array(a)  BUILD_BUG_ON_ZERO(__same_type((a), &amp;(a)[0]))</span><br><span class="line"></span><br><span class="line"># define __same_type(a, b) __builtin_types_compatible_p(typeof(a), typeof(b))</span><br></pre></td></tr></table></figure>
 
 <p>首先这里用到了一个 Linux Kernel 的一个宏——<code>BUILD_BUG_ON_ZERO</code>。需要说明的是，这个宏的命名跟他的实际意义是相反的，这个宏的意义是当传入的参数不是 0 的时候抛一个编译错误，否则返回 0，所以曾经有人建议把这个宏改名为 <code>BUILD_BUG_OR_ZERO</code>。这个命名就是比较贴切的，但是最终并没有被接纳，所以一直在误导新人。</p>
 <p>先来看一个这个宏的定义：</p>
-<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/* Force a compilation <span class="keyword">error</span> <span class="keyword">if</span> condition <span class="keyword">is</span> <span class="literal">true</span>, <span class="keyword">but</span> also produce a</span><br><span class="line">   <span class="literal">result</span> (<span class="keyword">of</span> value <span class="number">0</span> <span class="keyword">and</span> type size_t), so <span class="keyword">the</span> expression can be used</span><br><span class="line">   e.g. <span class="keyword">in</span> a structure initializer (<span class="keyword">or</span> <span class="keyword">where</span>-ever <span class="keyword">else</span> comma expressions</span><br><span class="line">   aren't permitted). */</span><br><span class="line"><span class="comment">#define BUILD_BUG_ON_ZERO(e) (sizeof(struct &#123; int:-!!(e);  &#125;))</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/* Force a compilation error if condition is true, but also produce a</span><br><span class="line">   result (of value 0 and type size_t), so the expression can be used</span><br><span class="line">   e.g. in a structure initializer (or where-ever else comma expressions</span><br><span class="line">   aren&apos;t permitted). */</span><br><span class="line">#define BUILD_BUG_ON_ZERO(e) (sizeof(struct &#123; int:-!!(e);  &#125;))</span><br></pre></td></tr></table></figure>
 
 <p>这里面最重要的知识点就是：逻辑取反和位域（bitfield），其中位域分为两种，命名位域和匿名位域。其中匿名位域长度可以为 0，命名位域必须大于 0。</p>
 <p>两次逻辑取反会把非零值变为 1，所以如果 e 为非零值，那么就会是一个长度为 -1 的位域；否则就是一个长度为 0 的匿名位域，对其去 sizeof 就是 0。</p>
@@ -415,6 +415,9 @@
 
           </div>
           
+    
+    <div class="comments" id="gitalk-container"></div>
+  
 
         </div>
           
@@ -506,7 +509,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-code"></i>
   </span>
@@ -574,6 +577,25 @@
   
 
   
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '64dccd465ffcc827c9ed',
+      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
+      repo: 'simowce.github.io/',
+      owner: 'simowce',
+      admin: ['simowce'],
+      id: '7cf6e42a8db0052a8fa8c41437d324e1',
+        language: 'zh-CN',
+      
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
 
 </body>
 </html>

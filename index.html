@@ -375,7 +375,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>如果让你在 C 语言计算一个数组的长度，那么通常的写法是：</p><figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#define ARRAY_SIZE(<span class="name">a</span>) (<span class="name">sizeof</span>(<span class="name">a</span>)/sizeof(<span class="name">a</span>[<span class="number">0</span>]))</span><br></pre></td></tr></table></figure><p>这个确实是行之有效的，但是问题是什么呢？问题是<strong>ARRAY_SIZE 的参数必须是一个数组，不能是一个指针，否则就会出现问题</strong>。因为 sizeof(一个指向数组的指针) 它的值是固定的（64 位是 8,32 位是 4）。那么怎么避免这个问题的，Linux Kernel 给了一个很好的解决方法，来看 Kernel 版本的 <code>ARRAY_SIZE</code>:</p>
+          <p>如果让你在 C 语言计算一个数组的长度，那么通常的写法是：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))</span><br></pre></td></tr></table></figure><p>这个确实是行之有效的，但是问题是什么呢？问题是<strong>ARRAY_SIZE 的参数必须是一个数组，不能是一个指针，否则就会出现问题</strong>。因为 sizeof(一个指向数组的指针) 它的值是固定的（64 位是 8,32 位是 4）。那么怎么避免这个问题的，Linux Kernel 给了一个很好的解决方法，来看 Kernel 版本的 <code>ARRAY_SIZE</code>:</p>
           <!--noindex-->
           
             <div class="post-button">
@@ -1301,7 +1301,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-code"></i>
   </span>
@@ -1369,6 +1369,7 @@
   
 
   
+
 
 </body>
 </html>
