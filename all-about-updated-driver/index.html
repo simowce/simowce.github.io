@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.4.1">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"right","display":"hide","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="背景GPU 驱动自升级，是在以下两个痛点下催生出来的： 换机频率降低，手机的生命周期越来越长智能手机已经不再是一个增量市场，变成一个存量市场。消费者换机频率逐年降低，手机生命周期变长。生命周期变长了以后，那么如何更好地维护老机型就变成一个难题 开发者需要升级 ROM 才能用到 GPU driver 的新功能一直以来，游戏开发者想要升级到最新的 GPU 驱动的渠道跟普通的用户一样，只能靠 OEM 厂">
+<meta name="keywords" content="Graphic">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GPU 驱动自升级及其原理">
+<meta property="og:url" content="https://simowce.github.io/all-about-updated-driver/index.html">
+<meta property="og:site_name" content="Silence.Slow.Simple">
+<meta property="og:description" content="背景GPU 驱动自升级，是在以下两个痛点下催生出来的： 换机频率降低，手机的生命周期越来越长智能手机已经不再是一个增量市场，变成一个存量市场。消费者换机频率逐年降低，手机生命周期变长。生命周期变长了以后，那么如何更好地维护老机型就变成一个难题 开发者需要升级 ROM 才能用到 GPU driver 的新功能一直以来，游戏开发者想要升级到最新的 GPU 驱动的渠道跟普通的用户一样，只能靠 OEM 厂">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://simowce.github.io/assets/chooseDriverInternal.jpg">
+<meta property="og:image" content="https://simowce.github.io/assets/VNDK.png">
+<meta property="og:image" content="https://simowce.github.io/assets/VNDK-SP.png">
+<meta property="og:image" content="https://simowce.github.io/assets/VNDK-all.png">
+<meta property="og:image" content="https://simowce.github.io/assets/getDriverNamespace.jpg">
+<meta property="og:image" content="https://simowce.github.io/assets/load_updated_driver.jpg">
+<meta property="og:image" content="https://simowce.github.io/assets/updated_driver_all.jpg">
+<meta property="og:updated_time" content="2020-04-14T12:50:26.340Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="GPU 驱动自升级及其原理">
+<meta name="twitter:description" content="背景GPU 驱动自升级，是在以下两个痛点下催生出来的： 换机频率降低，手机的生命周期越来越长智能手机已经不再是一个增量市场，变成一个存量市场。消费者换机频率逐年降低，手机生命周期变长。生命周期变长了以后，那么如何更好地维护老机型就变成一个难题 开发者需要升级 ROM 才能用到 GPU driver 的新功能一直以来，游戏开发者想要升级到最新的 GPU 驱动的渠道跟普通的用户一样，只能靠 OEM 厂">
+<meta name="twitter:image" content="https://simowce.github.io/assets/chooseDriverInternal.jpg">
+  <link rel="canonical" href="https://simowce.github.io/all-about-updated-driver/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>GPU 驱动自升级及其原理 | Silence.Slow.Simple</title>
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-56242445-1"></script>
+  <script>
+    var host = window.location.hostname;
+    if (host !== "localhost" || !true) {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-56242445-1');
+    }
+  </script>
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Silence.Slow.Simple</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">a simowce's blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section">首页</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section">标签</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section">分类</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section">归档</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section">关于</a>
+
+  </li>
+  </ul>
+
+    
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/all-about-updated-driver/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">GPU 驱动自升级及其原理
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2020-04-14 20:11:40 / 修改时间：20:50:26" itemprop="dateCreated datePublished" datetime="2020-04-14T20:11:40+08:00">2020-04-14</time>
+            </span>
+          
+            
+
+            
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>GPU 驱动自升级，是在以下两个痛点下催生出来的：</p><ol>
+<li>换机频率降低，手机的生命周期越来越长<br>智能手机已经不再是一个增量市场，变成一个存量市场。消费者换机频率逐年降低，手机生命周期变长。生命周期变长了以后，那么如何更好地维护老机型就变成一个难题</li>
+<li>开发者需要升级 ROM 才能用到 GPU driver 的新功能<br>一直以来，游戏开发者想要升级到最新的 GPU 驱动的渠道跟普通的用户一样，只能靠 OEM 厂商的推送系统更新，他们没有一个渠道能够直接拿到最新的 GPU 驱动，因此无法第一时间对驱动的新特性进行适配。如何建立一个渠道能够让游戏开发者能够及时获取到最新的 GPU 驱动也是一个难题</li>
+</ol><a id="more"></a>
+
+<p>有痛点就会有需求，GPU 驱动自升级就是针对这两个痛点提出的解决方案。</p>
+<p>不过，这个方案要落地还会遇到很多实际问题：首先，GPU 驱动跟整个操作系统依赖极大，影响的模块很多，如 Display，Camera，Media 等，稍有不慎整个系统就会不稳定甚至 crash。</p>
+<p>同时，这个功能要真正落地，还涉及到多方：GPU 驱动来自 SoC 厂商；Android 的 OEM 厂商等。每一方里涉及到厂商的又十分众多。因此在确定方案的时候需要保证能够有足够的兼容性。</p>
+<p>以上这么多难题注定了这个方案从提出到落地，需要花很长的时间，走很长的路。</p>
+<p>而事实也是如此，从 2017 年开始，Android O 提出了 Project Treble，引入了 VNDK 和 linker namespace，那时候其实已经在对这个方案进行技术铺垫了；再到 2018 年的 Android P，谷歌在 framework 加了很多 dummy code，此时整个方案的框架已经基本完成；再到 2019 年的 Android Q，这个方案作为 Q 的核心功能跟大家见面了。而<strong>小米十周年旗舰——<a href="https://item.mi.com/product/10000214.html" target="_blank" rel="noopener">小米 10</a>/<a href="https://www.mi.com/mi10pro" target="_blank" rel="noopener">小米 10 Pro</a> 也成为国内第一款落地 GPU 驱动自升级功能的 Android 智能手机。</strong></p>
+<p>在 GPU 驱动自升级方案中，可升级的 GPU 驱动分为两种，一种称为 Game Driver，面向的普通用户，主要是针对游戏这种十分依赖 GPU 的场景进行特殊优化，<strong>稳定</strong>的 driver；另一种称为 Prerelease Driver，面向游戏开发者，目的是让游戏开发者能够提前获取到包含新特性的，<strong>不稳定</strong>的驱动，进行提前的适配和利用。这两种驱动分别封装在两个 apk，分别通过两个 property 来分区：<code>ro.gfx.driver.1</code> 指定的是 Game Driver 的包名，<code>ro.gfx.driver.1</code> 指定的是 Prerelease Driver 的包名。</p>
+<p>需要说明的是，虽然称为 apk，但是实际上更多地可以理解为是两个盛放 driver 的容器，apk 本身不具备任何的代码，而之所以要将其打包为 apk，更多的是为了利用 Android 的签名机制以及利用 PMS 能够对所有安装的 apk 进行统一的管理。</p>
+<p>将 apk 解包以后可以放在整个包的结构如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">├── AndroidManifest.xml</span><br><span class="line">├── assets</span><br><span class="line">│   ├── sphal_libraries.txt</span><br><span class="line">│   └── whitelist.txt</span><br><span class="line">├── lib</span><br><span class="line">│   ├── arm64-v8a</span><br><span class="line">│   └── armeabi-v7a</span><br><span class="line">└── res</span><br></pre></td></tr></table></figure>
+
+<p>分别说明一下各个结构的作用：</p>
+<ul>
+<li>sphal_libraries.txt<br>能够被 <code>gfx driver</code> 访问的， <code>sphal</code> 中的库列表，后面会详细讲解</li>
+<li>whitelist.txt<br>使用 Game Driver 的包名白名单</li>
+<li>lib<br>driver 本体，分为 32 位和 64 位，根据应用的 abi 选择加载对应的 driver</li>
+</ul>
+<p>Game Driver 和 Prerelease Driver （后面统称为 updated driver）这两个 apk 的结构是一样的，只不过 lib 文件夹里面的驱动不一样而已。</p>
+<h2 id="updated-driver-配置流程"><a href="#updated-driver-配置流程" class="headerlink" title="updated driver 配置流程"></a>updated driver 配置流程</h2><p>这部分讲讲在 app 启动的时候，是怎么给 app 挑选对应的 GPU driver 的。</p>
+<p>app 在启动的过程中，经过下面的流转（详细的流程省略，非本文主题）：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ActivityThread::handleBindApplication()</span><br><span class="line">   \__ActivityThread::setupGraphicsSupport()</span><br><span class="line">        \__GraphicsEnvironment.setup()</span><br></pre></td></tr></table></figure>
+
+<p>最终走到核心代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public void setup(Context context, Bundle coreSettings) &#123;</span><br><span class="line">   final PackageManager pm = context.getPackageManager();</span><br><span class="line">    final String packageName = context.getPackageName();</span><br><span class="line">    </span><br><span class="line">    ....</span><br><span class="line">    </span><br><span class="line">    if (!chooseDriver(context, coreSettings, pm, packageName)) &#123;</span><br><span class="line">        setGpuStats(SYSTEM_DRIVER_NAME, SYSTEM_DRIVER_VERSION_NAME, SYSTEM_DRIVER_VERSION_CODE,</span><br><span class="line">                SystemProperties.getLong(PROPERTY_GFX_DRIVER_BUILD_TIME, 0), packageName,</span><br><span class="line">                getVulkanVersion(pm));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>核心函数 <code>chooseDriver()</code>：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">private static boolean chooseDriver(</span><br><span class="line">        Context context, Bundle coreSettings, PackageManager pm, String packageName) &#123;</span><br><span class="line">    // PART 1</span><br><span class="line">    final String driverPackageName = chooseDriverInternal(context, coreSettings);</span><br><span class="line">    if (driverPackageName == null) &#123;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="chooseDriverInternal"><a href="#chooseDriverInternal" class="headerlink" title="chooseDriverInternal()"></a>chooseDriverInternal()</h3><p><code>chooseDriverInternal()</code>，这个函数的主要作用是，根据系统的配置，为当前启动的 app 判断是否需要加载 Game/Prerelease Driver，如果需要那么返回对应的 driver apk 的包名；如果不需要，那么返回 <code>null</code>，表明当前启动的 app 只需要加载 system gpu driver。判断的逻辑：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">private static String chooseDriverInternal(Context context, Bundle coreSettings) &#123;</span><br><span class="line">    // 判断 game driver 的 property 是否配置了</span><br><span class="line">    final String gameDriver = SystemProperties.get(PROPERTY_GFX_DRIVER);</span><br><span class="line">    final boolean hasGameDriver = gameDriver != null &amp;&amp; !gameDriver.isEmpty();</span><br><span class="line"></span><br><span class="line">    // 判断 prerelease driver 的 property 是否配置了</span><br><span class="line">    final String prereleaseDriver = SystemProperties.get(PROPERTY_GFX_DRIVER_PRERELEASE);</span><br><span class="line">    final boolean hasPrereleaseDriver = prereleaseDriver != null &amp;&amp; !prereleaseDriver.isEmpty();</span><br><span class="line"></span><br><span class="line">    // 两个 property 都没有配置，前面提到这两个 property 代表的是两个包名</span><br><span class="line">    // 如果都没有配置，那么说明这项功能没有使能，使用 system gpu driver</span><br><span class="line">    if (!hasGameDriver &amp;&amp; !hasPrereleaseDriver) &#123;</span><br><span class="line">        if (DEBUG) Log.v(TAG, &quot;Neither Game Driver nor prerelease driver is supported.&quot;);</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // To minimize risk of driver updates crippling the device beyond user repair, never use an</span><br><span class="line">    // updated driver for privileged or non-updated system apps. Presumably pre-installed apps</span><br><span class="line">    // were tested thoroughly with the pre-installed driver.</span><br><span class="line">    // 不是所有的 app 都可以使用这个功能的，如果当前是预装应用，那么也不会对其使用该功能</span><br><span class="line">    final ApplicationInfo ai = context.getApplicationInfo();</span><br><span class="line">    if (ai.isPrivilegedApp() || (ai.isSystemApp() &amp;&amp; !ai.isUpdatedSystemApp())) &#123;</span><br><span class="line">        if (DEBUG) Log.v(TAG, &quot;Ignoring driver package for privileged/non-updated system app.&quot;);</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 接下来看下面的流程图：</span><br></pre></td></tr></table></figure>
+
+<p><img src="/assets/chooseDriverInternal.jpg" alt="chooseDriverInternal"></p>
+<p>在判断完当前的 app 需要使用的 driver 类型以后，返回到 <code>chooseDriver()</code>。</p>
+<h3 id="chooseDriver"><a href="#chooseDriver" class="headerlink" title="chooseDriver()"></a>chooseDriver()</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">private static boolean chooseDriver(</span><br><span class="line">        Context context, Bundle coreSettings, PackageManager pm, String packageName) &#123;</span><br><span class="line">    final String driverPackageName = chooseDriverInternal(context, coreSettings);</span><br><span class="line">    if (driverPackageName == null) &#123;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // PART 2</span><br><span class="line">    final PackageInfo driverPackageInfo;</span><br><span class="line">    // 容纳 game driver 的 apk 必须是一个 system app，否则会直接跳过</span><br><span class="line">    try &#123;</span><br><span class="line">        driverPackageInfo = pm.getPackageInfo(driverPackageName,</span><br><span class="line">                PackageManager.MATCH_SYSTEM_ONLY | PackageManager.GET_META_DATA);</span><br><span class="line">    &#125; catch (PackageManager.NameNotFoundException e) &#123;</span><br><span class="line">        Log.w(TAG, &quot;driver package &apos;&quot; + driverPackageName + &quot;&apos; not installed&quot;);</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // Android O 及以后，谷歌提出了 Project Triple，其中包括 VNDK，规定了 GPU driver 必须是在 sphal 的 linker space</span><br><span class="line">    // 因此 driver apk 的 targetSdkVersion 必须大于等于 O</span><br><span class="line">    // O drivers are restricted to the sphal linker namespace, so don&apos;t try to use</span><br><span class="line">    // packages unless they declare they&apos;re compatible with that restriction.</span><br><span class="line">    final ApplicationInfo driverAppInfo = driverPackageInfo.applicationInfo;</span><br><span class="line">    if (driverAppInfo.targetSdkVersion &lt; Build.VERSION_CODES.O) &#123;</span><br><span class="line">        if (DEBUG) &#123;</span><br><span class="line">            Log.w(TAG, &quot;updated driver package is not known to be compatible with O&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 判断当前运行 app 是 32 位的还是 64 位的，以便加载正确 abi 的 gpu driver</span><br><span class="line">    final String abi = chooseAbi(driverAppInfo);</span><br><span class="line">    if (abi == null) &#123;</span><br><span class="line">        if (DEBUG) &#123;</span><br><span class="line">            // This is the normal case for the pre-installed empty driver package, don&apos;t spam</span><br><span class="line">            if (driverAppInfo.isUpdatedSystemApp()) &#123;</span><br><span class="line">                Log.w(TAG, &quot;updated driver package has no compatible native libraries&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    final StringBuilder sb = new StringBuilder();</span><br><span class="line">    sb.append(driverAppInfo.nativeLibraryDir)</span><br><span class="line">      .append(File.pathSeparator);</span><br><span class="line">    sb.append(driverAppInfo.sourceDir)</span><br><span class="line">      .append(&quot;!/lib/&quot;)</span><br><span class="line">      .append(abi);</span><br><span class="line">    final String paths = sb.toString();</span><br><span class="line">    // 读取 driver apk 里面的 sphal_libraries.txt 的内容</span><br><span class="line">    final String sphalLibraries = getSphalLibraries(context, driverPackageName);</span><br><span class="line">    if (DEBUG) &#123;</span><br><span class="line">        Log.v(TAG,</span><br><span class="line">                &quot;gfx driver package search path: &quot; + paths</span><br><span class="line">                        + &quot;, required sphal libraries: &quot; + sphalLibraries);</span><br><span class="line">    &#125;</span><br><span class="line">    // 配置阶段最重要的一个函数，下面详解</span><br><span class="line">    setDriverPathAndSphalLibraries(paths, sphalLibraries);</span><br><span class="line"></span><br><span class="line">    ......</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中，<code>path</code> 这个变量存放了当前 app 的 GPU Driver 的加载路径，类似于：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/system/app/xxx/lib/:/system/app/xxx/xxx.apk!/lib/armeabi-v7a/</span><br></pre></td></tr></table></figure>
+
+<p>包括两部分，使用 <strong>:</strong> 分隔，一部分是 driver apk 所在的 lib 路径，另一个的 driver apk 包内部的 lib 路径，请注意这里有一个特殊的符号：<strong>!/</strong>，这个符号的意义后面会详细说明。</p>
+<p>在确定了启动的 apk 需要用到的 driver apk 以后，最终会走到一个最重要的函数：<code>setDriverPathAndSphalLibraries()</code>，通过这个函数，带上两个参数—— driver path 和 sphal_libraries.txt 里面的内容。查看这个函数的定义，其实这个是一个 JNI 函数，真正的实现在这里（<code>frameworks/native/libs/graphicsenv/GraphicsEnv.cpp</code>）：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">void GraphicsEnv::setDriverPathAndSphalLibraries(const std::string path,</span><br><span class="line">                                                 const std::string sphalLibraries) &#123;</span><br><span class="line">    ......</span><br><span class="line">    mDriverPath = path;</span><br><span class="line">    mSphalLibraries = sphalLibraries;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里就是简单地将这两个变量存起来。至此，updated driver 的配置流程就走完了，而要看这两个变量到底怎么用，得看下面的加载流程。</p>
+<h2 id="VNDK-和-linker-namespace"><a href="#VNDK-和-linker-namespace" class="headerlink" title="VNDK 和 linker namespace"></a>VNDK 和 linker namespace</h2><p>在说明加载流程之前，需要说明一下 <strong>linker namespace</strong>，这个是 GPU 驱动自升级用到的核心技术，而这个技术是在 Google 在 Android O 的 Project Treble 引入的。要理解这个技术的作用先要理解一下 Project Treble。</p>
+<p>Project Treble 将系统拆分解耦为两部分——system 和 vendor，诣在分离 android framework 和硬件驱动的耦合，system 分区只存放原生 android 相关的内容，vendor 分区存放厂商相关定制的内容。目的是为了达到在保持 vendor 分区不变的情况下，仅通过升级 system 分区即可升级到新版本的 Android。前面提到 system 和 vendor 要保持独立，不能相互依赖。但是也不可能完全独立，双方还是存在一些依赖的，。基于这样的需求，将 system 分区的 so 分为以下：</p>
+<ul>
+<li><p>FMK-ONLY<br>framework 专有库，称为 <strong>FMK-ONLY</strong>，vendor 无法访问</p>
+</li>
+<li><p>LLNDK<br>API/ABI 稳定的，system 和 vendor 共享一套的库，称为 <strong>LLNDK</strong></p>
+</li>
+<li><p>VNDK<br>vendor 如果需要访问到一部分的 <strong>FMK-ONLY</strong> 的库，那么可以通过 <strong>VNDK</strong>。<strong>VNDK</strong> 是专门给 vendor 模块维护的一部分 system 库，位于 <code>/system/lib[64]/vndk-${version}/</code>，在 <strong>FMK-ONLY</strong> 可以找到同名的库，但是两者的符号表是不一致，是 <strong>FMK-ONLY</strong> 的同名不同副本。如下图：<br><img src="/assets/VNDK.png" alt="VNDK"></p>
+</li>
+<li><p>VNDK-SP<br><strong>VNDK-SP</strong> 属于 <strong>VNDK</strong>， 是 <strong>SP-HAL</strong> 维二能够依赖的模块（另一个是上面提到的 <strong>LLNDK</strong>）。而 <strong>SP-HAL</strong> 是 system 访问 vendor 的唯一途径，位于 vendor 分区。如果此时 system 和 vendor 需要涉及到相同的库，那么 vendor 调用的就是 <strong>VDNK-SP</strong>，路径是 <code>/system/lib[64]/vndk-sp-${version}/</code>。<br>这么说可能比较难以理解，举个例子：<br>surfaceflinger 属于 system 的进程，但是当它要进行 GPU 合成的时候，需要访问位于 vendor 分区的 GPU 驱动，此时需要通过 <strong>SP-HAL</strong>—— <code>libGLES_${chipset}.so</code>，而此时 surfaceflinger 和 <code>libGLES_${chipset}.so</code> 都要依赖 <code>libcutils.so</code>，我们就称 <code>libGLES_${chipset}.so</code> 依赖的 <code>libcutils.so</code> 为 <strong>VNDK-SP</strong>。如下图：</p>
+<p><img src="/assets/VNDK-SP.png" alt="VNDK-SP"><br>用一张图展示上面各个名词在各个分区的位置：<br><img src="/assets/VNDK-all.png" alt></p>
+<p>通过上面的例子可以看到，在 surfaceflinger 其实是有两个 <code>libcutils.so</code> 的副本的，两个库名字一样，但是符号表完全不一样，如何正确加载不引起冲突呢？<br>linker namespace 就是为解决这个问题而提出的技术。<strong>LLNDK</strong> 和 <strong>VNDK-SP</strong> 的 <code>libcutils.so</code> 分别隶属于不同的 liner namespace，这样就可以避免冲突问题，各自加载各自的库。降维理解就是：linker namespace 相当于 shell 的 <code>$PATH</code> 环境变量。当我们在 shell 里面敲入 <code>java</code> 的时候，shell 会从 <code>$PATH</code> 里面一个一个寻找 <code>java</code> 可执行二进制文件。同样的， so 库在被加载的时候同样有一个类似环境变量的东西（称为<strong>“搜索路径”</strong>）告诉 linker 链接器去哪里找到这个 so，而 linker namespace 相当于就是通过创建两个隔离的空间，不同的空间有不同的搜索路径，不同的进程从不同的空间加载 so 库，从而避免了加载库的时候出现的名字一致的问题。详细的在后面的加载流程会具体说明。</p>
+</li>
+</ul>
+<h2 id="driver-加载时机"><a href="#driver-加载时机" class="headerlink" title="driver 加载时机"></a>driver 加载时机</h2><p>在 Android Q 上，EGL/OpenGL driver 加载时机有两种，一种是 zygote 在启动的时候会先将他们进行预加载，另一种是 Activity 在启动的时候也会去进行加载，下面分别说明：</p>
+<h3 id="zygote-预加载-GPU-driver"><a href="#zygote-预加载-GPU-driver" class="headerlink" title="zygote 预加载 GPU driver"></a>zygote 预加载 GPU driver</h3><p>我们知道，所有的 Android 进程都是由 zygote 或者 zygote64 孵化出来的，而当 zygote 和 zygote64 在启动的时候，会去将 gpu driver 进行预加载（省略了 zygote 启动的完整流程，与主题无关）：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">frameworks/base/core/java/com/android/internal/os/ZygoteInit.java</span><br><span class="line">ZygoteInit::main()</span><br><span class="line">  \__ ZygoteInit::preload()</span><br><span class="line">        \__ZygoteInit:maybePreloadGraphicsDriver()</span><br><span class="line">             \__ZygoteInit::nativePreloadGraphicsDriver()</span><br></pre></td></tr></table></figure>
+
+<p>然后通过 JNI 走到：<code>frameworks/base/core/jni/com_android_internal_os_ZygoteInit.cpp</code> 的 <code>android_internal_os_ZygoteInit_nativePreloadGraphicsDriver</code>：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">void android_internal_os_ZygoteInit_nativePreloadGraphicsDriver(JNIEnv* env, jclass) &#123;</span><br><span class="line">    ScopedSCSExit x;</span><br><span class="line">    // 这里通过判断 debug.hwui.renderer 这个 property 的值：</span><br><span class="line">    // skiavk: hwui 使用 Vulkan</span><br><span class="line">    // skiagl: hwui 使用 OpenGL</span><br><span class="line">    if (Properties::peekRenderPipelineType() == RenderPipelineType::SkiaGL) &#123;</span><br><span class="line">        eglGetDisplay(EGL_DEFAULT_DISPLAY);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后通过下面路径：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">eglGetDisplay()</span><br><span class="line">  \__egl_init_drivers()</span><br><span class="line">       \__egl_init_drivers_locked()</span><br><span class="line">            \__Loader::open()</span><br></pre></td></tr></table></figure>
+
+<p>走到最终的 driver 加载函数 <code>Loader::open()</code>。接下来看第二种：</p>
+<h3 id="activity-加载-GPU-driver"><a href="#activity-加载-GPU-driver" class="headerlink" title="activity 加载 GPU driver"></a>activity 加载 GPU driver</h3><p>当启动一个 Activity 的时候会调用 <code>startActivity</code> 的方法，这个方法会 Binder 调用到 system_server AMS，AMS 作为中转经过一系列处理后会 Binder 调用到目标进程 <code>ApplicationThread</code>（Activity 的启动这里就不展开了，与主题无关），最终会调用到 <code>ActivityThread</code> 的 <code>handleLaunchActivity</code> 方法，而 gpu driver 就是在这里加载的：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ActivityThread::handleLaunchActivity()</span><br><span class="line">  \__HardwareRenderer::preload()</span><br></pre></td></tr></table></figure>
+
+<p>这里的 <code>preload()</code> 这一个 JNI 方法，具体的实现流程：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">android_view_ThreadedRenderer_preload()</span><br><span class="line">  \__RenderProxy::preload()</span><br><span class="line">       \__RenderThread::preload()</span><br></pre></td></tr></table></figure>
+
+<p>而 <code>RenderThread::preload()</code> 里面会去调用 <code>eglGetDisplay()</code>：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">void RenderThread::preload() &#123;</span><br><span class="line">    // EGL driver is always preloaded only if HWUI renders with GL.</span><br><span class="line">    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) &#123;</span><br><span class="line">        std::thread eglInitThread([]() &#123; eglGetDisplay(EGL_DEFAULT_DISPLAY); &#125;);</span><br><span class="line">        eglInitThread.detach();</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        requireVkContext();</span><br><span class="line">    &#125;</span><br><span class="line">    HardwareBitmapUploader::initialize();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最终也会走到 <code>Loader::open()</code> 这个函数，在这个函数完成真正完成的加载流程：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">void* Loader::open(egl_connection_t* cnx)</span><br></pre></td></tr></table></figure>
+
+<p>在说明加载流程之前，得先说明一下 <code>egl_connection_t</code> 这个结构体，整个加载过程就是对这个结构体的填充赋值，因此需要对这个结构体有深刻地理解：</p>
+<h3 id="egl-connection-t"><a href="#egl-connection-t" class="headerlink" title="egl_connection_t"></a>egl_connection_t</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct egl_connection_t &#123;</span><br><span class="line">    enum &#123;</span><br><span class="line">        GLESv1_INDEX = 0,</span><br><span class="line">        GLESv2_INDEX = 1</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    inline egl_connection_t() : dso(nullptr),</span><br><span class="line">                                libEgl(nullptr),</span><br><span class="line">                                libGles1(nullptr),</span><br><span class="line">                                libGles2(nullptr),</span><br><span class="line">                                systemDriverUnloaded(false) &#123;</span><br><span class="line">        ......</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    void *              dso;</span><br><span class="line">    gl_hooks_t *        hooks[2];</span><br><span class="line">    EGLint              major;</span><br><span class="line">    EGLint              minor;</span><br><span class="line">    EGLint              driverVersion;</span><br><span class="line">    egl_t               egl;</span><br><span class="line"></span><br><span class="line">    // Functions implemented or redirected by platform libraries</span><br><span class="line">    platform_impl_t     platform;</span><br><span class="line"></span><br><span class="line">    void*               libEgl;</span><br><span class="line">    void*               libGles1;</span><br><span class="line">    void*               libGles2;</span><br><span class="line"></span><br><span class="line">    // 当需要使能 updated driver 的时候，需要将默认的 gpu driver unload，再加载 updated driver</span><br><span class="line">    // 当 updated driver 加载完成以后，会将 systemDriverUnloaded 设置为 true</span><br><span class="line">    bool                systemDriverUnloaded;</span><br><span class="line">    ......</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>结构体中有几个重要的成员变量：</p>
+<ul>
+<li><p><code>void * dso</code><br>存放的其实是这个结构的地址：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> struct driver_t &#123;</span><br><span class="line">      explicit driver_t(void* gles);</span><br><span class="line">      ~driver_t();</span><br><span class="line">      // returns -errno</span><br><span class="line">      int set(void* hnd, int32_t api);</span><br><span class="line">      void* dso[3];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>主要的是 <code>void *dso[]</code>：<code>dso[0]</code> 存放了 libEGL.so 的句柄（<code>dlopen</code> 的返回值，后面一致）；<code>dso[1]</code> 存放了 libGLESv1_CM.so 的句柄；<code>dso[2]</code> 存放了 <code>libGLESv2.so</code> 的句柄。作用是判断 GPU driver 是否已经加载了。</p>
+</li>
+<li><p><code>gl_hooks_t * hooks[2]</code><br>hooks[0] 保存了所有 GLESv1_CM 函数的符号地址；hooks<a href="https://item.mi.com/product/10000214.html" target="_blank" rel="noopener">1</a> 保存了所有 GLESv2 函数的符号地址</p>
+</li>
+<li><p><code>egl_t egl</code><br>egl 保存了所有 EGL 函数的符号地址</p>
+</li>
+<li><p>void * libEgl/libGles1/libGles2<br>保存了 <code>libEGL.so</code>，<code>libGLESv1_CM.so</code>，<code>libGLESv2.so</code> 这三个 wrapper 库的句柄</p>
+</li>
+</ul>
+<h2 id="updated-driver-加载流程"><a href="#updated-driver-加载流程" class="headerlink" title="updated driver 加载流程"></a>updated driver 加载流程</h2><p>libEGL/libGLES（<strong>后面统称为 GPU driver</strong>） 这些库都是在 <code>Loader::open()</code> 里面完成的。这个函数分为两部分——首先判断是否需要 unload system GPU driver，如果需要会先执行 unload 操作；接着尝试加载 game/prerelease driver（这两种 driver 在这里走的流程是完全一致的，因此后面统称为 <strong>updated driver</strong>）；如果失败会再尝试多次加载 system GPU driver。虽然是先 unload 再 load，但是如果不先说明 load 的流程，unload 会难以说明清楚，所以下面的内容会先说明 load 的流程，再说明 unload 的流程：</p>
+<h3 id="加载-updated-driver"><a href="#加载-updated-driver" class="headerlink" title="加载 updated driver"></a>加载 updated driver</h3><p>加载 updated driver 在 <code>attempt_to_load_updated_driver()</code> 这个函数中完成，这个函数用到了三个核心函数：</p>
+<ul>
+<li><code>getDriverNamespace()</code> 配置 linker namespace</li>
+<li><code>load_updated_driver()</code> 加载 GPU driver</li>
+<li><code>initialize_api()</code> 获取符号地址</li>
+</ul>
+<h4 id="getDriverNamespace-配置-linker-namespace"><a href="#getDriverNamespace-配置-linker-namespace" class="headerlink" title="getDriverNamespace() 配置 linker namespace"></a>getDriverNamespace() 配置 linker namespace</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">android_namespace_t* GraphicsEnv::getDriverNamespace() &#123;</span><br><span class="line">    std::lock_guard&lt;std::mutex&gt; lock(mNamespaceMutex);</span><br><span class="line"></span><br><span class="line">    if (mDriverNamespace) &#123;</span><br><span class="line">        return mDriverNamespace;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (mDriverPath.empty()) &#123;</span><br><span class="line">        return nullptr;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    auto vndkNamespace = android_get_exported_namespace(&quot;vndk&quot;);</span><br><span class="line">    if (!vndkNamespace) &#123;</span><br><span class="line">        return nullptr;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    mDriverNamespace = android_create_namespace(&quot;gfx driver&quot;,</span><br><span class="line">                                                mDriverPath.c_str(), // ld_library_path</span><br><span class="line">                                                mDriverPath.c_str(), // default_library_path</span><br><span class="line">                                                ANDROID_NAMESPACE_TYPE_ISOLATED,</span><br><span class="line">                                                nullptr, // permitted_when_isolated_path</span><br><span class="line">                                                nullptr);</span><br><span class="line"></span><br><span class="line">    if (!linkDriverNamespaceLocked(vndkNamespace)) &#123;</span><br><span class="line">        mDriverNamespace = nullptr;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return mDriverNamespace;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>getDriverNamespace()</code> 这个函数主要做了以下的事情：</p>
+<ol>
+<li><p>使用前面<strong>配置流程的最后一步</strong>，updated driver 的路径就是被存放在 <code>mDriverPath</code> 这个变量。而现在 <code>mDriverPath</code> 被当做参数传给 <code>android_create_namespace()</code>。这里就需要说明一下 <code>android_create_namespace()</code> 这个函数，它的作用是创建一个 linker namespace，各个参数：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">android_create_namespace(</span><br><span class="line">     const char *name, // 这个 link namespace 的名字</span><br><span class="line">     const char *ld_library_path,</span><br><span class="line">     const char *default_library_path,</span><br><span class="line">     unint64_t type, </span><br><span class="line">     const char *permitted_when_isolated_path,</span><br><span class="line">     android_namespace_t *parent);</span><br></pre></td></tr></table></figure>
+
+<p>参数中有很多个路径，这些表明了这个 linker namespace 中库的搜索路径，按照先 <code>ld_library_path</code> 后 <code>default_library_path</code> 的顺序，并且如果 namespace 的 <code>type</code> 是 <code>ANDROID_NAMESPACE_TYPE_ISOLATED</code>，那么如果在前面的路径找不到，还会在 <code>permitted_when_isolated_path</code> 里面寻找。</p>
+<p>这些路径最终会传到 <code>create_namespace()</code>：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ns-&gt;set_ld_library_paths(std::move(ld_library_paths));</span><br><span class="line">ns-&gt;set_default_library_paths(std::move(default_library_paths));</span><br><span class="line">ns-&gt;set_permitted_paths(std::move(permitted_paths));</span><br></pre></td></tr></table></figure>
+
+<p>这里只是把路径保存在 app 的 <code>gfx driver</code> 的 linker namespace 里面。至于这些路径怎么用，后面加载部分会详细介绍。</p>
+<p>因此这里创建里一个名为 <code>gfx driver</code> 的 linker namespace，并且指定 <code>mDriverPath</code> 为该 linker namespace 的库搜索路径。</p>
+</li>
+<li><p>调用 <code>linkDriverNamespaceLocked()</code>：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> bool GraphicsEnv::linkDriverNamespaceLocked(android_namespace_t* vndkNamespace) &#123;</span><br><span class="line">        const std::string llndkLibraries = getSystemNativeLibraries(NativeLibrary::LLNDK);</span><br><span class="line">        if (llndkLibraries.empty()) &#123;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">        if (!android_link_namespaces(mDriverNamespace, nullptr, llndkLibraries.c_str())) &#123;</span><br><span class="line">            ALOGE(&quot;Failed to link default namespace[%s]&quot;, dlerror());</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        const std::string vndkspLibraries = getSystemNativeLibraries(NativeLibrary::VNDKSP);</span><br><span class="line">        if (vndkspLibraries.empty()) &#123;</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">        if (!android_link_namespaces(mDriverNamespace, vndkNamespace, vndkspLibraries.c_str())) &#123;</span><br><span class="line">            ALOGE(&quot;Failed to link vndk namespace[%s]&quot;, dlerror());</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        if (mSphalLibraries.empty()) &#123;</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        // Make additional libraries in sphal to be accessible</span><br><span class="line">        auto sphalNamespace = android_get_exported_namespace(&quot;sphal&quot;);</span><br><span class="line">        if (!sphalNamespace) &#123;</span><br><span class="line">            ALOGE(&quot;Depend on these libraries[%s] in sphal, but failed to get sphal namespace&quot;,</span><br><span class="line">                  mSphalLibraries.c_str());</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        if (!android_link_namespaces(mDriverNamespace, sphalNamespace, mSphalLibraries.c_str())) &#123;</span><br><span class="line">            ALOGE(&quot;Failed to link sphal namespace[%s]&quot;, dlerror());</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个函数多次调用了 <code>android_link_namespaces()</code> 这个函数：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">bool android_link_namespaces(struct android_namespace_t* from,</span><br><span class="line">                                struct android_namespace_t* to,</span><br><span class="line">                                const char* shared_libs_sonames);</span><br></pre></td></tr></table></figure>
+
+<p>作用是，<code>from</code> 这个 namespace 能够访问到 <code>shared_libs_sonames</code>（内容是一连串以 <strong>:</strong> 分隔开来的 so 的名字，例如：<code>libc.so:libmath.so</code>）的这些库，但是 <code>shared_libs_sonames</code> 却是从 <code>to</code> 这个 namespace 中加载的。<br>因此，<code>linkDriverNamespaceLocked()</code> 这个函数做了这几件事：</p>
+<ul>
+<li>让 <code>gfx driver</code> 能够访问 LLNDK 的库</li>
+<li>让 <code>gfx driver</code> 能够访问 VNDKSP 的库</li>
+<li>让 <code>gfx driver</code> 能够从 <code>sphal</code> 这个 link namespace 访问到 <code>mSphalLibraries</code> 的库。前面提到，<code>sphallibraries.txt</code> 的内容被存放在 <code>mSpahlLibraries</code> 这个变量中。至此，我们终于能够理解 <code>sphallibraries.txt</code> 这个文件里面的内容的意义，就是<strong>能够被 <code>gfx driver</code> 访问的， <code>sphal</code> 中的库列表</strong>。</li>
+</ul>
+<p>通过 <code>linkDriverNamespaceLocked()</code>，<code>gfx driver</code> 这个 linker namespace 变得非常完备以及真正可用。updated driver 能够正确地在这个新创建的 linker namespace 中被搜索和加载。</p>
+</li>
+</ol>
+<p>通过一张图总结上面的内容：<br>  <img src="/assets/getDriverNamespace.jpg" alt="getDriverNamespace"></p>
+<p> <code>getDriverNamespace()</code> 创建，配置完 <code>gfx driver</code> 这个 linker namespace 之后，就开始真正的加载流程，主要都是在 <code>load_updated_driver()</code> 这个函数完成的：</p>
+<h4 id="load-updated-driver-加载-GPU-driver"><a href="#load-updated-driver-加载-GPU-driver" class="headerlink" title="load_updated_driver() 加载 GPU driver"></a>load_updated_driver() 加载 GPU driver</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">static void* load_updated_driver(const char* kind, android_namespace_t* ns) &#123;</span><br><span class="line">    ATRACE_CALL();</span><br><span class="line">    // 当 flags 为 ANDROID_DLEXT_USE_NAMESPACE 的时候，说明库是从 library_namespace 指定的 link namespace 加载</span><br><span class="line">    const android_dlextinfo dlextinfo = &#123;</span><br><span class="line">        .flags = ANDROID_DLEXT_USE_NAMESPACE,</span><br><span class="line">        .library_namespace = ns,</span><br><span class="line">    &#125;;</span><br><span class="line">    void* so = nullptr;</span><br><span class="line">    // static const char* DRIVER_SUFFIX_PROPERTY = ;</span><br><span class="line">    //</span><br><span class="line">    // static const char* HAL_SUBNAME_KEY_PROPERTIES[2] = &#123;</span><br><span class="line">    //     &quot;ro.hardware.egl&quot;       // 在 8250 平台是 adreno</span><br><span class="line">    //     &quot;ro.board.platform&quot;,    // 在 8250 平台是 kona</span><br><span class="line">    // &#125;;</span><br><span class="line">    // 这里拼凑出 SoC 私有的 GPU driver 的名字，例如高通的 GPU driver 名字为：libGLESv2_adreno.so</span><br><span class="line">    char prop[PROPERTY_VALUE_MAX + 1];</span><br><span class="line">    for (auto key : HAL_SUBNAME_KEY_PROPERTIES) &#123;</span><br><span class="line">        if (property_get(key, prop, nullptr) &lt;= 0) &#123;</span><br><span class="line">            continue;</span><br><span class="line">        &#125;</span><br><span class="line">        std::string name = std::string(&quot;lib&quot;) + kind + &quot;_&quot; + prop + &quot;.so&quot;;</span><br><span class="line">        so = do_android_dlopen_ext(name.c_str(), RTLD_LOCAL | RTLD_NOW, &amp;dlextinfo);</span><br><span class="line">        if (so) &#123;</span><br><span class="line">            return so;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return nullptr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> <code>do_android_dlopen_ext</code> 实际上调用的就是 <code>android_dlopen_ext(const char* __filename, int __flags, const android_dlextinfo* __info)</code>，前两个参数的意义跟 <code>dlopen()</code> 是一致的（参见<a href="http://man7.org/linux/man-pages/man3/dlopen.3.html" target="_blank" rel="noopener">这里</a>），另外的 <code>__info</code> 这个参数是 Android 自定义的，例如这里的 <code>dlextinfo</code> 就是表明当前这个 so 是从前面创建的 <code>gfx driver</code> 这个 link namespace 中加载。</p>
+<p> 这里需要注意 <strong>kind</strong> 有两种情况：在具体的实现中，GPU driver 要么全都集成在一个库：<code>/vendor/lib/egl/libGLES.so</code>，此时 <code>kind</code> 就是 <code>GLES</code>；要么是（最常见的）拆分成三个库：<code>/vendor/lib/egl/libEGL.so|libGLESv1_CM.so|libGLESv2.so</code>，此时 <code>kind</code> 总共有三类：<code>EGL</code>，<code>GLESv1_CM</code>，<code>GLESv2</code>，其中 <code>GLESv1_CM</code> 代表的是 OpenGL ES 1.1 的驱动，<code>GLESv2</code> 代表的是 OpenGL ES 2.0/3.0/3.1 的驱动。</p>
+<p> 加载函数 <code>android_dlopen_ext()</code> 经过下面的调用：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">android_dlopen_ex()</span><br><span class="line"> \_ _loader_android_dlopen_ext()</span><br><span class="line">       \_ dlopen_ext()</span><br><span class="line">           \_ do_dlopen()</span><br><span class="line">               \_ find_library()</span><br><span class="line">                   \_ find_libraries()</span><br><span class="line">                       \_ find_library_internal()</span><br><span class="line">                           \_ load_library()</span><br><span class="line">                               \_ open_library()</span><br></pre></td></tr></table></figure>
+
+<p><code>open_library</code>() 把存起来的路径传给 <code>open_library_on_paths</code>：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int fd = open_library_on_paths(zip_archive_cache, name, file_offset, ns-&gt;get_ld_library_paths(), realpath);</span><br></pre></td></tr></table></figure>
+
+
+<p> 这个函数把前面创建 link namespace 的时候保存的路径当做参数，然后会去检查 path 里面是否有 <strong>!/</strong> 分隔符，如果有，那么就从 apk 这个 zip 包里面把 so 解压出来：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">static int open_library_at_path(ZipArchiveCache* zip_archive_cache,</span><br><span class="line">                             const char* path, off64_t* file_offset,</span><br><span class="line">                             std::string* realpath) &#123;</span><br><span class="line">   int fd = -1;</span><br><span class="line">   // const char* const kZipFileSeparator = &quot;!/&quot;;</span><br><span class="line">   if (strstr(path, kZipFileSeparator) != nullptr) &#123;</span><br><span class="line">      fd = open_library_in_zipfile(zip_archive_cache, path, file_offset, realpath);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>因此现在可以解答前面的疑问：<code>path</code> 里面带 <strong>!/</strong> 的意义是：<strong>从 apk 的包里面解压拿到包里面 !/ 后面的路径代表的内容。</strong>，例如前面的 <code>/system/app/xxx/xxx.apk!/lib/armeabi-v7a/</code> 意义就是从 <code>/system/app/xxx/xxx.apk</code> 这个 zip 包里面的 <code>lib/armeabi-v7a/</code>。</p>
+<p>同样用一张图来总结上面的内容：</p>
+<p><img src="/assets/load_updated_driver.jpg" alt="load_updated_driver"></p>
+<h4 id="initialize-api-获取符号地址"><a href="#initialize-api-获取符号地址" class="headerlink" title="initialize_api 获取符号地址"></a>initialize_api 获取符号地址</h4><p>这个函数依据不同的类型（<code>EGL</code>，<code>GLESv1_CM</code>，<code>GLESv2</code>），获取符号地址的方式也不同：</p>
+<ul>
+<li><p>EGL</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if (mask &amp; EGL) &#123;</span><br><span class="line">    getProcAddress = (getProcAddressType)dlsym(dso, &quot;eglGetProcAddress&quot;);</span><br><span class="line"></span><br><span class="line">    ALOGE_IF(!getProcAddress,</span><br><span class="line">            &quot;can&apos;t find eglGetProcAddress() in EGL driver library&quot;);</span><br><span class="line"></span><br><span class="line">    egl_t* egl = &amp;cnx-&gt;egl;</span><br><span class="line">    __eglMustCastToProperFunctionPointerType* curr =</span><br><span class="line">        (__eglMustCastToProperFunctionPointerType*)egl;</span><br><span class="line">    char const * const * api = egl_names;</span><br><span class="line">    while (*api) &#123;</span><br><span class="line">        char const * name = *api;</span><br><span class="line">        __eglMustCastToProperFunctionPointerType f =</span><br><span class="line">            (__eglMustCastToProperFunctionPointerType)dlsym(dso, name);</span><br><span class="line">        if (f == nullptr) &#123;</span><br><span class="line">            // couldn&apos;t find the entry-point, use eglGetProcAddress()</span><br><span class="line">            f = getProcAddress(name);</span><br><span class="line">            if (f == nullptr) &#123;</span><br><span class="line">                f = (__eglMustCastToProperFunctionPointerType)nullptr;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        *curr++ = f;</span><br><span class="line">        api++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里首先获取到 <code>eglGetProcAddress()</code> 的符号地址并且保存在 <code>getProcAddress</code> 这个变量，后面会用到。<code>eglGetProcAddress</code> 这个函数的作用是返回一个 EGL/GL(ES) 的符号地址，作用跟后面的 <code>dlsym()</code> 类似。<br>需要注意的是 <code>egl_names</code>：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">char const * const egl_names[] = &#123;</span><br><span class="line">   #include &quot;egl_entries.in&quot;</span><br><span class="line">   nullptr</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>而 <code>elg_entries.in</code> 的内容是一系列的 EGL 标准接口的名称字符串：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#define EGL_ENTRY(_r, _api, ...) #_api,</span><br><span class="line">EGL_ENTRY(EGLDisplay, eglGetDisplay, NativeDisplayType)</span><br></pre></td></tr></table></figure>
+
+<p>因此 <code>egl_names</code> 的内容就是一个 EGL 接口函数的字符串数组，遍历该数组，并且从 <code>load_updated_driver()</code> 加载的库调用 <code>dlsym()</code> 获取接口函数的符号地址（前面提到 <code>load_updated_driver()</code> 调用的 <code>android_dlopen_ext()</code> 跟 <code>dlopen()</code> 作用类似），获取到的函数符号地址最终都保存在 <code>cnx-&gt;egl</code>：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"> struct egl_connection_t &#123;</span><br><span class="line">        ...</span><br><span class="line">        egl_t               egl;</span><br><span class="line">&#125;</span><br><span class="line"> struct egl_t &#123;</span><br><span class="line">         #include &quot;EGL/egl_entries.in&quot;</span><br><span class="line"> &#125;;</span><br></pre></td></tr></table></figure>
+
+<p>神奇的事情来了，这里 <code>struct egl_t</code> 的定义和上面的 <code>egl_names[]</code> 用到了同样的 <code>egl_entries.in</code>，但是在 <code>struct egl_t</code> 中 <code>EGL_ENTRY</code> 的定义不一样了，这里变成了函数指针：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#define EGL_ENTRY(_r, _api, ...) _r (*(_api))(__VA_ARGS__);</span><br></pre></td></tr></table></figure>
+
+<p>所以 <code>cnx-&gt;egl</code> 保存了所有 EGL 函数的符号地址。</p>
+</li>
+<li><p>GLESv1_CM/GLESv2<br>GLESv1_CM 和 GLESv2 加载主要都在 <code>init_api()</code> 完成，函数的作用是将 GLESv1_CM 的所有函数符号地址保存到 <code>cnx-&gt;hooks[0]</code>，GLESv2 保存在 <code>cnx-&gt;hooks[1]</code>：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">void init_api(void* dso,</span><br><span class="line">           char const * const * api,</span><br><span class="line">           char const * const * ref_api,</span><br><span class="line">           __eglMustCastToProperFunctionPointerType* curr,</span><br><span class="line">           getProcAddressType getProcAddress);</span><br></pre></td></tr></table></figure>
+
+<p>解释一下各个参数的意义：</p>
+<ul>
+<li><p><code>api</code><br>这个参数，GLESv1_CM 传的是 <code>gl_names_1</code>，GLESv2 传的是 <code>gl_names</code> 这两个跟前面的 <code>egl_names</code> 一样，同样是 <code>#include</code> 一个 in 文件（<code>gl_names_1</code> 是 <code>entries_gles1.in</code>，<code>gl_names</code> 是 <code>entries.in</code>），这些 in 文件跟 <code>egl_entries.in</code> 类似：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GL_ENTRY(void, glActiveShaderProgram, GLuint pipeline, GLuint program)</span><br></pre></td></tr></table></figure>
+
+<p> 跟前面 <code>EGL_ENTRY</code> 一样，也是有两个定义，这里是将接口转成接口的函数声明字符串：</p>
+ <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#define GL_ENTRY(_r, _api, ...) #_api,</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>ref_api</code><br>这个参数的作用是加速 GLESv1_CM 符号表地址的加载速度，在获取 GLESv1_CM 所有函数的符号表时，<code>ref_api</code> 赋值为 <code>gl_names</code>（也就是 GLESv2 的函数列表），然后在获取符号表的时候，如果当前的函数属于 GLESv2，那么就将地址赋值为 NULL 并且跳过。原理是 GLESv1_CM 是 GLESv2 的子集，而在 <code>cnx-&gt;hook[2]</code> 的声明中：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct egl_connection_t &#123;</span><br><span class="line">        ......</span><br><span class="line">        gl_hooks_t *        hooks[2];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">struct gl_hooks_t &#123;</span><br><span class="line">       struct gl_t &#123;</span><br><span class="line">           #include &quot;entries.in&quot;</span><br><span class="line">       &#125; gl;</span><br><span class="line">       struct gl_ext_t &#123;</span><br><span class="line">           __eglMustCastToProperFunctionPointerType extensions[MAX_NUMBER_OF_GL_EXTENSIONS];</span><br><span class="line">       &#125; ext;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p> 数组两个都是 <code>gl_hooks_t</code>，即 GLESv2 的长度。因此对于 GLESv1_CM 的库，如果函数名属于 GLESv2，那么可以直接跳过符号表获取的逻辑转而赋值为 NULL，从而加快 GLESv1_CM 的处理速度。 </p>
+</li>
+<li><p><code>curr</code><br>分别对应了上面提到的 <code>cnx-&gt;hooks[]</code>，GLESv1_CM 对应 <code>cnx-&gt;hooks[0]</code>，GLESv2 对应 <code>cnx-&gt;hooks[1]</code>，代表这符号表地址保存的位置。</p>
+</li>
+<li><p><code>getProcAddress</code><br>前面获取 EGL 库的符号地址的时候提到的，<code>eglGetProcAddress</code> 的符号地址。</p>
+</li>
+</ul>
+<p>接着，获取 GLESv1_CM/GLESv2 的符号地址按照下面的顺序进行：</p>
+<ul>
+<li>直接 <code>dlsym()</code> 尝试获取</li>
+<li>如果失败，使用 <code>eglGetProcAddress()</code> 尝试获取</li>
+<li>如果失败，尝试使用 <code>dlsym()</code> 加载非 <code>OES</code> 的版本。例如 <code>glAlphaFuncxOES()</code> 获取符号地址失败，那么尝试获取 <code>glAlphaFuncx()</code> 这个非 <code>OES</code> 的符号地址（注：假设 OpenGL 针对移动平台作了专门的修改或者优化，就会加上 OES）</li>
+<li>如果失败，尝试使用 <code>dlsym()</code> 加载 <code>OES</code> 的版本</li>
+<li>如果都失败，那么将当前函数的符号表赋值为 <code>gl_unimplemented</code>，意为没有实现。</li>
+</ul>
+</li>
+</ul>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>总结一下，updated driver 的加载主要在 <code>attempt_to_load_system_driver()</code> 中完成，主要分为三步：</p>
+<ol>
+<li>创建/配置 link namespace，主要作用是将 app 加载 GPU driver 的路径转到 updated driver apk 所在的位置</li>
+<li>从 updated driver apk 中依次将 <code>libEGL</code>，<code>libGLESv1_CM</code> 和 <code>libGLESv2</code> 打开获取 handle</li>
+<li>从第二步获取的 handle 中获取各个 EGL, GLES 的函数的符号地址</li>
+</ol>
+<p>其实看上去跟常规的加载库的步骤是一直的，只不过多了第一步的创建 link namespace 限定 so 的加载路径。</p>
+<p>至此，整个 updated driver 的加载流程就完全讲完了。再用一张图总结前面所有的内容：<br><img src="/assets/updated_driver_all.jpg" alt="updated driver 总结"></p>
+<h3 id="unload-system-driver"><a href="#unload-system-driver" class="headerlink" title="unload system driver"></a>unload system driver</h3><p>如<strong>driver 加载时机</strong>那一节提到的那样，zygote[64] 在启动的时候会去将 system driver 预加载，而所有 Android 进程都是由 zygote[64] 孵化的，因此每一个进程默认 system driver 都是已经加载完毕的，因此对于那些需要 updated driver 的 app，就需要将 system driver unload。而是否需要 unload system driver 是通过判断 <code>mDriverPath</code> 是否为空（updated driver 的配置过程提到，这个变量的意义是 updated driver 的具体路径）。而 unload 的操作也非常简单，跟前面的加载恰恰相反，就是将存放 EGL 和 GLES 库的 handle 和函数符号地址的 <code>hooks[]</code> 和 <code>dso[]</code> 这两个变量的内容都置为 nullptr，这里就不赘述了。</p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/images/wechat-qrcode.jpg" alt="simowce wechat" style="width: 200px; max-width: 100%;">
+  <div>欢迎订阅我的微信公众号</div>
+</div>
+
+      
+        
+      
+        <div id="reward-container">
+  <div>您的支持是我更新的第二大动力，谢谢！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/wechatpay.jpg" alt="simowce 微信支付">
+        <p>微信支付</p>
+      </div>
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/alipay.jpg" alt="simowce 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+      
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>simowce</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://simowce.github.io/all-about-updated-driver/" title="GPU 驱动自升级及其原理">https://simowce.github.io/all-about-updated-driver/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-ND</a> 许可协议。转载请注明出处！</li>
+</ul>
+</div>
+
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/Graphic/" rel="tag"># Graphic</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/all-about-dispsync/" rel="next" title="Android DispSync 详解">
+                  <i class="fa fa-chevron-left"></i> Android DispSync 详解
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+    <div class="comments" id="gitalk-container"></div>
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#updated-driver-配置流程"><span class="nav-number">2.</span> <span class="nav-text">updated driver 配置流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#chooseDriverInternal"><span class="nav-number">2.1.</span> <span class="nav-text">chooseDriverInternal()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#chooseDriver"><span class="nav-number">2.2.</span> <span class="nav-text">chooseDriver()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VNDK-和-linker-namespace"><span class="nav-number">3.</span> <span class="nav-text">VNDK 和 linker namespace</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#driver-加载时机"><span class="nav-number">4.</span> <span class="nav-text">driver 加载时机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#zygote-预加载-GPU-driver"><span class="nav-number">4.1.</span> <span class="nav-text">zygote 预加载 GPU driver</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#activity-加载-GPU-driver"><span class="nav-number">4.2.</span> <span class="nav-text">activity 加载 GPU driver</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#egl-connection-t"><span class="nav-number">4.3.</span> <span class="nav-text">egl_connection_t</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#updated-driver-加载流程"><span class="nav-number">5.</span> <span class="nav-text">updated driver 加载流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#加载-updated-driver"><span class="nav-number">5.1.</span> <span class="nav-text">加载 updated driver</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#getDriverNamespace-配置-linker-namespace"><span class="nav-number">5.1.1.</span> <span class="nav-text">getDriverNamespace() 配置 linker namespace</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#load-updated-driver-加载-GPU-driver"><span class="nav-number">5.1.2.</span> <span class="nav-text">load_updated_driver() 加载 GPU driver</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#initialize-api-获取符号地址"><span class="nav-number">5.1.3.</span> <span class="nav-text">initialize_api 获取符号地址</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结"><span class="nav-number">5.1.4.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#unload-system-driver"><span class="nav-number">5.2.</span> <span class="nav-text">unload system driver</span></a></li></ol></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">simowce</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-code"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">simowce</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a></div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/muse.js?v=7.4.1"></script>
+
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '64dccd465ffcc827c9ed',
+      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
+      repo: 'simowce.github.io',
+      owner: 'simowce',
+      admin: ['simowce'],
+      id: '6ef5277ec6bddbba78e0221e972eb936',
+        language: 'zh-CN',
+      
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
+
+</body>
+</html>

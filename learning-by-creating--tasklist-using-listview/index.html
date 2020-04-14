@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.4.1">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"right","display":"hide","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="规划既然我们要实现一个应用列表，那么我们需要什么呢？一个列表，然后列表中的每一表项都有相同的结构和各自的内容。那么这些在 Android 中究竟是如何实现的呢？查询过后发现，我们可以使用 ListView 来实现一个列表，而列表中的表项则可以用 LayoutInflater 来设置列表中的表项。好，似乎进展挺不错的，开干。">
+<meta name="keywords" content="Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Learning By Creating  之使用 ListView 实现一个应用列表">
+<meta property="og:url" content="https://simowce.github.io/learning-by-creating--tasklist-using-listview/index.html">
+<meta property="og:site_name" content="Silence.Slow.Simple">
+<meta property="og:description" content="规划既然我们要实现一个应用列表，那么我们需要什么呢？一个列表，然后列表中的每一表项都有相同的结构和各自的内容。那么这些在 Android 中究竟是如何实现的呢？查询过后发现，我们可以使用 ListView 来实现一个列表，而列表中的表项则可以用 LayoutInflater 来设置列表中的表项。好，似乎进展挺不错的，开干。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-04-06T06:27:00.692Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Learning By Creating  之使用 ListView 实现一个应用列表">
+<meta name="twitter:description" content="规划既然我们要实现一个应用列表，那么我们需要什么呢？一个列表，然后列表中的每一表项都有相同的结构和各自的内容。那么这些在 Android 中究竟是如何实现的呢？查询过后发现，我们可以使用 ListView 来实现一个列表，而列表中的表项则可以用 LayoutInflater 来设置列表中的表项。好，似乎进展挺不错的，开干。">
+  <link rel="canonical" href="https://simowce.github.io/learning-by-creating--tasklist-using-listview/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Learning By Creating  之使用 ListView 实现一个应用列表 | Silence.Slow.Simple</title>
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-56242445-1"></script>
+  <script>
+    var host = window.location.hostname;
+    if (host !== "localhost" || !true) {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-56242445-1');
+    }
+  </script>
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Silence.Slow.Simple</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">a simowce's blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section">首页</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section">标签</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section">分类</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section">归档</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section">关于</a>
+
+  </li>
+  </ul>
+
+    
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/learning-by-creating--tasklist-using-listview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">Learning By Creating  之使用 ListView 实现一个应用列表
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2016-05-05 00:00:00" itemprop="dateCreated datePublished" datetime="2016-05-05T00:00:00+08:00">2016-05-05</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/编程/" itemprop="url" rel="index"><span itemprop="name">编程</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h2><p>既然我们要实现一个应用列表，那么我们需要什么呢？一个列表，然后列表中的每一表项都有相同的结构和各自的内容。那么这些在 Android 中究竟是如何实现的呢？查询过后发现，我们可以使用 ListView 来实现一个列表，而列表中的表项则可以用 LayoutInflater 来设置列表中的表项。好，似乎进展挺不错的，开干。</p><a id="more"></a>
+<h2 id="ListView"><a href="#ListView" class="headerlink" title="ListView"></a>ListView</h2><p>我们先来新建一个 ListView 的主布局：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">RelativeLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">"http://schemas.android.com/tools"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:paddingBottom</span>=<span class="string">"@dimen/activity_vertical_margin"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:paddingLeft</span>=<span class="string">"@dimen/activity_horizontal_margin"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:paddingRight</span>=<span class="string">"@dimen/activity_horizontal_margin"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:paddingTop</span>=<span class="string">"@dimen/activity_vertical_margin"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:context</span>=<span class="string">"io.github.simowce.tasklist.MainActivity"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">ListView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/lvTaskList"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"fill_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"fill_parent"</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">ListView</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>很简单，没什么嘛。没错，因为我们只是建立了一个列表的布局而已，具体的表项结构和数据来源都还没有呢。好，我们接下来设置我们列表数据的类：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TaskItem</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> String appName;</span><br><span class="line">    <span class="keyword">public</span> String packageName;</span><br><span class="line">    <span class="keyword">public</span> Drawable appImg;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">TaskItem</span><span class="params">(String appName, String packageName, Drawable appImg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.appName = appName;</span><br><span class="line">        <span class="keyword">this</span>.packageName = packageName;</span><br><span class="line">        <span class="keyword">this</span>.appImg = appImg;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也是很简单，我们想要列出我们手机里面应用的图标，名称和包名（当然你可以有你自己更多的想法 :-)）。接下来，我们来设置我们表项的布局了：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"50dp"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">ImageView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/appImg"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_gravity</span>=<span class="string">"center"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">RelativeLayout</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/lable_appName"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:text</span>=<span class="string">"App Name: "</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/appName"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_toRightOf</span>=<span class="string">"@id/lable_appName"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_marginLeft</span>=<span class="string">"3dp"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/lable_packageName"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:text</span>=<span class="string">"Package Name: "</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_below</span>=<span class="string">"@id/lable_appName"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/packageName"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_below</span>=<span class="string">"@id/appName"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_toRightOf</span>=<span class="string">"@id/lable_packageName"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_marginLeft</span>=<span class="string">"3dp"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>也很简单。好，流程到了现在似乎很顺利。</p>
+<p>诶诶诶，等一下。有一个问题，一个大问题！想象一下，如果我们有一个巨大无比的表项，例如 10 亿个，那么，我们如果要一次性将这么多个表项载入内存显然是不可能的，所以我们就应该只载入一部分表项，例如说可见的。但是又会有一个问题，如果只载入一部分，那么我们就必须要记录一下当前载入的表项范围。这似乎就变得有点复杂了。所以，Android 派出了一个大将来帮我们解决这个问题，那就是：Adapter。</p>
+<h2 id="Adapter"><a href="#Adapter" class="headerlink" title="Adapter"></a>Adapter</h2><p>Adapter 就是专门来解决上面的问题的。不过，Adapter 的内容还挺多的，我暂时只看了一部分，没来得及总结。将来补上。这里我们主要介绍里面的一种 —— ArrayAdapter。</p>
+<p>我们上面说了 Adapter 只是将一部分表项显示在我们的屏幕上，具体是怎么实现的呢？这里就涉及到一个很重要的方法了：<strong>getView()</strong>。我们先来看看 API 文档是怎么描述它的：</p>
+ <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> View <span class="title">getView</span> <span class="params">(<span class="keyword">int</span> position, View convertView, ViewGroup parent)</span></span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Get a View that displays the data at the specified position in the data set. You can either create a View manually or inflate it from an XML layout file. When the View is inflated, the parent View (GridView, ListView…) will apply default layout parameters unless you use inflate(int, android.view.ViewGroup, boolean) to specify a root view and to prevent attachment to the root.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Parameters</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">position</td>
+<td align="left">int: The position of the item within the adapter’s data set of the item whose view we want.</td>
+</tr>
+<tr>
+<td align="left">convertView</td>
+<td align="left">View: The old view to reuse, if possible. Note: You should check that this view is non-null and of an appropriate type before using. If it is not possible to convert this view to display the correct data, this method can create a new view. Heterogeneous lists can specify their number of view types, so that this View is always of the right type (see getViewTypeCount() and getItemViewType(int)).</td>
+</tr>
+<tr>
+<td align="left">parent</td>
+<td align="left">ViewGroup: The parent that this view will eventually be attached to</td>
+</tr>
+</tbody></table>
+<p>Returns</p>
+<p>View:    A View corresponding to the data at the specified position.</p>
+</blockquote>
+<p>根据里面的描述，getView() 是用来展示由 position 指定位置的 View。我们可以在这里手动建立一个 View 或者通过 XML 来指定布局。似乎不是很清楚。还有传入的这个 position 和 convertView 究竟是什么含义呢？不急，我们等我们的代码运行起来了之后再来做个实验。现在先卖个萌先 ;-&gt; 。</p>
+<p>看了上面的描述，知道 getView 是用来显示我们的表项的，于是乎，我们就要用到 LayoutInflater 这个东东了。这个东东有什么用呢？我们知道，我们在 onCreat() 中使用 setContext() 的时候使用的布局只是一个 ListView 而已，并没有具体的页表项。所以，如同名字一样，LayoutInflater 就是用来填充我们的 ListVIew 的。具体的代码是这样的：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TaskAdapter</span> <span class="keyword">extends</span> <span class="title">ArrayAdapter</span>&lt;<span class="title">TaskItem</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> String TAG = <span class="string">"SIMOWCE"</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">TaskAdapter</span><span class="params">(Context context, ArrayList&lt;TaskItem&gt; taskitem)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context, <span class="number">0</span>, taskitem);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> View <span class="title">getView</span><span class="params">(<span class="keyword">int</span> position, View convertView, ViewGroup parent)</span> </span>&#123;</span><br><span class="line">        TaskItem task = getItem(position);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (convertView == <span class="keyword">null</span>) &#123;</span><br><span class="line">            convertView = LayoutInflater.from(getContext()).inflate(R.layout.task_item, parent, <span class="keyword">false</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 具体的查找和填充操作就是在这里了</span></span><br><span class="line">        TextView appName = (TextView) convertView.findViewById(R.id.appName);</span><br><span class="line">        TextView packageName = (TextView) convertView.findViewById(R.id.packageName);</span><br><span class="line">        ImageView appImg = (ImageView) convertView.findViewById(R.id.appImg);</span><br><span class="line">        appName.setText(task.appName);</span><br><span class="line">        packageName.setText(task.packageName);</span><br><span class="line">        appImg.setImageDrawable(task.appImg);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> convertView;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>好，我们再来看一下我们的数据来源。我们是要输出我们系统的应用，Android 已经贴心的给我们提供了一个类供我们查询了 —— PackageManager，具体我们在 onCreate() 方法中的代码是这样的：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        ListView listView = (ListView) findViewById(R.id.lvTaskList);</span><br><span class="line">        PackageManager pm = <span class="keyword">this</span>.getPackageManager();</span><br><span class="line">        Intent mainInent = <span class="keyword">new</span> Intent(Intent.ACTION_MAIN, <span class="keyword">null</span>);</span><br><span class="line">        mainInent.addCategory(Intent.CATEGORY_LAUNCHER);</span><br><span class="line">        List&lt;ResolveInfo&gt; appInfo = pm.queryIntentActivities(mainInent, PackageManager.MATCH_DEFAULT_ONLY);</span><br><span class="line">        ArrayList&lt;TaskItem&gt; all_task = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (ResolveInfo t : appInfo) &#123;</span><br><span class="line">            String appName = (String) t.loadLabel(pm);</span><br><span class="line">            String packageName = t.activityInfo.packageName;</span><br><span class="line">            Drawable appImg = t.loadIcon(pm);</span><br><span class="line">            all_task.add(<span class="keyword">new</span> TaskItem(appName, packageName, appImg));</span><br><span class="line">        &#125;</span><br><span class="line">        TaskAdapter adapter = <span class="keyword">new</span> TaskAdapter(<span class="keyword">this</span>, all_task);</span><br><span class="line">        listView.setAdapter(adapter);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后的一句就是将我们的 ListView 和 Adapter 给连接起来。这样，我们的代码就可以运行了。</p>
+<p>好，我们可以来看看那个 getView() 的前两个参数的含义了，我们修改以下代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> View <span class="title">getView</span><span class="params">(<span class="keyword">int</span> position, View convertView, ViewGroup parent)</span> </span>&#123;</span><br><span class="line">    TaskItem task = getItem(position);</span><br><span class="line"></span><br><span class="line">    Log.d(TAG, <span class="string">"++++++++++++++++++++"</span> + <span class="string">"I am "</span> + position + <span class="string">" +++++++++++++++++++++"</span>);</span><br><span class="line">    <span class="keyword">if</span> (convertView == <span class="keyword">null</span>) &#123;</span><br><span class="line">        Log.d(TAG, <span class="string">"-----------------------HEHE---------------------------"</span>);</span><br><span class="line">        convertView = LayoutInflater.from(getContext()).inflate(R.layout.task_item, parent, <span class="keyword">false</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        Log.d(TAG, <span class="string">"************************YEYEYE*************************************"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    ......</span><br></pre></td></tr></table></figure>
+
+<p>然后我们在 Android Studio 上看看输出是什么，下面是我的输出：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">++++++++++++++++++++I am 1 +++++++++++++++++++++</span><br><span class="line">-----------------------HEHE---------------------------</span><br><span class="line">++++++++++++++++++++I am 2 +++++++++++++++++++++</span><br><span class="line">-----------------------HEHE---------------------------</span><br><span class="line">++++++++++++++++++++I am 3 +++++++++++++++++++++</span><br><span class="line">-----------------------HEHE---------------------------</span><br><span class="line">++++++++++++++++++++I am 4 +++++++++++++++++++++</span><br><span class="line">-----------------------HEHE---------------------------</span><br><span class="line">++++++++++++++++++++I am 5 +++++++++++++++++++++</span><br><span class="line">-----------------------HEHE---------------------------</span><br><span class="line">++++++++++++++++++++I am 6 +++++++++++++++++++++</span><br><span class="line">-----------------------HEHE---------------------------</span><br><span class="line">++++++++++++++++++++I am 7 +++++++++++++++++++++</span><br><span class="line">-----------------------HEHE---------------------------</span><br><span class="line">++++++++++++++++++++I am 8 +++++++++++++++++++++</span><br><span class="line">-----------------------HEHE---------------------------</span><br><span class="line">++++++++++++++++++++I am 9 +++++++++++++++++++++</span><br><span class="line">-----------------------HEHE---------------------------</span><br><span class="line">++++++++++++++++++++I am 10 +++++++++++++++++++++</span><br><span class="line">-----------------------HEHE---------------------------</span><br><span class="line">++++++++++++++++++++I am 11 +++++++++++++++++++++</span><br><span class="line">-----------------------HEHE---------------------------</span><br><span class="line">++++++++++++++++++++I am 11 +++++++++++++++++++++</span><br><span class="line">************************YEYEYE*************************************</span><br><span class="line">++++++++++++++++++++I am 12 +++++++++++++++++++++</span><br><span class="line">************************YEYEYE*************************************</span><br><span class="line">++++++++++++++++++++I am 13 +++++++++++++++++++++</span><br><span class="line">************************YEYEYE*************************************</span><br><span class="line">++++++++++++++++++++I am 14 +++++++++++++++++++++</span><br><span class="line">************************YEYEYE*************************************</span><br></pre></td></tr></table></figure>
+
+<p>首先声明一下，在我的手机里面 ListView 能够显示 11 行。</p>
+<p>看了上面的 log，我想你应该明白了。getView() 是用来显示页表项的，position 是当前要显示的页表项的下标（或者我们可以理解为数组下标，因为我们使用的是 ArrayAdapter），每次要显示一个页表项，就会调用一次 getView ，同时，为了防止老是分配页表项，convertView 是系统为我们缓存的页表项，这样当我们往下滑的话，就无需在重新分配页表项了，只需要重复利用前面已经分配但是已经不再屏幕上显示的页表项了。我们要做的，只是将内容重新赋值即可。这样就可以大大地提高性能。</p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/images/wechat-qrcode.jpg" alt="simowce wechat" style="width: 200px; max-width: 100%;">
+  <div>欢迎订阅我的微信公众号</div>
+</div>
+
+      
+        
+      
+        <div id="reward-container">
+  <div>您的支持是我更新的第二大动力，谢谢！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/wechatpay.jpg" alt="simowce 微信支付">
+        <p>微信支付</p>
+      </div>
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/alipay.jpg" alt="simowce 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+      
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>simowce</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://simowce.github.io/learning-by-creating--tasklist-using-listview/" title="Learning By Creating  之使用 ListView 实现一个应用列表">https://simowce.github.io/learning-by-creating--tasklist-using-listview/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-ND</a> 许可协议。转载请注明出处！</li>
+</ul>
+</div>
+
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/Android/" rel="tag"># Android</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/one-shot-to-compile/" rel="next" title="指哪打哪地进行编译工作">
+                  <i class="fa fa-chevron-left"></i> 指哪打哪地进行编译工作
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/all-about-signature/" rel="prev" title="代码之外——Andriod 签名">
+                  代码之外——Andriod 签名 <i class="fa fa-chevron-right"></i>
+                </a>
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+    <div class="comments" id="gitalk-container"></div>
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#规划"><span class="nav-number">1.</span> <span class="nav-text">规划</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ListView"><span class="nav-number">2.</span> <span class="nav-text">ListView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Adapter"><span class="nav-number">3.</span> <span class="nav-text">Adapter</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">simowce</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-code"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">simowce</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a></div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/muse.js?v=7.4.1"></script>
+
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '64dccd465ffcc827c9ed',
+      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
+      repo: 'simowce.github.io',
+      owner: 'simowce',
+      admin: ['simowce'],
+      id: '478fb932426b0e62f4c06bce420e1345',
+        language: 'zh-CN',
+      
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
+
+</body>
+</html>

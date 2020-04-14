@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.4.1">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"right","display":"hide","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="终于，时隔这么多天，总算是把 第八章 完成了。从下篇开始，作者的写作风格大变，上篇基本上是把大部分的代码都弄出来讲，不过下篇的话，作者只拿了一些关键的代码，而且很多地方都做了修改，但是他却没有提到，所以，你只能自己去扒代码。在实现的过程中，出现了超级多的 bug ，debug 到要吐。不过，我不会像以前一样只会抱怨说：“这不科学！” 在这快一个星期的改错过程中，我学到了很多东西。不要总是抱怨改 b">
+<meta name="keywords" content="一个操作系统的实现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一个操作系统的实现 -- IPC">
+<meta property="og:url" content="https://simowce.github.io/chapter-8-IPC/index.html">
+<meta property="og:site_name" content="Silence.Slow.Simple">
+<meta property="og:description" content="终于，时隔这么多天，总算是把 第八章 完成了。从下篇开始，作者的写作风格大变，上篇基本上是把大部分的代码都弄出来讲，不过下篇的话，作者只拿了一些关键的代码，而且很多地方都做了修改，但是他却没有提到，所以，你只能自己去扒代码。在实现的过程中，出现了超级多的 bug ，debug 到要吐。不过，我不会像以前一样只会抱怨说：“这不科学！” 在这快一个星期的改错过程中，我学到了很多东西。不要总是抱怨改 b">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-04-06T06:27:00.688Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一个操作系统的实现 -- IPC">
+<meta name="twitter:description" content="终于，时隔这么多天，总算是把 第八章 完成了。从下篇开始，作者的写作风格大变，上篇基本上是把大部分的代码都弄出来讲，不过下篇的话，作者只拿了一些关键的代码，而且很多地方都做了修改，但是他却没有提到，所以，你只能自己去扒代码。在实现的过程中，出现了超级多的 bug ，debug 到要吐。不过，我不会像以前一样只会抱怨说：“这不科学！” 在这快一个星期的改错过程中，我学到了很多东西。不要总是抱怨改 b">
+  <link rel="canonical" href="https://simowce.github.io/chapter-8-IPC/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>一个操作系统的实现 -- IPC | Silence.Slow.Simple</title>
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-56242445-1"></script>
+  <script>
+    var host = window.location.hostname;
+    if (host !== "localhost" || !true) {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-56242445-1');
+    }
+  </script>
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Silence.Slow.Simple</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">a simowce's blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section">首页</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section">标签</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section">分类</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section">归档</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section">关于</a>
+
+  </li>
+  </ul>
+
+    
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/chapter-8-IPC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">一个操作系统的实现 -- IPC
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2014-12-18 00:00:00" itemprop="dateCreated datePublished" datetime="2014-12-18T00:00:00+08:00">2014-12-18</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/一个操作系统的实现/" itemprop="url" rel="index"><span itemprop="name">一个操作系统的实现</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>终于，时隔这么多天，总算是把 <code>第八章</code> 完成了。从下篇开始，作者的写作风格大变，上篇基本上是把大部分的代码都弄出来讲，不过下篇的话，作者只拿了一些关键的代码，而且很多地方都做了修改，但是他却没有提到，所以，你只能自己去扒代码。在实现的过程中，出现了超级多的 <code>bug</code> ，<code>debug</code> 到要吐。不过，我不会像以前一样只会抱怨说：“这不科学！” 在这快一个星期的改错过程中，我学到了很多东西。不要总是抱怨改 <code>bug</code>辛苦， <code>bug</code> 都是自己制造出来的，这个就只能怪自己了。最重要的一点，那就是，<strong>所有的 <code>bug</code> 都是思维的漏洞</strong>。所以，在你的思想体系还没有十分清晰的情况下，不要轻易写代码，不然，出现 <code>bug</code> 是很正常的事情。</p><a id="more"></a>
+<p>好了，闲话不多说了。下面进入正题。</p>
+<h3 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h3><p>这一章有几个比较大的改动。首先，上一章的 write 系统调用改成了 printx ，使之能够对 <code>assert()</code> 和 <code>panic()</code> 这两个函数进行特殊的处理，其他的功能基本一致。然后就是用 <code>IPC</code> 重新实现了 get_ticks() 这个函数。</p>
+<h3 id="IPC"><a href="#IPC" class="headerlink" title="IPC"></a>IPC</h3><p>这个是微内核的核心，它使得我们的系统系统调用可以大大减少。当初在看书的时候也确实花费了相当长的时间在理解这个东西。下面分别来说一下个中细节。</p>
+<h4 id="msg-send"><a href="#msg-send" class="headerlink" title="msg_send"></a>msg_send</h4><p>首先，通讯通讯，肯定是有收有发。我们的进程通过 <code>send_recv</code> 这个函数发送消息，最终就是调用 <code>msg_send</code> 。首先判断是否死锁，之后再判断发送的目的地是否是接收消息的状态(即是否有 <code>RECEIVING</code> 标志)，并且是否是接收来自当前进程的消息或者是任意进程的消息(就是那个 ANY)，如果是，则将消息复制到接收端，清除接收端的 <code>RECEIVING</code> 标志，待接收信息指针指向空；否则，给当前的进程打上 <code>SENDING</code> 标志，待发送的消息赋给消息指针，待接收端赋给 <code>p_sendto</code> (也就是将所有的信息保存在进程体里面。)接下来有做的是就是将当前进程加入到目标进程的消息发送队列了。这里有两种情况，躲过目标进程的消息接收队列为空，那么直接将当前的进程加入到目标进程的 <code>q_sending</code> ，否则的话，就要找到当前消息队列的最后一个(也就是找到那个 <code>next_sending</code> 为 0 的那个)，然后把当前进程赋给队列最后一个的 <code>next_sending</code> 。然后，都要将消息队列的最后一个(也就是当前进程)的 <code>next_sending</code> 赋值为 0 。最后，调用 <code>block()</code> 函数，并最终调用了 <code>schedule()</code> 函数切换进程。<strong>注意，这里有一个很重要的点，就是它是如何实现进程切换的。我们知道，我们调用发送消息是通过系统中断来实现，在中断处理程序 <code>sys_call</code> 中的 <code>save()</code> 函数，会根据当前的 <code>k_reenter</code> 的值来分别将不同的东西压栈，而压入的内容，其实就是最终的进程切换程序 <code>restart()</code> ，并且最终在 <code>sys_call</code> 的最后一句 <code>ret</code> 来跳转到这个进程切换程序。</strong> 完整的消息发送过程就是这样。</p>
+<h4 id="msg-receive"><a href="#msg-receive" class="headerlink" title="msg_receive"></a>msg_receive</h4><p>接下来就是消息接收了。首先判断当前进程是否接收来自任意进程的消息，如果是，则判断当前接收消息的进程的消息队列是否有在等待发送的进程，如果有的话，就把消息队列的第一个赋给 <code>p_sendto</code> 变量，以便接下来的处理；如果不是接收任意进程的消息，而是有特定的发送对象，那么就检查那个特定对象是否在当前进程的消息发送队列中(也就是检查特定对象是否有 <code>SENDING</code> 标志位并且 <code>p_sendto</code> 指针是否指向当前进程)，如果是，那么就遍历整个消息发送队列，如果是第一个，那最好，直接赋给 <code>p_sendto</code> 变量，否则，找到特定对象以及排在它前面的进程(这个排在前面的进程是有用的，后面会提到)，分别赋给变量 <code>p_sendto</code> 以及 <code>prev</code> 。接下来就是真真正正的消息传递了，如果当前进程接收任意进程的消息或者接收特定进程的消息并且该进程在在消息发送队列的第一个，那么就将该进程从队列中提出来，并且将队列整体前移。否则，为了从夹在消息队列的中间的特定进程从队列中抽出来，并且不影响队列的整体，这时前面的那个 <code>prev</code> 就派上了用场，将 <code>p_sendto</code> 的 <code>p_sendto</code> 指针指向 <code>prev</code> 的 <code>p_sendto</code> 指针，这样就能够实现将其从队列中抽出来的目的了(如果你还是不懂的话，自己画个图就很容易懂了～)。然后就是一些收尾的工作，清除当前进程的 <code>RECEIVING</code> 标志，清空指向消息的指针。最后的最后，如果是最坏的情况，那就是既不接收任意进程的消息，同时特定进程不在消息队列中，那么，就将当前进程打上 <code>RECEIVING</code> 的标志位，将消息等各种信息保存在进程体中，然后阻塞进程。</p>
+<h3 id="全过程"><a href="#全过程" class="headerlink" title="全过程"></a>全过程</h3><p>好了，各种细节解释完了，接下来我们来看一个 IPC 的具体例子：就是用 IPC 来替换系统调用 <code>get_ticks</code> ，接下来，我将详细描述整个过程，以便大家能够有一个比较清晰的理解：</p>
+<p>首先，由于 <code>task_sys</code> 系统进程，所以比用户进程先执行。整个进程其实就是一个守护进程，它是一个死循环，不断地接收信息，处理完之后再发送，然后继续如此。首先它先接收任意进程的消息，但是很明显，当前还没有进程给它发送消息，所以 <code>task_sys</code> 被阻塞了。然后进程切换到用户进程， 用户进程调用函数 <code>get_ticks()</code>， <code>get_ticks()</code> 函数初始化一个消息变量，并且将消息类型设置为 <code>GET_TICKS</code> ，然后调用一个封装函数 <code>send_recv()</code> ，并且最终将调用系统调用 <code>sys_sendrecv</code>。因为是 <code>BOTH</code> 类型的，所以是先发送，然后在接送。首先是发送消息，由于上面的 <code>task_sys</code> 已经执行，也就是说，接收端表明它在接收一个函数，将消息复制给 <code>task_sys</code> 的消息指针，然后消除 <code>task_sys</code> 的 <code>RECEIVING</code> 标志位，<strong>注意，因为此时 <code>task_sys</code> 的 <code>RECEIVING</code> 标志位已经被消除了，所以 <code>task_sys</code> 已经被解除阻塞了，只是进程切换还没有运行而已</strong> 。至此，消息发送成功。然后，即使等待接收，很明显，虽然 <code>task_sys</code> 已经被解除阻塞了，但是进程切换还没有运行，所以，消息还没哟被处理，所以，用户进程被阻塞了。接下来，进程切换，** <code>task_sys</code> 从上次被阻塞的地方继续运行(这一点很重要，我一开始就是忽略了这一点，导致了一直无法正确理解)**。因为已经成功地接收了消息，接下来，将 <code>ticks</code> 赋给消息，然后发送消息给用户进程，上面说道，用户进程此时是 <code>RECEIVING</code> 的状态，所以，将消息复制给用户进程，然后消除 <code>RECEIVING</code> 的标志位，跟上面说的一样，此时用户进程已经被解除阻塞了，只是进程切换还没有运行而已。消息发送成功。然后，进程切换，切换到用户进程，从上次被阻塞的地方继续。最后用户进程的 <code>send_recv</code> 成功执行，<code>get_ticks</code> 将消息中的 <code>ticks</code> 返回，至此，一个消息传递的全过程完整结束了！</p>
+<p>简单来说，整个过程其实就是这样：</p>
+<p><code>task_sys</code> 等待接收消息并且被阻塞 -&gt; 用户进程调用 <code>get_ticks()</code> 并且最终调用 <code>msg_send()</code> 还有 <code>msg_receive()</code> -&gt; 先是 <code>msg_send()</code> ，将消息复制给 <code>task_sys</code> ，消息发送成功 -&gt; 然后是 <code>msg_receive()</code> ，用户进程等待接收消息并且在该处被阻塞 -&gt; <code>task_sys</code> 解除阻塞，将消息处理完之后发送给用户进程，用户进程被解除阻塞 -&gt; 用户进程继续从被阻塞的地方运行，并且最终成功返回。</p>
+<p>写得有点多，不过这个 <code>IPC</code> 机制真的很重要！</p>
+<h3 id="遇到的-BUG"><a href="#遇到的-BUG" class="headerlink" title="遇到的 BUG"></a>遇到的 BUG</h3><p>一开始一运行就老是报 <code>#PAGE FAULT</code> 的错误，不知道是为什么？最后终于发现了 <code>BUG</code> 出现在 <code>./kernel/main.c</code> 文件上，总共有两个疏忽的点：</p>
+<ol>
+<li>就是在判断是是用户进程还是好任务的时候，如果是用户进程，一开始我是这样写的：</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">p_proc = user_proc_table + i;</span><br></pre></td></tr></table></figure>
+
+<p>这其实是不对的，得这样：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">p_proc = user_proc_table + i - NR_TASKS;</span><br></pre></td></tr></table></figure>
+
+<p>这样就好了。</p>
+<ol start="2">
+<li>就是在给每一个进程赋初始的 <code>TTY</code> 时，也出现了像上面一样的疏忽：</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">proc_table[NR_TASKS + <span class="number">0</span>] = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>而我就是忘记了把那个 <code>NR_TASKS</code> 加上去了。。。</p>
+<p>总之，都是疏忽，都是思维漏洞！！！</p>
+<hr>
+<p>好了，第八章总算是告一段落了，接下来就要向我最期待的第九章 – 硬盘进军了！</p>
+<p>EOF</p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/images/wechat-qrcode.jpg" alt="simowce wechat" style="width: 200px; max-width: 100%;">
+  <div>欢迎订阅我的微信公众号</div>
+</div>
+
+      
+        
+      
+        <div id="reward-container">
+  <div>您的支持是我更新的第二大动力，谢谢！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/wechatpay.jpg" alt="simowce 微信支付">
+        <p>微信支付</p>
+      </div>
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/alipay.jpg" alt="simowce 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+      
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>simowce</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://simowce.github.io/chapter-8-IPC/" title="一个操作系统的实现 -- IPC">https://simowce.github.io/chapter-8-IPC/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-ND</a> 许可协议。转载请注明出处！</li>
+</ul>
+</div>
+
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/一个操作系统的实现/" rel="tag"># 一个操作系统的实现</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/chapter-8-printf/" rel="next" title="一个操作系统的实现 -- printf">
+                  <i class="fa fa-chevron-left"></i> 一个操作系统的实现 -- printf
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/LCD-display/" rel="prev" title="POJ 1102 -- LC-Display">
+                  POJ 1102 -- LC-Display <i class="fa fa-chevron-right"></i>
+                </a>
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+    <div class="comments" id="gitalk-container"></div>
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#综述"><span class="nav-number">1.</span> <span class="nav-text">综述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IPC"><span class="nav-number">2.</span> <span class="nav-text">IPC</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#msg-send"><span class="nav-number">2.1.</span> <span class="nav-text">msg_send</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#msg-receive"><span class="nav-number">2.2.</span> <span class="nav-text">msg_receive</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#全过程"><span class="nav-number">3.</span> <span class="nav-text">全过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#遇到的-BUG"><span class="nav-number">4.</span> <span class="nav-text">遇到的 BUG</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">simowce</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-code"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">simowce</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a></div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/muse.js?v=7.4.1"></script>
+
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '64dccd465ffcc827c9ed',
+      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
+      repo: 'simowce.github.io',
+      owner: 'simowce',
+      admin: ['simowce'],
+      id: '95b8f4074c0f9b33ca84d938ef117c9f',
+        language: 'zh-CN',
+      
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
+
+</body>
+</html>

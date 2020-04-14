@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.4.1">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"right","display":"hide","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="郑重说明，这一篇以及后序的博文我都尽量少贴代码，而是尽我的描述能力之所能把我自己的理解和思考的过程总结表达出来，千万别指望着看完我的某一篇博客就能彻底地理解某一个知识点，至少我是没有这样的表达能力的。想要知其所以然，唯一的途径就是： Read the F**king source code 正如侯捷在某一本书的扉页中写道的那样： 代码面前，没有秘密 以上">
+<meta name="keywords" content="Linux kernel,内存管理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux 内存管理 -- Slab 分配器和 kmalloc">
+<meta property="og:url" content="https://simowce.github.io/linux-memory-managent-slab-allocator-and-kmalloc/index.html">
+<meta property="og:site_name" content="Silence.Slow.Simple">
+<meta property="og:description" content="郑重说明，这一篇以及后序的博文我都尽量少贴代码，而是尽我的描述能力之所能把我自己的理解和思考的过程总结表达出来，千万别指望着看完我的某一篇博客就能彻底地理解某一个知识点，至少我是没有这样的表达能力的。想要知其所以然，唯一的途径就是： Read the F**king source code 正如侯捷在某一本书的扉页中写道的那样： 代码面前，没有秘密 以上">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://simowce.github.io/assets/slab.gif">
+<meta property="og:updated_time" content="2020-04-06T06:27:00.692Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux 内存管理 -- Slab 分配器和 kmalloc">
+<meta name="twitter:description" content="郑重说明，这一篇以及后序的博文我都尽量少贴代码，而是尽我的描述能力之所能把我自己的理解和思考的过程总结表达出来，千万别指望着看完我的某一篇博客就能彻底地理解某一个知识点，至少我是没有这样的表达能力的。想要知其所以然，唯一的途径就是： Read the F**king source code 正如侯捷在某一本书的扉页中写道的那样： 代码面前，没有秘密 以上">
+<meta name="twitter:image" content="https://simowce.github.io/assets/slab.gif">
+  <link rel="canonical" href="https://simowce.github.io/linux-memory-managent-slab-allocator-and-kmalloc/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Linux 内存管理 -- Slab 分配器和 kmalloc | Silence.Slow.Simple</title>
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-56242445-1"></script>
+  <script>
+    var host = window.location.hostname;
+    if (host !== "localhost" || !true) {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-56242445-1');
+    }
+  </script>
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Silence.Slow.Simple</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">a simowce's blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section">首页</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section">标签</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section">分类</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section">归档</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section">关于</a>
+
+  </li>
+  </ul>
+
+    
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/linux-memory-managent-slab-allocator-and-kmalloc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">Linux 内存管理 -- Slab 分配器和 kmalloc
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2015-11-01 00:00:00" itemprop="dateCreated datePublished" datetime="2015-11-01T00:00:00+08:00">2015-11-01</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux-kernel/" itemprop="url" rel="index"><span itemprop="name">Linux kernel</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>郑重说明，这一篇以及后序的博文我都尽量少贴代码，而是尽我的描述能力之所能把我自己的理解和思考的过程总结表达出来，千万别指望着看完我的某一篇博客就能彻底地理解某一个知识点，至少我是没有这样的表达能力的。想要知其所以然，唯一的途径就是：</p>
+<p>Read the F**king source code</p>
+<p>正如侯捷在某一本书的扉页中写道的那样：</p>
+<p>代码面前，没有秘密</p>
+<p>以上</p>
+</blockquote><a id="more"></a>
+<h2 id="为什么要有-slab"><a href="#为什么要有-slab" class="headerlink" title="为什么要有 slab"></a>为什么要有 slab</h2><p>一般来说，一个新东西的产生总是为了解决某一个现有的问题的。那么，slab 是为了解决什么问题呢？我们知道，在 Linux 内核中的内存管理是使用伙伴系统 (Buddy system)，但是这个系统有一个问题就是，它的最小单位是页，即　PAGE_SIZE ，在 x86 架构中这个常数一般是 4k 。但是很多情况下我们要分配的单元大小是远远小于 4k 的，如果使用伙伴系统的话，必定是会产生很大的浪费的。所以，一个粒度更加小的分配器呼之欲出，slab 就是为了解决这个小粒度内存分配的问题的。</p>
+<h2 id="如何解决以及结构组织"><a href="#如何解决以及结构组织" class="headerlink" title="如何解决以及结构组织"></a>如何解决以及结构组织</h2><p>既然 slab 分配器已经定下了这样的一个目标，那么它的策略是什么呢？ 答曰，slab 分配器是基于所谓“面向对象”的思想，当然，这里的“面向对象”跟 C++ 和 Java 等的“面向对象”是不一样的。这里的“面向对象”更加确切的说法是“面向对象类型”，不同的类型使用不同的 slab ，一个 slab 只分配一种类型。而且，slab 为了提高内核中一些十分频繁进行分配释放的“对象”的分配效率， slab 的做法是：每次释放掉某个对象之后，不是立即将其返回给伙伴系统（slab 分配器是建立在伙伴系统之上的），而是存放在一个叫 array_cache 的结构中，下次要分配的时候就可以直接从这里分配，从而加快了速度。</p>
+<p>这里必须明确几个概念，说明如下：</p>
+<ul>
+<li><p>缓存(cache) : 这里的缓存只是一个叫法而已，其实就是一个管理结构头，它控制了每个 slab 的布局，具体的结构体是 struct kmem_cache 。（注意，虽然现在几乎所有的书或者博客都将这一个结构称为“缓存”，不过我觉得在这里称为“管理结构头”是更为合适的，所以下文中统一将“缓存（cache）”称为“管理结构头”。）</p>
+</li>
+<li><p>slab: 从伙伴系统分配的 2^order 个物理页就组成了一个 slab ，而后续的操作就是在这个 slab 上在进行细分的，具体的结构体是 struct slab 。</p>
+</li>
+<li><p>对象(object) : 上面说到，每一个 slab 都只针对一个数据类型，这个数据类型就被称为该 slab 的“对象”，将该对象进行对齐之后的大小就是该“对象”的大小，依照该大小将上面的 slab 进行切分，从而实现了我们想要的细粒度内存分配。</p>
+</li>
+<li><p>per-CPU 缓存：这个就是上面提到的 array_cache ，这个是为了加快分配，预先从 slab 中分配部分对象内存以加快速度。具体的结构体是 struct array_cache，包含在　struct kmem_cache　中。</p>
+</li>
+</ul>
+<p>具体的结构如下图：</p>
+<p><img src="/assets/slab.gif" alt></p>
+<p>还有，我们在用户态编程的时候，需要分配内存的时候，一般都是使用 malloc() 函数来实现。那么在内核态编程中，如果我们要分配内存，而且又没有必要使用上面的基于某个特定对象的，内核给我们提供了一个类似 malloc() 的接口—— kmalloc() 。值得注意的是，其实 kmalloc() 也是基于 slab 分配器的，只不过它所需要的管理结构头已经按照 2^n 的大小排列事先准备好了而已，这个管理结构体数组是 struct cache_sizes malloc_sizes[] 。</p>
+<p>还有，每个“对象”的缓存被组织成一个链表——cache_chain，然后每个缓存的 slab 被组织了三个不同的链表——slab_full，slab_partial和 slab_free，这三个链表有何不同应该可以见名知意，就不赘述了。</p>
+<p>然后，你可能就会发现了，在<strong>对象</strong>那一点，很可能出现一种情况，那就是 slab 的大小跟 object 的大小不整除，也就是说有不足于一个 object 的大小的空间剩余，怎么办，浪费掉吗？肯定不是！内核很好地利用了这些剩余的空间，提出了“缓存染色(cache coloring)”的概念。当然，这里的<strong>染色</strong>不是真的去染成红绿蓝等颜色，这只是一种说法而已。具体地将，就是让每个缓存的 slab 在页的起始位置有不同的偏移，以缓解<strong>缓存过热</strong>的问题。注意，这里提到的“缓存过热”中的“缓存”是真的 CPU 的物理缓存。具体的我后面会详细说明，这里只是综述一下。</p>
+<h2 id="初始化——-kmem-cache-init"><a href="#初始化——-kmem-cache-init" class="headerlink" title="初始化—— kmem_cache_init()"></a>初始化—— kmem_cache_init()</h2><p>想要让 slab 分配器工作起来，必须进行一系列的初始化。不过这里存在一个“鸡生蛋蛋生鸡”的问题。我们前面说过，每个缓存需要一个管理结构头，而建立缓存的实质就是分配一个管理结构头 struct kmem_cache 来描述 slab 的布局，以指导后续的分配行为，这个建立缓存的过程是用函数 kmem_cache_create() 来实现的，这里这是点一下，下面会详细说明。很明显这个管理结构头的大小小于一页，那么是十分适合使用 slab 分配器进行分配的，但是问题是此时 slab 分配器还没有初始化完成，怎么办？内核的做法是直接静态分配一个 struct kmem_cache 类型的变量——cache_cache（不得不说，这个变量名起得真好！），然后呢，整个初始化的过程分为六步：</p>
+<ol>
+<li><p>初始化 struct kmem_cache 变量 cache_cache 。该变量之所以重要，是因为<strong>它是以后所有的对象的管理结构头的管理结构头，专业一点的话可以称作是“元管理结构头”</strong>，然后上面提到的 array_cache 和三个链表 kmem_list3 都是这个结构体里面的成员，初始化也都是静态分配的，对应的静态变量分别是 initarray_cache 和 initkmem_list3 。</p>
+</li>
+<li><p>建立 kmalloc() 的 struct array_cache 对应大小的管理结构头。为什么要进行这一步呢，因为下面的步骤是要完整地建立其 kmalloc() 支持的所有 2^n 大小的管理结构头，完成这一步就相当于 kmalloc() 完全可用了。但是每个管理结构头都必须要 struct array_cache 和 struct kmem_list3 这两个辅助管理结构头，就必须要建立这两个对应大小的 kmalloc() 的管理结构头以便能够使用 kmalloc() <strong>动态分配</strong>！这里之所以要提到<strong>动态分配</strong>是因为在给 struct array_cache 对应大小建立 kmalloc() 的管理结构头的时候，其自己的 struct array_cache 和 struct kmem_list3 也是静态分配的，所以后续将会把它们使用动态分配的空间替换掉。</p>
+</li>
+<li><p>建立 kmalloc() 的 struct kmem_list3 对应大小的管理结构头以及剩下的 2^n 对应大小的管理结构头。第二点已经说明过了，就不重复了。</p>
+</li>
+<li><p>（其实包括第五步）此时 kmalloc() 已经可用了，所以如上面所说要使用 kmalloc() 分配的动态内存去替代前面所有的静态内存，需要替换的对象有：cache_cache 的 struct array_cache ，struct array_cache 对应大小的 kmalloc() 的管理结构头的 struct array_cache 和 struct kmem_list3，以及 struct kmem_list3 对应大小的 kmalloc() 的管理结构头的 struct kmem_list3 。</p>
+</li>
+<li><p>重新调整各个管理结构体的 struct array_cache 中的 entry[] 的数目。</p>
+</li>
+</ol>
+<p>然后这里有一个问题就是，内核是如何知道当前是属于哪一个阶段呢？为了解决这个问题，内核使用了一个枚举变量 g_cpucache_up ，其接受的变量范围有：NULL , PARTIAL_AC , PARTIAL_L3，PEARLY , FULL 。当第二步完成的时候，标记为 PARTIAL_AC ，此时意味着以后的 struct array_cache 都可以使用 kmalloc() 分配了；当第三步完成的时候，标记为 PARTIAL_L3 ，此时意味着以后的 struct kmem_l3 都可以使用；当第四和第五步完成的时候，标记为 PARTIAL_EARLY ，此时意味着 kmalloc() 已经支持所有其支持的 2^n 大小的内存分配了。</p>
+<p>然后有一个很重要的点就是，如果你读过 mm/slab.c 的源代码，你就会发现，在建立 struct array_cache 的管理结构头和为 kmalloc() 各个管理结构头的 struct array_cache 的时候，*<em>内核使用的是 struct arraycache_init 而不是 struct array_cache *</em>，这究竟是怎么一回事？其实这是很有讲究的，且听我慢慢到来。</p>
+<p>其实 struct initarray_cache 的完整结构是这样的：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">arraycache_init</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">array_cache</span> <span class="title">cache</span>;</span></span><br><span class="line">	<span class="keyword">void</span> *entry[BOOT_CPUCACHE_ENTRIES];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>从上面的结构可以看出，struct arraycache_init 就只是比 struct array_cache 多了一个 void * 的数组而已，这个究竟有什么区别呢？诶，别着急，我们再来看一下 struct array_cache 的结构就清楚了：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">array_cache</span> &#123;</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> avail;</span><br><span class="line">	unsighed <span class="keyword">int</span> limit;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> batchcount;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> touched;</span><br><span class="line">	<span class="keyword">spinlock_t</span> lock;</span><br><span class="line">	<span class="keyword">void</span> *entry[];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>联系上文我提到 Per-CPU 的时候说过，为了加快速度将 slab 的一部分内存分配到 array_cache ，而事实上就上面我们看到的 struct array_cache 的结构，只是有一个 void * 的数组而已，而且是个伪数组，并没有数组项。其实细想这是一种十分优美的实现方法。因为各个管理结构头所需要的“一部分内存”是不一样的，这样就保证了一个通用性，每次要访问 array_cache 里面的内存的时候，只需要进行 array_cache-&gt;entry[下标] 就可以了。然后我们再来解决上面提到的 struct arraycache_init 的问题。内核静态分配了这样的一个 struct arraycache_init 的静态变量：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">arraycache_init</span> <span class="title">initarray_cache</span> __<span class="title">initdata</span> =</span></span><br><span class="line"><span class="class">	&#123;</span> &#123;<span class="number">0</span>, BOOT_CPUCACHE_ENTRIES, <span class="number">1</span>, <span class="number">0</span>&#125; &#125;;</span><br></pre></td></tr></table></figure>
+
+<p>对照结构体的成员我们发现，struct array_cache 的 batchcount 被被赋值为 BOOT_CPUCACHE_ENTRIES ，这个 batchcount 是什么来头呢？这个变量就是控制着我们上面提到的“一部分内存”的具体量了。更重要的是，我们可以看到，struct arraycache_init 多出来的那个 void * 数组的个数，就是 BOOT_CPUCACHE_ENTRIES 。也就是说，<strong>struct array_cache 的管理结构头的 struct array_cache 里面的 entry 的真正空间就在这里了。</strong></p>
+<p>提到这里的话，那么初始化的第六步就可以彻底地理解了：为每个 kmalloc() 的管理结构头的 array_cache 重新调整 entry 的个数，具体的函数调用是 enable_cpucache()-&gt;do_tune_cpucache()-&gt;alloc_arraycache() 。</p>
+<h2 id="创建管理结构头——-kmem-cache-create"><a href="#创建管理结构头——-kmem-cache-create" class="headerlink" title="创建管理结构头—— kmem_cache_create()"></a>创建管理结构头—— kmem_cache_create()</h2><p>因为在初始化的过程中已经静态分配了管理结构头的管理结构头—— cache_cache，所以可以直接使用 kmem_cache_alloc() 给提供的对象建立其自己的管理结构头 struct kmem_cache ，而这个函数的作用也是如此。除了如此外，这个函数还有一个十分重要的功能就是创建 slab 的布局，即—— 应该占用页帧的阶数，slab 管理头应该在页内还是页外，剩余空间是多少，染色的个数，染色的大小（这两个说法在这里可能有点奇怪，不过等我们提到“染色”的时候就清楚了）等，具体的函数调用是 calculate_slab_order()-&gt;cache_estimate() ，过程比较简单，就不提了。</p>
+<p>最后调用 enable_cpu_cache() 配置 struct array_cache 和 struct kmem_list3 ，这一步类似于我们在初始化那一节提到的第六步，也就不在重复了。</p>
+<p>最后建立的管理结构头加入到 cache_chain 这个链表。</p>
+<h2 id="分配内存——-kmem-cache-alloc"><a href="#分配内存——-kmem-cache-alloc" class="headerlink" title="分配内存—— kmem_cache_alloc()"></a>分配内存—— kmem_cache_alloc()</h2><p>kmem_cache_alloc() 这个函数进过多层的封装，最终调用的是 ____cache_alloc() ，kmalloc() 也是如此。我们先来看一下这个函数：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">void</span> * ____cache_alloc(struct kmem_cache *cachep, <span class="keyword">gfp_t</span> flags)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">void</span> *objp;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">array_cache</span> *<span class="title">ac</span>;</span></span><br><span class="line"></span><br><span class="line">	check_irq_off();</span><br><span class="line"></span><br><span class="line">	ac = cpu_cache_get(cachep);</span><br><span class="line">	<span class="keyword">if</span> (likely(ac-&gt;avail)) &#123;</span><br><span class="line">		STATS_INC_ALLOCHIT(cachep);</span><br><span class="line">		ac-&gt;touched = <span class="number">1</span>;</span><br><span class="line">		objp = ac-&gt;entry[--ac-&gt;avail];</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		STATS_INC_ALLOCMISS(cachep);</span><br><span class="line">		objp = cache_alloc_refill(cachep, flags);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	kmemleak_erase(&amp;ac-&gt;entry[ac-&gt;avail]);</span><br><span class="line">	<span class="keyword">return</span> objp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里首先涉及到我当初一直困惑的一个点：在使用 kmem_cache_create() 建立相关的管理结构之后，究竟有没有分配真正的内存空间呢？在通读了相关的代码之后，我得到了答案：<strong>没有，也没必要。因为存在这么一种情况：如果使用 kmem_cache_create() 之后还分配了真正的内存空间之后，如果该 slab 一直不使用，那么岂不是浪费了很多宝贵的内存了吗？</strong></p>
+<p>解决上面的这一个疑惑之后，我们就可以知道在上面的代码中，第一次我们是走 else 那个分支了，也就是调用了 cache_alloc_refill() 来分配空间：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> *<span class="title">cache_alloc_refill</span><span class="params">(struct kmem_cache *cachep, <span class="keyword">gfp_t</span> flags)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	...</span><br><span class="line">retry:</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">while</span> (batchcount &gt; <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> *<span class="title">entry</span>;</span></span><br><span class="line">		<span class="class"><span class="keyword">struct</span> <span class="title">slab</span>　*<span class="title">slabp</span>;</span></span><br><span class="line"></span><br><span class="line">		entry = l3-&gt;slabs_partial.next;</span><br><span class="line">		<span class="keyword">if</span> (entry == &amp;l3-&gt;slabs_partial) &#123;</span><br><span class="line">			l3-&gt;free_touched = <span class="number">1</span>;</span><br><span class="line">			entry = l3-&gt;slabs_free.next;</span><br><span class="line">			<span class="keyword">if</span> (entry == &amp;l3-&gt;slabs_free) </span><br><span class="line">				<span class="keyword">goto</span> must_grow;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里我再插一句：在 Linux 内核中的链表的实现是十分简洁优美的，它只有两个指针，并不存在数据域。这么做是为了通用性，即任何结构都可以组织自己的链表，然后在结构体中嵌入 struct list_head 即可。然后可能有人会问了，如果我有一个 struct list_head ，那么如何才能访问到该链表的起始结构呢？内核十分贴心的给我们准备了一个宏：<strong>container_of</strong>：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> container_of(ptr, type, member) (&#123; \</span></span><br><span class="line">	<span class="function"><span class="keyword">const</span> <span class="title">typeof</span><span class="params">((type *)<span class="number">0</span>-&gt;member)</span>*__mptr </span>= (ptr);	  \</span><br><span class="line">	(type *)((<span class="keyword">char</span> *)__mptr - offsetof(type, member)) \</span><br><span class="line">		&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>简单来说，这个宏的作用就是：<strong>我有一个类型为 (type *)-&gt;member 的变量，想要得到包含该变量的 type 类型变量的地址。</strong></p>
+<p>所以在这里，如前面所说，这里 l3 的三个链表都是连接 struct slab 类型的，而这个类型就是内存空间的真正所在，也就是我们前面所说的 2^order 个物理页组成的 slab 。</p>
+<p>在 kmem_cache_create() 的过程中，在分配 struct kmem_list3 的时候调用了 kmem_list3_init() (line 3844) 将 l3 的三个链表全都置为首尾相连的空链表，所以上面的函数在初次运行的时候最终将跳转到 must_grow 这个标签：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">must_grow:</span><br><span class="line">	l3-&gt;free_objects -= ac-&gt;avail;</span><br><span class="line">alloc_done:</span><br><span class="line">	spin_unlock(&amp;l3-&gt;list_lock);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (unlikely(!ac-&gt;avail)) &#123;</span><br><span class="line">		<span class="keyword">int</span> x;</span><br><span class="line">		x = cache_grow(cachep, flag | THISNODE, node, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">		ac = cpu_cache_get(cachep);</span><br><span class="line">		<span class="keyword">if</span> (!x &amp;&amp; ac-&gt;avail)</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (!ac-&gt;avail)</span><br><span class="line">			<span class="keyword">goto</span> retry;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>很明显，函数将调用 cache_grow() 来进行真正的内存分配：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">cache_grow</span><span class="params">(struct kmem_cache *cachep,</span></span></span><br><span class="line"><span class="function"><span class="params">		<span class="keyword">gfp_t</span> flags, <span class="keyword">int</span> nodeid, <span class="keyword">void</span> *objp)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	...</span><br><span class="line">	offset = l3-&gt;colour_next;</span><br><span class="line">	l3-&gt;colour_next++;</span><br><span class="line">	<span class="keyword">if</span> (l3-&gt;colour_next &gt;= cachep-&gt;colour)</span><br><span class="line">		l3-&gt;colour = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	offset *= cachep-&gt;colur_off;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>诶，到这里，总算可以说到前面铺垫了很久的所谓的“缓存着色”了，不过我觉得我得先简单地提一下 CPU cache 的工作原理才行：</p>
+<p>CPU cache 就是我们常看到的一级缓存，二级缓存，三级缓存啊，引入这些缓存是因为内存 RAM 的速度相较于 CPU 的速度而言，是在是太慢了，所以为了提高速度，所以 CPU 制造商提供了速度接近于 CPU 的小容量缓存，以便加速 CPU 与 RAM 的数据交换。具体的策略是：</p>
+<p>每块 cache 会被分为更小的 cache line ，每个 cache line 的容量是一样的，然后 CPU 将虚拟地址分成三部分—— data, index, tag　，其中 data 长度是 cache line 的长度，index 的长度是 cache 的长度减去 data 的长度，最后 tag 的长度是虚拟地址的长度减去 data+index 的长度。举个例子，在 x86 的机器中，虚拟地址的地址空间是 32bit=2^32 ，假设我们的一级缓存有 4MB=2^22，cache line 的长度是 64bit=2^6 ，所以，data 就是 6 位，index 就是 (22-6) = 12 位，tag 就是 32-22=10 位。然后得到这些位之后，CPU 的每一个虚拟地址，将其分成上面的三部分之后，将按照 index 作为索引存入到 cache 中，然后在看需要的内容是否在 cache 中，这回比较需要的虚拟地址的 tag 与 cache 对应索引 index 的 tag 是否一致，如果一致说明 cache hit ，否则说明 cache miss 。</p>
+<p>有点啰嗦，不过这些知识准备是必须的，然后我们就可以来具体阐述了。</p>
+<p>我们在前面提到，slab 利用剩余的不足一个 object 的空间来进行缓存染色。具体说来，就是以平台的 cache line 的长度（存储在 cachep-&gt;colour_off）为偏移值（<strong>这一点非常重要！</strong>），计算出剩余的空间有多少个偏移值 cachep-&gt;colour ，然后就从 0 到 cachep-&gt;colour - 1（这个值是 l3-&gt;colour_next），每次就偏移 colour_next * colour_off 。这样，根据我们上面的叙述，每个 slab 将最终被放到不同的 cache line ，从而缓解了缓存过热的问题。</p>
+<p>不过，如果你细心一点的话，你也可以发现，其实这个方法并不是特别的有效，因为它的有效范围只有 colour 个，也就是说，colour 个之后，还是会发生覆盖的问题，所以我在上面才用了<strong>缓解</strong>一词。</p>
+<p>总之，上面的代码就计算了下一个偏移值 offset ，那么真正的偏移在那里呢？请看后面的代码：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (!objp)</span><br><span class="line">	objp = kmem_getpages(cachep, local_flags, nodeid);</span><br><span class="line"><span class="keyword">if</span> (!objp)</span><br><span class="line">	<span class="keyword">goto</span> failed;</span><br><span class="line"></span><br><span class="line">slabp = alloc_slabmgmt(cachep, objp, offset,</span><br><span class="line">		local_flags &amp; ~GFP_CONSTRAINT_MASK, nodeid);</span><br></pre></td></tr></table></figure>
+
+<p>真正的页分配就在这里了—— kmem_getpages() ，而真正的偏移就在 alloc_slabmgmt() 这个函数：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> struct slab *<span class="title">alloc_slabmgmt</span><span class="params">(struct kmem_cache *cachep, <span class="keyword">void</span> *objp,</span></span></span><br><span class="line"><span class="function"><span class="params">					<span class="keyword">int</span> colour_off, <span class="keyword">gfp_t</span> local_flags,</span></span></span><br><span class="line"><span class="function"><span class="params">					<span class="keyword">int</span> nodeid)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">slab</span> *<span class="title">slabp</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (OFF_SLAB(cachep)) &#123;</span><br><span class="line">		...</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		slabp = objp + colour_off;</span><br><span class="line">		colour_off += cachep-&gt;slab_size;</span><br><span class="line">	&#125;</span><br><span class="line">	slabp-&gt;inuse = <span class="number">0</span>;</span><br><span class="line">	slabp-&gt;colouroff = colour_off;</span><br><span class="line">	slabp-&gt;s_mem = objp + colour_off;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>诶，这里就可以很明显的看出来了整个 slab 的布局了：在连续页 objp 的起始，先是 colour_off 的偏移，然后是 slab 的一些管理头（管理头的大小是 cachep-&gt;slab_size），最后就是 object 的起始地址 slab-&gt;s_mem 了。</p>
+<p>接下来的具体工作就是设置 slab 的 bufctl 控制数组，这里简单地提一下：slab 控制头有一个成员是 slabp-&gt;free ，意义是当前可用的 object 的索引，而 bufctl 控制的则是当前可用的下一个 object 的索引。</p>
+<p>然后，新建立的 slab 加入到 l3 的 slabs_free 链表（这很重要！）。然后 cache_grow() 函数结束，返回 cache_alloc_refill() ，注意，此时我们只是分配了一个新的 slab ，还没有分配出去。具体就是在 goto retry 重新回到 cache_alloc_refill() 那里重新分配，因为此时我们的 slabs_free 已经不是空的了，所以函数接下来将 batchcount 个 object 移到 array_cache 中，然后修改 slab 的 bufctl 数组。最后，看 slab 是否所有 object 都分配完了，如果是，则移到 l3-&gt;slabs_full，否则则移到 l3-&gt;slabs_partial 。</p>
+<p>然后，在后续的操作中，如果 array_cache 中有空间，则从其直接分配，否则就看 slabs_partial　或者是 slabs_free 是否有足够的 object ，在不然，就再次重复上面分配 slab 的操作了。</p>
+<h2 id="释放内存——-kmem-cache-free"><a href="#释放内存——-kmem-cache-free" class="headerlink" title="释放内存—— kmem_cache_free()"></a>释放内存—— kmem_cache_free()</h2><p>有了上面已经十分详细的阐述之后，释放内存和后面的销毁就显得简单许多了，就是从 array_cache 移回 slab 并且修改 bufctl 控制数组而已。就不赘述了。</p>
+<h2 id="销毁内存——-kmem-cache-destroy"><a href="#销毁内存——-kmem-cache-destroy" class="headerlink" title="销毁内存—— kmem_cache_destroy()"></a>销毁内存—— kmem_cache_destroy()</h2><p>同样不赘述了。</p>
+<p>好了，整个 slab 分配器我大概就简单地说到这里。下面我说一下我自己的看法。我们可以发现，slab 为了加快分配速度，使用了很多的管理结构，其中花销最大的就是那个 bufctl 数组，所以如果是分配小的 object 的话，那么这个 bufctl 数组占用的空间还是相当可观的。这也是它的一个主要的缺点。而后来的 slub ，就是针对这个缺点进行了有效的改进，而这，我在后面的博客中，将会详细讲解。</p>
+<p>EOF</p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/images/wechat-qrcode.jpg" alt="simowce wechat" style="width: 200px; max-width: 100%;">
+  <div>欢迎订阅我的微信公众号</div>
+</div>
+
+      
+        
+      
+        <div id="reward-container">
+  <div>您的支持是我更新的第二大动力，谢谢！</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/wechatpay.jpg" alt="simowce 微信支付">
+        <p>微信支付</p>
+      </div>
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/alipay.jpg" alt="simowce 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+      
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>simowce</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://simowce.github.io/linux-memory-managent-slab-allocator-and-kmalloc/" title="Linux 内存管理 -- Slab 分配器和 kmalloc">https://simowce.github.io/linux-memory-managent-slab-allocator-and-kmalloc/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-ND</a> 许可协议。转载请注明出处！</li>
+</ul>
+</div>
+
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/Linux-kernel/" rel="tag"># Linux kernel</a>
+            
+              <a href="/tags/内存管理/" rel="tag"># 内存管理</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/show-variable-in-the-makefile/" rel="next" title="显示 Makefile 中的变量名">
+                  <i class="fa fa-chevron-left"></i> 显示 Makefile 中的变量名
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/linux-kernel-code-check/" rel="prev" title="Linux 内核代码风格检查">
+                  Linux 内核代码风格检查 <i class="fa fa-chevron-right"></i>
+                </a>
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+    <div class="comments" id="gitalk-container"></div>
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么要有-slab"><span class="nav-number">1.</span> <span class="nav-text">为什么要有 slab</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何解决以及结构组织"><span class="nav-number">2.</span> <span class="nav-text">如何解决以及结构组织</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化——-kmem-cache-init"><span class="nav-number">3.</span> <span class="nav-text">初始化—— kmem_cache_init()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建管理结构头——-kmem-cache-create"><span class="nav-number">4.</span> <span class="nav-text">创建管理结构头—— kmem_cache_create()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分配内存——-kmem-cache-alloc"><span class="nav-number">5.</span> <span class="nav-text">分配内存—— kmem_cache_alloc()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#释放内存——-kmem-cache-free"><span class="nav-number">6.</span> <span class="nav-text">释放内存—— kmem_cache_free()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#销毁内存——-kmem-cache-destroy"><span class="nav-number">7.</span> <span class="nav-text">销毁内存—— kmem_cache_destroy()</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">simowce</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-code"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">simowce</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a></div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/muse.js?v=7.4.1"></script>
+
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '64dccd465ffcc827c9ed',
+      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
+      repo: 'simowce.github.io',
+      owner: 'simowce',
+      admin: ['simowce'],
+      id: '6ab35c88b4fc310564fd555e83df9e25',
+        language: 'zh-CN',
+      
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
+
+</body>
+</html>
