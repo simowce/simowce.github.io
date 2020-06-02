@@ -139,7 +139,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <p class="site-subtitle">a simowce's blog</p>
+        <h1 class="site-subtitle" itemprop="description">a simowce's blog</h1>
       
   </div>
 
@@ -227,312 +227,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/linux-kernel-code-check/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="simowce">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Silence.Slow.Simple">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-            
-            <a href="/linux-kernel-code-check/" class="post-title-link" itemprop="url">Linux 内核代码风格检查</a>
-          
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              
-                
-              
-
-              <time title="创建时间：2015-11-03 00:00:00" itemprop="dateCreated datePublished" datetime="2015-11-03T00:00:00+08:00">2015-11-03</time>
-            </span>
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
-              </span>
-            
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux-kernel/" itemprop="url" rel="index"><span itemprop="name">Linux kernel</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Linux 作为一个人人都可以参与的大型项目，就必须规定其自身的代码风格来规范统一管理。在内核代码树里由一份文档 Documents/CodingStyle 详细地描述了这个代码风格的各种细节，我这里就不赘述了，我想来说一说写完代码之后如何检查是否符合规范。</p><p>当然，人肉查询是完全可以的，不过内核代码树提供了一个检查的脚本可以供我们使用，路径在 scripts/checkpatch.pl ，一般可能会出现以下几种错误：</p>
-          <!--noindex-->
-          
-            <div class="post-button">
-              <a class="btn" href="/linux-kernel-code-check/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-          <div class="post-eof"></div>
-        
-      </footer>
-  </article>
-  
-  
-  
-
-    
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/linux-memory-managent-slab-allocator-and-kmalloc/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="simowce">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Silence.Slow.Simple">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-            
-            <a href="/linux-memory-managent-slab-allocator-and-kmalloc/" class="post-title-link" itemprop="url">Linux 内存管理 -- Slab 分配器和 kmalloc</a>
-          
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              
-                
-              
-
-              <time title="创建时间：2015-11-01 00:00:00" itemprop="dateCreated datePublished" datetime="2015-11-01T00:00:00+08:00">2015-11-01</time>
-            </span>
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
-              </span>
-            
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux-kernel/" itemprop="url" rel="index"><span itemprop="name">Linux kernel</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <blockquote>
-<p>郑重说明，这一篇以及后序的博文我都尽量少贴代码，而是尽我的描述能力之所能把我自己的理解和思考的过程总结表达出来，千万别指望着看完我的某一篇博客就能彻底地理解某一个知识点，至少我是没有这样的表达能力的。想要知其所以然，唯一的途径就是：</p>
-<p>Read the F**king source code</p>
-<p>正如侯捷在某一本书的扉页中写道的那样：</p>
-<p>代码面前，没有秘密</p>
-<p>以上</p>
-</blockquote>
-          <!--noindex-->
-          
-            <div class="post-button">
-              <a class="btn" href="/linux-memory-managent-slab-allocator-and-kmalloc/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-          <div class="post-eof"></div>
-        
-      </footer>
-  </article>
-  
-  
-  
-
-    
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/show-variable-in-the-makefile/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="simowce">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Silence.Slow.Simple">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-            
-            <a href="/show-variable-in-the-makefile/" class="post-title-link" itemprop="url">显示 Makefile 中的变量名</a>
-          
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              
-                
-              
-
-              <time title="创建时间：2015-10-31 00:00:00" itemprop="dateCreated datePublished" datetime="2015-10-31T00:00:00+08:00">2015-10-31</time>
-            </span>
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
-              </span>
-            
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/编程/" itemprop="url" rel="index"><span itemprop="name">编程</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>最近在编译内核的时候出现了一些错误，最后定位在了某个点，不过出现了很多的变量名不知道，这样很难找出问题，所以我在 Makefile 里面加入了一个可以打印变量值的函数，如下：</p><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">print-%:</span><br><span class="line">	@echo $* = $($*)</span><br></pre></td></tr></table></figure><p>这样，每一次只要使用 <code>make print-你要打印的变量</code> 就可以打印出其变量名了，还是挺有帮助的～</p>
-          <!--noindex-->
-          
-            <div class="post-button">
-              <a class="btn" href="/show-variable-in-the-makefile/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-          <div class="post-eof"></div>
-        
-      </footer>
-  </article>
-  
-  
-  
-
-    
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://simowce.github.io/linux-kernel-memory-management/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -545,11 +239,11 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
             
             <a href="/linux-kernel-memory-management/" class="post-title-link" itemprop="url">Linux Kernel 内存管理</a>
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -573,7 +267,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:27:32" itemprop="dateModified" datetime="2020-06-02T21:27:32+08:00">2020-06-02</time>
               </span>
             
           
@@ -583,7 +277,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux-kernel/" itemprop="url" rel="index"><span itemprop="name">Linux kernel</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Kernel-Magic/" itemprop="url" rel="index"><span itemprop="name">Kernel Magic</span></a></span>
 
                 
                 
@@ -602,211 +296,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>自学操作系统一年多以来，遇到的最大的坎就是内存管理。最近捧着《深入Linux内核架构》还有《Understand the Linux Kernel》这两本大块头的书死命地吭，然后联系之前的已学的内容以及模糊的地方，总算是有点清晰的感觉了，赶紧记下来。</p><h3 id="各种地址"><a href="#各种地址" class="headerlink" title="各种地址"></a>各种地址</h3><p>内存管理一开始让人很困惑的一点就是有很多以“地址”结尾的术语，让人有点摸不着北，所以我想根据自己的理解总结一下让人困惑的“各种地址”：</p>
+          <p>曾经我认为我学完能够改变世界</p>
           <!--noindex-->
           
             <div class="post-button">
               <a class="btn" href="/linux-kernel-memory-management/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-          <div class="post-eof"></div>
-        
-      </footer>
-  </article>
-  
-  
-  
-
-    
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/new-post/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="simowce">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Silence.Slow.Simple">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-            
-            <a href="/new-post/" class="post-title-link" itemprop="url">安装操作系统的最后一根救命稻草</a>
-          
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              
-                
-              
-
-              <time title="创建时间：2015-09-21 00:00:00" itemprop="dateCreated datePublished" datetime="2015-09-21T00:00:00+08:00">2015-09-21</time>
-            </span>
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
-              </span>
-            
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/日常/" itemprop="url" rel="index"><span itemprop="name">日常</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>不知道你是否有这样的经历，一台老电脑，装有 XP ，然后想要换个 Linux 系统，但是情况是：USB 无法启动，没有光驱，无法没有网络，这时该如何解决这个问题呢？这个时候就该祭出 <code>Grub</code> 大法了。不过，我写这一篇博客，无意于介绍各种安装操作系统的细节，只是想记录一下 <code>Grub</code> 的一些神奇的用法，仅此而已。</p>
-          <!--noindex-->
-          
-            <div class="post-button">
-              <a class="btn" href="/new-post/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-          <div class="post-eof"></div>
-        
-      </footer>
-  </article>
-  
-  
-  
-
-    
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/let-nvidia-driver-run-in-kernel-42/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="simowce">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Silence.Slow.Simple">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-            
-            <a href="/let-nvidia-driver-run-in-kernel-42/" class="post-title-link" itemprop="url">让 Nvidia 显卡驱动在 Linux 4.2 不再出错</a>
-          
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              
-                
-              
-
-              <time title="创建时间：2015-09-14 00:00:00" itemprop="dateCreated datePublished" datetime="2015-09-14T00:00:00+08:00">2015-09-14</time>
-            </span>
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
-              </span>
-            
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux-kernel/" itemprop="url" rel="index"><span itemprop="name">Linux kernel</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>最近自己编译了一下最新的 Linux kernel 4.2 ，一切都还算顺利，不过出现了一个很大的问题就是，在编译内核最后一步：</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">make install</span><br></pre></td></tr></table></figure><p>老是 Nvidia 驱动出错，最后不得已删掉 N 的驱动，终于编译安装成功。</p><p>不过，之后我尝试着重新安装 N 卡的驱动的时候，依然报错。一直无解，无奈求助 Google , 发现 Geforce 论坛上面有人也提到了这样的问题，而且给出了临时的 workaround ，方法十分的 tricky：</p>
-          <!--noindex-->
-          
-            <div class="post-button">
-              <a class="btn" href="/let-nvidia-driver-run-in-kernel-42/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -845,11 +339,11 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
             
             <a href="/how-to-compile-a-linux-kernel/" class="post-title-link" itemprop="url">初试 Linux 内核编译</a>
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -873,7 +367,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:30:52" itemprop="dateModified" datetime="2020-06-02T21:30:52+08:00">2020-06-02</time>
               </span>
             
           
@@ -883,7 +377,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux-kernel/" itemprop="url" rel="index"><span itemprop="name">Linux kernel</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Kernel-Magic/" itemprop="url" rel="index"><span itemprop="name">Kernel Magic</span></a></span>
 
                 
                 
@@ -902,12 +396,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>这两天在试着编译一下 Linux 内核，过程十分的刺激，随手记下来：</p><ol>
-<li><p>首先去 <a href="http://www.kernel.org" target="_blank" rel="noopener">官方网站</a> 下载最新版的 Linux 内核，然后解压，进入到内核目录里</p>
-</li>
-<li><p>下面是整个过程中最复杂的一步了：配置内核。想要让内核依照你的电脑配置发挥出最大的功效，那么就必须为为你的电脑量身定做一套配置。然而，看那配置列表一万多个配置选项真的是会被吓到的。总不能一个一个选吧，而且大部分选项根本就看不懂。所以我使用了最保险的做法，去 Ubuntu 官网下载一个配置文件，保存在内核顶层目录，重命名为 <code>.config</code> ，然后使用：</p>
-</li>
-</ol>
+          <p>曾经我为了编译内核买了一台二手台式机</p>
           <!--noindex-->
           
             <div class="post-button">
@@ -950,11 +439,11 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
             
             <a href="/how-to-understand-b-and-b-in-regular-expression/" class="post-title-link" itemprop="url">正则表达式 \b 和 \B 辨析</a>
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -978,7 +467,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:32:20" itemprop="dateModified" datetime="2020-06-02T21:32:20+08:00">2020-06-02</time>
               </span>
             
           
@@ -988,7 +477,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/编程/" itemprop="url" rel="index"><span itemprop="name">编程</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/代码之外/" itemprop="url" rel="index"><span itemprop="name">代码之外</span></a></span>
 
                 
                 
@@ -1007,9 +496,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>我想很多初学正则表达式的人都会跟我一样，一开始在接触到 \b 的时候，由于一些例子错误引导，可能会认为跟正则表达式的另一个元字符 ^ 是一样的，都是匹配单词开头的，其实不然，不信，我们来举个例子。</p><p>如果正文的内容是这样的：</p><blockquote>
-<p>-simowce go: Hello, steve jobs<br>-steve jobs: Hey, simowce. Hope you can change the world</p>
-</blockquote>
+          <p>正则表达式的一个小点</p>
           <!--noindex-->
           
             <div class="post-button">
@@ -1052,11 +539,11 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
             
             <a href="/linux-kernel-012-reminder-sys/" class="post-title-link" itemprop="url">Linux 0.12 备忘录 -- 第八章</a>
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -1080,7 +567,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:35:11" itemprop="dateModified" datetime="2020-06-02T21:35:11+08:00">2020-06-02</time>
               </span>
             
           
@@ -1090,7 +577,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux-kernel/" itemprop="url" rel="index"><span itemprop="name">Linux kernel</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Kernel-Magic/" itemprop="url" rel="index"><span itemprop="name">Kernel Magic</span></a></span>
 
                 
                 
@@ -1109,7 +596,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>比较仔细地看完了这一部分的内容，收获还是蛮大的，知道了很多不知道的知识，理解了很多已经知道的知识，例如：<strong>为什么 fork 子进程的时候会有多个输出？ 信号究竟是什么？</strong> 等等。下面我主要说一说几个方面：<strong>系统调用 system_call，signal 机制以及其原理，进程调度函数 schedule， 退出函数 exit，等待子进程结束函数 wait_pid ， 增加子进程函数 fork</strong> ，这一些在平常的系统编程里面都是非常常用的东西，理解其实现过程能够更加清楚地明白自己究竟在干什么～</p>
+          <p>Linux Kernel 0.12 的进程与信号</p>
           <!--noindex-->
           
             <div class="post-button">
@@ -1152,11 +639,11 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
             
             <a href="/thinking-in-data-structure----red-black-treethinking/" class="post-title-link" itemprop="url">Thinking in Data Structure -- 红黑树（思考）</a>
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -1180,7 +667,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:37:19" itemprop="dateModified" datetime="2020-06-02T21:37:19+08:00">2020-06-02</time>
               </span>
             
           
@@ -1190,7 +677,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Data-Structure/" itemprop="url" rel="index"><span itemprop="name">Data Structure</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/代码之美/" itemprop="url" rel="index"><span itemprop="name">代码之美</span></a></span>
 
                 
                 
@@ -1209,13 +696,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>红黑树，是二叉搜索树的一种。跟 AVL树 都属于平衡二叉树。我们将一棵树定义为红黑树当且仅当其满足下面的性质：</p><ol>
-<li>树的节点要么是黑的，要么是红的</li>
-<li>树的根节点是黑的</li>
-<li>树的叶节点是黑的</li>
-<li>如果一个节点的颜色是红的，那么它的两个儿子的颜色都是黑的</li>
-<li>对于每一个节点，从该节点（不包含该节点本身）到其所有后代叶节点的简单路径，均包含相同数目的黑色节点。该数目称为 <code>黑高</code>。</li>
-</ol>
+          <p>《算法导论》中的红黑树</p>
           <!--noindex-->
           
             <div class="post-button">
@@ -1242,11 +723,511 @@
   
 
     
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/all-about-binary-tree/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+            
+            <a href="/all-about-binary-tree/" class="post-title-link" itemprop="url">Thinking in Data Structure -- Binary Tree</a>
+          
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2015-06-01 00:00:00" itemprop="dateCreated datePublished" datetime="2015-06-01T00:00:00+08:00">2015-06-01</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-02 21:38:37" itemprop="dateModified" datetime="2020-06-02T21:38:37+08:00">2020-06-02</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/代码之美/" itemprop="url" rel="index"><span itemprop="name">代码之美</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>面试常见问题</p>
+          <!--noindex-->
+          
+            <div class="post-button">
+              <a class="btn" href="/all-about-binary-tree/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+          <div class="post-eof"></div>
+        
+      </footer>
+  </article>
+  
+  
+  
+
+    
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/compile-code-to-so-library/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+            
+            <a href="/compile-code-to-so-library/" class="post-title-link" itemprop="url">动态链接库 .so 的编译和使用</a>
+          
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2015-05-31 00:00:00" itemprop="dateCreated datePublished" datetime="2015-05-31T00:00:00+08:00">2015-05-31</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-02 21:41:14" itemprop="dateModified" datetime="2020-06-02T21:41:14+08:00">2020-06-02</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/编程珠玑/" itemprop="url" rel="index"><span itemprop="name">编程珠玑</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>没啥想说的</p>
+          <!--noindex-->
+          
+            <div class="post-button">
+              <a class="btn" href="/compile-code-to-so-library/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+          <div class="post-eof"></div>
+        
+      </footer>
+  </article>
+  
+  
+  
+
+    
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/Thinking-in-Data-Structure--AVL Tree/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+            
+            <a href="/Thinking-in-Data-Structure--AVL Tree/" class="post-title-link" itemprop="url">Thinking in Data Structure -- AVL Tree</a>
+          
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2015-05-27 00:00:00" itemprop="dateCreated datePublished" datetime="2015-05-27T00:00:00+08:00">2015-05-27</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-02 21:42:23" itemprop="dateModified" datetime="2020-06-02T21:42:23+08:00">2020-06-02</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/代码之美/" itemprop="url" rel="index"><span itemprop="name">代码之美</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>十分优美的旋转操作</p>
+          <!--noindex-->
+          
+            <div class="post-button">
+              <a class="btn" href="/Thinking-in-Data-Structure--AVL Tree/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+          <div class="post-eof"></div>
+        
+      </footer>
+  </article>
+  
+  
+  
+
+    
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/LCD-display/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+            
+            <a href="/LCD-display/" class="post-title-link" itemprop="url">POJ 1102 -- LC-Display</a>
+          
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2014-12-27 00:00:00" itemprop="dateCreated datePublished" datetime="2014-12-27T00:00:00+08:00">2014-12-27</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-02 21:44:28" itemprop="dateModified" datetime="2020-06-02T21:44:28+08:00">2020-06-02</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/刷题/" itemprop="url" rel="index"><span itemprop="name">刷题</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>我特别喜欢拿它当作面试题</p>
+          <!--noindex-->
+          
+            <div class="post-button">
+              <a class="btn" href="/LCD-display/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+          <div class="post-eof"></div>
+        
+      </footer>
+  </article>
+  
+  
+  
+
+    
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/chapter-8-IPC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+            
+            <a href="/chapter-8-IPC/" class="post-title-link" itemprop="url">一个操作系统的实现 -- IPC</a>
+          
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2014-12-18 00:00:00" itemprop="dateCreated datePublished" datetime="2014-12-18T00:00:00+08:00">2014-12-18</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-02 21:45:43" itemprop="dateModified" datetime="2020-06-02T21:45:43+08:00">2020-06-02</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/一个操作系统的实现/" itemprop="url" rel="index"><span itemprop="name">一个操作系统的实现</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>“一个操作系统的实现”最后一篇</p>
+          <!--noindex-->
+          
+            <div class="post-button">
+              <a class="btn" href="/chapter-8-IPC/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+          <div class="post-eof"></div>
+        
+      </footer>
+  </article>
+  
+  
+  
+
+    
   </div>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1291,7 +1272,7 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1304,7 +1285,7 @@
             <a href="/categories/">
           
         
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span>
         </a>
       </div>
@@ -1436,7 +1417,6 @@
   
 
   
-
 
 </body>
 </html>

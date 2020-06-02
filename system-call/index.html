@@ -57,18 +57,18 @@
   };
 </script>
 
-  <meta name="description" content="综述首先我们来看看我们的系统调用是怎么工作的。我们的程序要进行一个系统调用，得有东西让他调用吧。所以我们必须有一个 系统调用的封装 。在我们的例子中，就是 get_ticks() 这个函数。系统调用一般都是通过中断来实现的，所以我们要统一一个系统调用的中断号，初始化 idt ，指明该中断的对应处理程序。然后，一个中断肯定不止实现一个功能，所以，我们要同一个 量 来告诉系统我们要的是哪个功能，在我们">
+  <meta name="description" content="玩具操作系统也有系统调用">
 <meta name="keywords" content="一个操作系统的实现">
 <meta property="og:type" content="article">
 <meta property="og:title" content="一个操作系统的实现 -- 系统调用">
 <meta property="og:url" content="https://simowce.github.io/system-call/index.html">
 <meta property="og:site_name" content="Silence.Slow.Simple">
-<meta property="og:description" content="综述首先我们来看看我们的系统调用是怎么工作的。我们的程序要进行一个系统调用，得有东西让他调用吧。所以我们必须有一个 系统调用的封装 。在我们的例子中，就是 get_ticks() 这个函数。系统调用一般都是通过中断来实现的，所以我们要统一一个系统调用的中断号，初始化 idt ，指明该中断的对应处理程序。然后，一个中断肯定不止实现一个功能，所以，我们要同一个 量 来告诉系统我们要的是哪个功能，在我们">
+<meta property="og:description" content="玩具操作系统也有系统调用">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-04-06T06:27:00.692Z">
+<meta property="og:updated_time" content="2020-06-02T13:48:52.247Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="一个操作系统的实现 -- 系统调用">
-<meta name="twitter:description" content="综述首先我们来看看我们的系统调用是怎么工作的。我们的程序要进行一个系统调用，得有东西让他调用吧。所以我们必须有一个 系统调用的封装 。在我们的例子中，就是 get_ticks() 这个函数。系统调用一般都是通过中断来实现的，所以我们要统一一个系统调用的中断号，初始化 idt ，指明该中断的对应处理程序。然后，一个中断肯定不止实现一个功能，所以，我们要同一个 量 来告诉系统我们要的是哪个功能，在我们">
+<meta name="twitter:description" content="玩具操作系统也有系统调用">
   <link rel="canonical" href="https://simowce.github.io/system-call/">
 
 
@@ -144,7 +144,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <p class="site-subtitle">a simowce's blog</p>
+        <h1 class="site-subtitle" itemprop="description">a simowce's blog</h1>
       
   </div>
 
@@ -244,10 +244,10 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">一个操作系统的实现 -- 系统调用
+        <h2 class="post-title" itemprop="name headline">一个操作系统的实现 -- 系统调用
 
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -271,7 +271,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:48:52" itemprop="dateModified" datetime="2020-06-02T21:48:52+08:00">2020-06-02</time>
               </span>
             
           
@@ -300,7 +300,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h4 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h4><p>首先我们来看看我们的系统调用是怎么工作的。我们的程序要进行一个系统调用，得有东西让他调用吧。所以我们必须有一个 <code>系统调用的封装</code> 。在我们的例子中，就是 <code>get_ticks()</code> 这个函数。系统调用一般都是通过中断来实现的，所以我们要统一一个系统调用的中断号，初始化 <code>idt</code> ，指明该中断的对应处理程序。然后，一个中断肯定不止实现一个功能，所以，我们要同一个 <code>量</code> 来告诉系统我们要的是哪个功能，在我们的实现中，我们是通过对 <code>eax</code> 这个寄存器赋予不同的值来指明对应的功能的。由于是中断，所以当中断发生了之后，我们当然要保存被中断的进程的信息，所以我们要用到之前用到的 <code>save</code> 函数，但是由于函数里面已经对 <code>eax</code> 进行了赋值，所以我们必须将 <code>save</code> 中与 <code>eax</code> 的相关寄存器都换掉。然后，我们前面说过要实现多个功能，所以我们建立了一个数组 <code>sys_call_table</code> ，根据 <code>eax</code> 的值在数组中找到相应的处理程序。所以，简单来说，系统调用就是这样的：</p><a id="more"></a>
+        <p>玩具操作系统也有系统调用</p>
+<a id="more"></a>
+
+<h4 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h4><p>首先我们来看看我们的系统调用是怎么工作的。我们的程序要进行一个系统调用，得有东西让他调用吧。所以我们必须有一个 <code>系统调用的封装</code> 。在我们的例子中，就是 <code>get_ticks()</code> 这个函数。系统调用一般都是通过中断来实现的，所以我们要统一一个系统调用的中断号，初始化 <code>idt</code> ，指明该中断的对应处理程序。然后，一个中断肯定不止实现一个功能，所以，我们要同一个 <code>量</code> 来告诉系统我们要的是哪个功能，在我们的实现中，我们是通过对 <code>eax</code> 这个寄存器赋予不同的值来指明对应的功能的。由于是中断，所以当中断发生了之后，我们当然要保存被中断的进程的信息，所以我们要用到之前用到的 <code>save</code> 函数，但是由于函数里面已经对 <code>eax</code> 进行了赋值，所以我们必须将 <code>save</code> 中与 <code>eax</code> 的相关寄存器都换掉。然后，我们前面说过要实现多个功能，所以我们建立了一个数组 <code>sys_call_table</code> ，根据 <code>eax</code> 的值在数组中找到相应的处理程序。所以，简单来说，系统调用就是这样的：</p>
 <blockquote>
 <p>用户调用系统调用的封装函数 -&gt; 封装函数赋值 <code>eax</code> ，执行中断 -&gt; 中断处理程序在 <code>sys_call_table</code> 数组中根据 <code>eax</code> 找到最终要执行的程序，并且执行之。至此，一个完整的中断结束~</p>
 </blockquote>
@@ -309,7 +312,7 @@
 <p> 一开始的时候，一启动就会产生 <code>#GP</code> 的错误，之后才发现，我在 <code>init_decriptor()</code> 初始化 <code>sys_call</code> 的地方，习惯性地将 <code>attr</code> 弄成 <code>PRIVILEGE_KERL</code> ，其实应该是 <code>PRIVILEGE_USER</code> 。既然犯错误了，顺便复习一下 <code>DPL</code> 的知识。之所以会产生 <code>#GP</code> 的错误，主要是 <code>DPL</code> 在起作用。<strong>对于调用门来说，DPL 规定了当前执行的程序或任务可以访问此调用门的最低特权级</strong>，而调用这个中断的 —— 我们的进程 —— 特权级是 1，很明显是低于 0 的，所以才会产生这个错误。</p>
 <hr>
 <p>今天在实现的时候，发现有出现了很奇怪的 <code>#GP</code> 错误（这是我用 bochs 的 snapshot 截下来的）：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Exception! --&gt; #GP General Protection</span><br><span class="line">         ß</span><br><span class="line">EFLAGS:0x11096CS:0x8EIP:0x306F4Error code:0xC</span><br><span class="line">BASEADDRL BASEADDRH LENGTHLOW LENGTHH TYPE</span><br><span class="line">00000000h 00000000h 0009F000h 00000000h 00000001h</span><br><span class="line">0009F000h 00000000h 00001000h 00000000h 00000002h</span><br><span class="line">000E8000h 00000000h 00018000h 00000000h 00000002h</span><br><span class="line">00100000h 00000000h 01EF0000h 00000000h 00000001h</span><br><span class="line">01FF0000h 00000000h 00010000h 00000000h 00000003h</span><br><span class="line">FFFC0000h 00000000h 00040000h 00000000h 00000002h</span><br><span class="line">RAM SIZE : 01FF0000h</span><br><span class="line">-----&quot;cstart&quot; begins-----</span><br><span class="line">-----&quot;cstart&quot; ends-----</span><br><span class="line">~~~~~~~~~~~ kernel_main ~~~~~~~~~~~~</span><br><span class="line">B.</span><br></pre></td></tr></table></figure>
+<figure class="highlight x86asm"><table><tr><td class="code"><pre><span class="line">Exception! --&gt; #GP General Protection</span><br><span class="line">         ß</span><br><span class="line"><span class="symbol">EFLAGS:</span>0x11096CS:0x8EIP:0x306F4Error code:<span class="number">0xC</span></span><br><span class="line">BASEADDRL BASEADDRH LENGTHLOW LENGTHH TYPE</span><br><span class="line"><span class="number">00000000h</span> <span class="number">00000000h</span> <span class="number">0009F000h</span> <span class="number">00000000h</span> <span class="number">00000001h</span></span><br><span class="line"><span class="number">0009F000h</span> <span class="number">00000000h</span> <span class="number">00001000h</span> <span class="number">00000000h</span> <span class="number">00000002h</span></span><br><span class="line"><span class="number">000E8000h</span> <span class="number">00000000h</span> <span class="number">00018000h</span> <span class="number">00000000h</span> <span class="number">00000002h</span></span><br><span class="line"><span class="number">00100000h</span> <span class="number">00000000h</span> <span class="number">01EF0000h</span> <span class="number">00000000h</span> <span class="number">00000001h</span></span><br><span class="line"><span class="number">01FF0000h</span> <span class="number">00000000h</span> <span class="number">00010000h</span> <span class="number">00000000h</span> <span class="number">00000003h</span></span><br><span class="line"><span class="number">FFFC0000h</span> <span class="number">00000000h</span> <span class="number">00040000h</span> <span class="number">00000000h</span> <span class="number">00000002h</span></span><br><span class="line">RAM SIZE : <span class="number">01FF0000h</span></span><br><span class="line">-----<span class="string">"cstart"</span> begins-----</span><br><span class="line">-----<span class="string">"cstart"</span> ends-----</span><br><span class="line">~~~~~~~~~~~ kernel_main ~~~~~~~~~~~~</span><br><span class="line">B.</span><br></pre></td></tr></table></figure>
 
 <p>一开始我一直不知道什么怎么解决。然后我就乱弄，然后错误就解决了。虽然我现在还是不知道究竟是什么错误，不过我说一下我的解决方法，用同样的问题可以参考一下。其实没有什么的，就是用 <code>bximage</code> 重新建立一个 <code>a.img</code> ,问题就解决了。</p>
 <hr>
@@ -336,7 +339,7 @@
         
       
         <div id="reward-container">
-  <div>您的支持是我更新的第二大动力，谢谢！</div>
+  <div>您的支持是我更新的最大动力</div>
   <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
     打赏
   </button>
@@ -420,9 +423,6 @@
 
           </div>
           
-    
-    <div class="comments" id="gitalk-container"></div>
-  
 
         </div>
           
@@ -468,7 +468,7 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -481,7 +481,7 @@
             <a href="/categories/">
           
         
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span>
         </a>
       </div>
@@ -591,25 +591,6 @@
   
 
   
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID: '64dccd465ffcc827c9ed',
-      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
-      repo: 'simowce.github.io',
-      owner: 'simowce',
-      admin: ['simowce'],
-      id: '8b06a463aab8675a22bbdd7df6c9d9ff',
-        language: 'zh-CN',
-      
-      distractionFreeMode: 'true'
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-</script>
 
 </body>
 </html>

@@ -57,18 +57,18 @@
   };
 </script>
 
-  <meta name="description" content="提起 Java，我们的耳边似乎总会响起这样的论调： Java 使用虚拟机，性能效率不行，跟 C/C++ 没法比 好像说，Java 跟性能是绝缘的，C/C++ 才是性能的典范。那么，能否将两者结合起来呢？当然可以，就是我们今天的主题 —— Java JNI 。简单地说，Java JNI 就是将 Java 类中的一些方法用 C/C++ 甚至是汇编来实现，以弥补 Java 某些方面的不足。下面我们通过一">
+  <meta name="description" content="JNI? JNI!">
 <meta name="keywords" content="JNI">
 <meta property="og:type" content="article">
 <meta property="og:title" content="JNI 编程初探">
 <meta property="og:url" content="https://simowce.github.io/jni-programming/index.html">
 <meta property="og:site_name" content="Silence.Slow.Simple">
-<meta property="og:description" content="提起 Java，我们的耳边似乎总会响起这样的论调： Java 使用虚拟机，性能效率不行，跟 C/C++ 没法比 好像说，Java 跟性能是绝缘的，C/C++ 才是性能的典范。那么，能否将两者结合起来呢？当然可以，就是我们今天的主题 —— Java JNI 。简单地说，Java JNI 就是将 Java 类中的一些方法用 C/C++ 甚至是汇编来实现，以弥补 Java 某些方面的不足。下面我们通过一">
+<meta property="og:description" content="JNI? JNI!">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-04-06T06:27:00.692Z">
+<meta property="og:updated_time" content="2020-06-02T13:11:01.307Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JNI 编程初探">
-<meta name="twitter:description" content="提起 Java，我们的耳边似乎总会响起这样的论调： Java 使用虚拟机，性能效率不行，跟 C/C++ 没法比 好像说，Java 跟性能是绝缘的，C/C++ 才是性能的典范。那么，能否将两者结合起来呢？当然可以，就是我们今天的主题 —— Java JNI 。简单地说，Java JNI 就是将 Java 类中的一些方法用 C/C++ 甚至是汇编来实现，以弥补 Java 某些方面的不足。下面我们通过一">
+<meta name="twitter:description" content="JNI? JNI!">
   <link rel="canonical" href="https://simowce.github.io/jni-programming/">
 
 
@@ -144,7 +144,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <p class="site-subtitle">a simowce's blog</p>
+        <h1 class="site-subtitle" itemprop="description">a simowce's blog</h1>
       
   </div>
 
@@ -244,10 +244,10 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">JNI 编程初探
+        <h2 class="post-title" itemprop="name headline">JNI 编程初探
 
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -271,7 +271,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:11:01" itemprop="dateModified" datetime="2020-06-02T21:11:01+08:00">2020-06-02</time>
               </span>
             
           
@@ -281,7 +281,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/编程/" itemprop="url" rel="index"><span itemprop="name">编程</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/代码之美/" itemprop="url" rel="index"><span itemprop="name">代码之美</span></a></span>
 
                 
                 
@@ -300,12 +300,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>提起 Java，我们的耳边似乎总会响起这样的论调：</p><blockquote>
+        <p>JNI? JNI!</p>
+<a id="more"></a>
+
+<p>提起 Java，我们的耳边似乎总会响起这样的论调：</p>
+<blockquote>
 <p>Java 使用虚拟机，性能效率不行，跟 C/C++ 没法比</p>
-</blockquote><p>好像说，Java 跟性能是绝缘的，C/C++ 才是性能的典范。那么，能否将两者结合起来呢？当然可以，就是我们今天的主题 —— Java JNI 。</p><p>简单地说，Java JNI 就是将 Java 类中的一些方法用 C/C++ 甚至是汇编来实现，以弥补 Java 某些方面的不足。下面我们通过一个简单的 Hello world 来阐述整个流程是怎么样的。</p><a id="more"></a>
-
-
-
+</blockquote>
+<p>好像说，Java 跟性能是绝缘的，C/C++ 才是性能的典范。那么，能否将两者结合起来呢？当然可以，就是我们今天的主题 —— Java JNI 。</p>
+<p>简单地说，Java JNI 就是将 Java 类中的一些方法用 C/C++ 甚至是汇编来实现，以弥补 Java 某些方面的不足。下面我们通过一个简单的 Hello world 来阐述整个流程是怎么样的。</p>
 <h3 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h3><p>首先，我们在 jni_first.java 中定义一个类，并且在类中声明一个方法，这个方法就是我们要使用 C/C++ 来实现的：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">jni_first</span> </span>&#123;</span><br><span class="line">	<span class="keyword">static</span> &#123;</span><br><span class="line">		System.loadLibrary(<span class="string">"first"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">void</span> <span class="title">disp_jni</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">new</span> jni_first().disp_jni();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -345,7 +348,7 @@ From Java_jni_1first_disp_1jni: Hello, Java world.</code></pre><p>好了，至�
         
       
         <div id="reward-container">
-  <div>您的支持是我更新的第二大动力，谢谢！</div>
+  <div>您的支持是我更新的最大动力</div>
   <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
     打赏
   </button>
@@ -400,8 +403,8 @@ From Java_jni_1first_disp_1jni: Hello, Java world.</code></pre><p>好了，至�
           <div class="post-nav">
             <div class="post-nav-next post-nav-item">
               
-                <a href="/page-fram-reclaim-algorithm/" rel="next" title="Page Fram Reclaim Algorithm">
-                  <i class="fa fa-chevron-left"></i> Page Fram Reclaim Algorithm
+                <a href="/page-fram-reclaim-algorithm/" rel="next" title="Page Fram Reclaim 算法详解">
+                  <i class="fa fa-chevron-left"></i> Page Fram Reclaim 算法详解
                 </a>
               
             </div>
@@ -429,9 +432,6 @@ From Java_jni_1first_disp_1jni: Hello, Java world.</code></pre><p>好了，至�
 
           </div>
           
-    
-    <div class="comments" id="gitalk-container"></div>
-  
 
         </div>
           
@@ -477,7 +477,7 @@ From Java_jni_1first_disp_1jni: Hello, Java world.</code></pre><p>好了，至�
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -490,7 +490,7 @@ From Java_jni_1first_disp_1jni: Hello, Java world.</code></pre><p>好了，至�
             <a href="/categories/">
           
         
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span>
         </a>
       </div>
@@ -600,25 +600,6 @@ From Java_jni_1first_disp_1jni: Hello, Java world.</code></pre><p>好了，至�
   
 
   
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID: '64dccd465ffcc827c9ed',
-      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
-      repo: 'simowce.github.io',
-      owner: 'simowce',
-      admin: ['simowce'],
-      id: '5787ccadd5defcb460ea245deaf530ff',
-        language: 'zh-CN',
-      
-      distractionFreeMode: 'true'
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-</script>
 
 </body>
 </html>

@@ -139,7 +139,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <p class="site-subtitle">a simowce's blog</p>
+        <h1 class="site-subtitle" itemprop="description">a simowce's blog</h1>
       
   </div>
 
@@ -227,610 +227,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/all-about-binary-tree/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="simowce">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Silence.Slow.Simple">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-            
-            <a href="/all-about-binary-tree/" class="post-title-link" itemprop="url">Thinking in Data Structure -- Binary Tree</a>
-          
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              
-                
-              
-
-              <time title="创建时间：2015-06-01 00:00:00" itemprop="dateCreated datePublished" datetime="2015-06-01T00:00:00+08:00">2015-06-01</time>
-            </span>
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
-              </span>
-            
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Data-Structure/" itemprop="url" rel="index"><span itemprop="name">Data Structure</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>二叉树是树结构中比较容易实现的一种，有关它的操作也有很多，在接下来的几天，我将陆续更新，先写个目录吧：</p><ol>
-<li>已知二叉树的前序和中序，要求重新构造出该二叉树</li>
-</ol><p>我们知道，前序遍历是所谓的 “根左右”，中序遍历是所谓的 “左根右”。注意，重点来了，中序遍历的根节点将整棵二叉树分成了左子树和右子树，而前序遍历因为总是先访问根节点，所以可以在前序遍历的第一个节点肯定是根节点，然后在根据这个根节点找到中序遍历的两棵子树，然后以此类推。即可以使用递归。</p>
-          <!--noindex-->
-          
-            <div class="post-button">
-              <a class="btn" href="/all-about-binary-tree/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-          <div class="post-eof"></div>
-        
-      </footer>
-  </article>
-  
-  
-  
-
-    
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/compile-code-to-so-library/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="simowce">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Silence.Slow.Simple">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-            
-            <a href="/compile-code-to-so-library/" class="post-title-link" itemprop="url">动态链接库 .so 的编译和使用</a>
-          
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              
-                
-              
-
-              <time title="创建时间：2015-05-31 00:00:00" itemprop="dateCreated datePublished" datetime="2015-05-31T00:00:00+08:00">2015-05-31</time>
-            </span>
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
-              </span>
-            
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/编程/" itemprop="url" rel="index"><span itemprop="name">编程</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>今天写代码的时候，发现需要之前的一些实现，有不想直接将代码复制过来，于是就想把之前实现的代码编译成一个动态链接库，这样显得更加的优雅。几番摸索之后，终有所获，遂记之~</p><hr><p>首先，我们约定要编译的文件名是 code.c ,编译后的动态库名是 libcode.so (<strong>注意，共享库的命名一般都是 libxxx 的</strong>)，目标文件是 target.c 。于是，编译命令如下：</p>
-          <!--noindex-->
-          
-            <div class="post-button">
-              <a class="btn" href="/compile-code-to-so-library/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-          <div class="post-eof"></div>
-        
-      </footer>
-  </article>
-  
-  
-  
-
-    
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/Thinking-in-Data-Structure--AVL Tree/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="simowce">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Silence.Slow.Simple">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-            
-            <a href="/Thinking-in-Data-Structure--AVL Tree/" class="post-title-link" itemprop="url">Thinking in Data Structure -- AVL Tree</a>
-          
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              
-                
-              
-
-              <time title="创建时间：2015-05-27 00:00:00" itemprop="dateCreated datePublished" datetime="2015-05-27T00:00:00+08:00">2015-05-27</time>
-            </span>
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
-              </span>
-            
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Data-Structure/" itemprop="url" rel="index"><span itemprop="name">Data Structure</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><code>AVL 树</code>， 是在二叉搜索树的基础上，在插入操作上加入了<strong>旋转</strong>的操作，从而避免了一棵树退化成一个链表或者树的深度过长导致搜索的时候效率太低的坏处，而旋转也是 <code>AVL 树</code> 中最重要的操作，也是本博文的重点内容。</p><p><code>AVL 树</code> 在普通二叉搜索树节点的基础上加入了一个 <code>buf</code> 值，意思是左孩子的高度减去右孩子的高度，而 <code>buf</code> 值的合法范围是 -1， 0， 1，如果不是这几个值，那么说明树不平衡，就要进行旋转。</p>
-          <!--noindex-->
-          
-            <div class="post-button">
-              <a class="btn" href="/Thinking-in-Data-Structure--AVL Tree/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-          <div class="post-eof"></div>
-        
-      </footer>
-  </article>
-  
-  
-  
-
-    
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/i-dont-know-c/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="simowce">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Silence.Slow.Simple">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-            
-            <a href="/i-dont-know-c/" class="post-title-link" itemprop="url">其实我根本不懂 C </a>
-          
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              
-                
-              
-
-              <time title="创建时间：2015-05-17 00:00:00" itemprop="dateCreated datePublished" datetime="2015-05-17T00:00:00+08:00">2015-05-17</time>
-            </span>
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
-              </span>
-            
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/思/" itemprop="url" rel="index"><span itemprop="name">思</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <ol>
-<li>char *p 和 char p[] 的区别：</li>
-</ol><p>问题的来源是基于这样的一段代码：</p><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">char</span> *p = <span class="string">"Hello world"</span>;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"%s\n"</span>, p);</span><br><span class="line">	<span class="built_in">strcpy</span>(p, <span class="string">"123"</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"%s\n"</span>, p);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-          
-            <div class="post-button">
-              <a class="btn" href="/i-dont-know-c/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-          <div class="post-eof"></div>
-        
-      </footer>
-  </article>
-  
-  
-  
-
-    
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/LCD-display/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="simowce">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Silence.Slow.Simple">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-            
-            <a href="/LCD-display/" class="post-title-link" itemprop="url">POJ 1102 -- LC-Display</a>
-          
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              
-                
-              
-
-              <time title="创建时间：2014-12-27 00:00:00" itemprop="dateCreated datePublished" datetime="2014-12-27T00:00:00+08:00">2014-12-27</time>
-            </span>
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
-              </span>
-            
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/ACM/" itemprop="url" rel="index"><span itemprop="name">ACM</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>已经很久没有刷题了。前几天在上 <code>EDA</code> 实验课的时候，突然想到了以前一道没有 <code>AC</code> 的题目，并且突然顿悟，想到了可能是正确的解决方法。然后今天着手实现。总算是 <code>1A</code> 。虽然已经退出了 <code>ACM</code> ，不过 <code>AC</code> 的感觉还是跟以前一样。嗯，我有点怀念以前那段岁月了。</p><h2 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h2><p>题意很简单。就是给你一串数，要你模拟出这串数在 <code>LC</code> 屏幕的输出。不过有一个要求，就是还有一个 <code>size</code> 值。</p>
-          <!--noindex-->
-          
-            <div class="post-button">
-              <a class="btn" href="/LCD-display/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-          <div class="post-eof"></div>
-        
-      </footer>
-  </article>
-  
-  
-  
-
-    
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/chapter-8-IPC/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="simowce">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Silence.Slow.Simple">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-            
-            <a href="/chapter-8-IPC/" class="post-title-link" itemprop="url">一个操作系统的实现 -- IPC</a>
-          
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              
-                
-              
-
-              <time title="创建时间：2014-12-18 00:00:00" itemprop="dateCreated datePublished" datetime="2014-12-18T00:00:00+08:00">2014-12-18</time>
-            </span>
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
-              </span>
-            
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/一个操作系统的实现/" itemprop="url" rel="index"><span itemprop="name">一个操作系统的实现</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>终于，时隔这么多天，总算是把 <code>第八章</code> 完成了。从下篇开始，作者的写作风格大变，上篇基本上是把大部分的代码都弄出来讲，不过下篇的话，作者只拿了一些关键的代码，而且很多地方都做了修改，但是他却没有提到，所以，你只能自己去扒代码。在实现的过程中，出现了超级多的 <code>bug</code> ，<code>debug</code> 到要吐。不过，我不会像以前一样只会抱怨说：“这不科学！” 在这快一个星期的改错过程中，我学到了很多东西。不要总是抱怨改 <code>bug</code>辛苦， <code>bug</code> 都是自己制造出来的，这个就只能怪自己了。最重要的一点，那就是，<strong>所有的 <code>bug</code> 都是思维的漏洞</strong>。所以，在你的思想体系还没有十分清晰的情况下，不要轻易写代码，不然，出现 <code>bug</code> 是很正常的事情。</p>
-          <!--noindex-->
-          
-            <div class="post-button">
-              <a class="btn" href="/chapter-8-IPC/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-          <div class="post-eof"></div>
-        
-      </footer>
-  </article>
-  
-  
-  
-
-    
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://simowce.github.io/chapter-8-printf/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -843,11 +239,11 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
             
             <a href="/chapter-8-printf/" class="post-title-link" itemprop="url">一个操作系统的实现 -- printf</a>
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -871,7 +267,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:46:22" itemprop="dateModified" datetime="2020-06-02T21:46:22+08:00">2020-06-02</time>
               </span>
             
           
@@ -900,7 +296,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h3 id="关于-vsprintf"><a href="#关于-vsprintf" class="headerlink" title="关于 vsprintf"></a>关于 vsprintf</h3><p>今天花了很长的时间去理解 <code>vsprintf</code> 这个函数并且自己把它实现了一遍。果然，比对着书打难多了。不过，确实是收获特别多，而且自己实现的话，能够加深理解，而不仅仅是从书上理解那么片面。</p><p>先说一下 <code>vsprintf()</code> 这个函数的作用。它是 <code>printf()</code> 的一个处理函数，接受 3 个变量：buf 是用来存放处理完的字符串，或者是说，将 <code>printf</code> 的第一个参数里面的 <code>%d</code> 啊， <code>%s</code> 等用后面对应的参数替换之后的字符串。<code>fmt</code> 很明显，就是 <code>printf()</code> 的第一个参数。<code>arg</code> 这个参数，是指向 <code>printf()</code> 第二个参数以及后面参数的一个指针。理解这一点很重要。</p>
+          <p>你会写 printf 吗？</p>
           <!--noindex-->
           
             <div class="post-button">
@@ -943,11 +339,11 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
             
             <a href="/chapter-7-input/" class="post-title-link" itemprop="url">一个操作系统的实现 -- IO</a>
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -971,7 +367,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:47:59" itemprop="dateModified" datetime="2020-06-02T21:47:59+08:00">2020-06-02</time>
               </span>
             
           
@@ -1000,7 +396,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="输入"><a href="#输入" class="headerlink" title="输入"></a>输入</h2><h4 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h4><p>这里面有两个核心函数，<code>keyboard_handler()</code> 和 <code>keyboard_read()</code> 。其中，<code>keyboard_handler()</code> 是键盘中断的处理程序，作用是将扫描码加入到缓冲区中。这个缓冲区，其实就是一个 <code>队列</code> ，<code>p_tail</code> 指向下一个要被处理的字节， <code>p_head</code> 指向下一个空闲的空间。而 <code>keyboard_read</code> 是我们的 <code>tty</code> 进程的守护程序，功能是从缓冲区读取扫描码并解析。</p>
+          <p>最好的输入是输出</p>
           <!--noindex-->
           
             <div class="post-button">
@@ -1043,11 +439,11 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
             
             <a href="/system-call/" class="post-title-link" itemprop="url">一个操作系统的实现 -- 系统调用</a>
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -1071,7 +467,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:48:52" itemprop="dateModified" datetime="2020-06-02T21:48:52+08:00">2020-06-02</time>
               </span>
             
           
@@ -1100,7 +496,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h4 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h4><p>首先我们来看看我们的系统调用是怎么工作的。我们的程序要进行一个系统调用，得有东西让他调用吧。所以我们必须有一个 <code>系统调用的封装</code> 。在我们的例子中，就是 <code>get_ticks()</code> 这个函数。系统调用一般都是通过中断来实现的，所以我们要统一一个系统调用的中断号，初始化 <code>idt</code> ，指明该中断的对应处理程序。然后，一个中断肯定不止实现一个功能，所以，我们要同一个 <code>量</code> 来告诉系统我们要的是哪个功能，在我们的实现中，我们是通过对 <code>eax</code> 这个寄存器赋予不同的值来指明对应的功能的。由于是中断，所以当中断发生了之后，我们当然要保存被中断的进程的信息，所以我们要用到之前用到的 <code>save</code> 函数，但是由于函数里面已经对 <code>eax</code> 进行了赋值，所以我们必须将 <code>save</code> 中与 <code>eax</code> 的相关寄存器都换掉。然后，我们前面说过要实现多个功能，所以我们建立了一个数组 <code>sys_call_table</code> ，根据 <code>eax</code> 的值在数组中找到相应的处理程序。所以，简单来说，系统调用就是这样的：</p>
+          <p>玩具操作系统也有系统调用</p>
           <!--noindex-->
           
             <div class="post-button">
@@ -1143,11 +539,11 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
+        <h2 class="post-title" itemprop="name headline">
             
             <a href="/muti-process/" class="post-title-link" itemprop="url">一个操作系统的实现 -- 多进程</a>
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -1171,7 +567,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:50:07" itemprop="dateModified" datetime="2020-06-02T21:50:07+08:00">2020-06-02</time>
               </span>
             
           
@@ -1200,16 +596,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="单进程"><a href="#单进程" class="headerlink" title="单进程"></a>单进程</h2><ol>
-<li><p>赋值 <code>tss.esp0</code><br> 首先我们要理解整个进程与中断的过程：</p>
-<blockquote>
-<p>在 <code>restart()</code> 函数运行之后，我们的进程开始运行，系统现在是在 <code>ring1</code> 特权级上。由于我们已经开启了时钟中断，所以，时钟中断会以一定频率发生。<strong>注意，要好好理解 <code>中断</code> 这个概念。一开始我一直无法理解，为什么我们的第一个进程是一个死循环，但是中断依旧能够发生。其实，中断就是将当前的进程终止，去执行其他任务，当该任务完成了之后，就会从当前进程停止处继续。</strong>这一点很重要，到后面的 <code>IPC</code> 都要依靠这个概念。</p>
-</blockquote>
-<p> 由于中断发生时出现了特权级转换： <code>ring1 -&gt; ring0</code> 所以存在堆栈的转换。（具体请看《一个操作系统的实现》 P99）堆栈的 <code>ss</code> 和 <code>esp</code> 存储在 <code>tss</code> 里面。在 <code>restart()</code> 我们已经准备好了 <code>tss0.esp</code> ，是指向当前进程的 <code>STACK_FRAME</code> 的最高处。至于为什么要指向这里，那是因为 <code>ring1 -&gt; ring0</code> 的转换，不仅存在堆栈的切换，而且还会将 <code>eip</code> <code>cs</code> <code>eflags</code> <code>esp</code> <code>ss</code> 这些压入新的堆栈中，这跟我们的 <code>struct stack_frame</code> 的顺序完全一致。最后一个疑问，为什么在中断处理程序中要一直给 <code>tss.esp0</code> 赋值？因为我们现在是单进程，所以这个赋值只是一个重复而已。不过，后面我们实现了多进程了之后，这个赋值操作就十分地重要了。</p>
-</li>
-<li><p>内核栈<br> 首先，中断处理程序的堆栈就是 <code>tss.esp0</code> ，而这里面存有我们进程的所有信息，所以如果我们的中断处理程序要进行一些函数操作，堆栈里面的信息可能会被破坏掉，所以，我们要切换到 <code>内核栈</code> 。这样，我们就可以放心地进行一系列的函数操作了。</p>
-</li>
-</ol>
+          <p>玩具操作系统也有多进程</p>
           <!--noindex-->
           
             <div class="post-button">
@@ -1236,11 +623,211 @@
   
 
     
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/chapter-6-single-process/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+            
+            <a href="/chapter-6-single-process/" class="post-title-link" itemprop="url">一个操作系统的实现 -- 单进程</a>
+          
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2014-11-24 00:00:00" itemprop="dateCreated datePublished" datetime="2014-11-24T00:00:00+08:00">2014-11-24</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-02 21:50:56" itemprop="dateModified" datetime="2020-06-02T21:50:56+08:00">2020-06-02</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/一个操作系统的实现/" itemprop="url" rel="index"><span itemprop="name">一个操作系统的实现</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><img src="/assets/process1.png" alt></p>
+          <!--noindex-->
+          
+            <div class="post-button">
+              <a class="btn" href="/chapter-6-single-process/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+          <div class="post-eof"></div>
+        
+      </footer>
+  </article>
+  
+  
+  
+
+    
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/i-have-finished-reading-the-oranges/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+            
+            <a href="/i-have-finished-reading-the-oranges/" class="post-title-link" itemprop="url">四个月整，我总算是看完了《一个操作系统的实现》</a>
+          
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2014-11-15 00:00:00" itemprop="dateCreated datePublished" datetime="2014-11-15T00:00:00+08:00">2014-11-15</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-02 21:52:07" itemprop="dateModified" datetime="2020-06-02T21:52:07+08:00">2020-06-02</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/一个操作系统的实现/" itemprop="url" rel="index"><span itemprop="name">一个操作系统的实现</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>梦的开始</p>
+          <!--noindex-->
+          
+            <div class="post-button">
+              <a class="btn" href="/i-have-finished-reading-the-oranges/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+          <div class="post-eof"></div>
+        
+      </footer>
+  </article>
+  
+  
+  
+
+    
   </div>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
   </nav>
 
 
@@ -1285,7 +872,7 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1298,7 +885,7 @@
             <a href="/categories/">
           
         
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span>
         </a>
       </div>
@@ -1417,20 +1004,11 @@
     
       
     
-      
-    
-      
-    
-      
-    
-      
-    
   
 
   
 
   
-
 
 </body>
 </html>

@@ -57,18 +57,18 @@
   };
 </script>
 
-  <meta name="description" content="红黑树，是二叉搜索树的一种。跟 AVL树 都属于平衡二叉树。我们将一棵树定义为红黑树当且仅当其满足下面的性质： 树的节点要么是黑的，要么是红的 树的根节点是黑的 树的叶节点是黑的 如果一个节点的颜色是红的，那么它的两个儿子的颜色都是黑的 对于每一个节点，从该节点（不包含该节点本身）到其所有后代叶节点的简单路径，均包含相同数目的黑色节点。该数目称为 黑高。">
-<meta name="keywords" content="红黑树">
+  <meta name="description" content="《算法导论》中的红黑树">
+<meta name="keywords" content="数据结构">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Thinking in Data Structure -- 红黑树（思考）">
 <meta property="og:url" content="https://simowce.github.io/thinking-in-data-structure----red-black-treethinking/index.html">
 <meta property="og:site_name" content="Silence.Slow.Simple">
-<meta property="og:description" content="红黑树，是二叉搜索树的一种。跟 AVL树 都属于平衡二叉树。我们将一棵树定义为红黑树当且仅当其满足下面的性质： 树的节点要么是黑的，要么是红的 树的根节点是黑的 树的叶节点是黑的 如果一个节点的颜色是红的，那么它的两个儿子的颜色都是黑的 对于每一个节点，从该节点（不包含该节点本身）到其所有后代叶节点的简单路径，均包含相同数目的黑色节点。该数目称为 黑高。">
+<meta property="og:description" content="《算法导论》中的红黑树">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-04-06T06:27:00.692Z">
+<meta property="og:updated_time" content="2020-06-02T13:37:19.212Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Thinking in Data Structure -- 红黑树（思考）">
-<meta name="twitter:description" content="红黑树，是二叉搜索树的一种。跟 AVL树 都属于平衡二叉树。我们将一棵树定义为红黑树当且仅当其满足下面的性质： 树的节点要么是黑的，要么是红的 树的根节点是黑的 树的叶节点是黑的 如果一个节点的颜色是红的，那么它的两个儿子的颜色都是黑的 对于每一个节点，从该节点（不包含该节点本身）到其所有后代叶节点的简单路径，均包含相同数目的黑色节点。该数目称为 黑高。">
+<meta name="twitter:description" content="《算法导论》中的红黑树">
   <link rel="canonical" href="https://simowce.github.io/thinking-in-data-structure----red-black-treethinking/">
 
 
@@ -144,7 +144,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <p class="site-subtitle">a simowce's blog</p>
+        <h1 class="site-subtitle" itemprop="description">a simowce's blog</h1>
       
   </div>
 
@@ -244,10 +244,10 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">Thinking in Data Structure -- 红黑树（思考）
+        <h2 class="post-title" itemprop="name headline">Thinking in Data Structure -- 红黑树（思考）
 
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -271,7 +271,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:37:19" itemprop="dateModified" datetime="2020-06-02T21:37:19+08:00">2020-06-02</time>
               </span>
             
           
@@ -281,7 +281,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Data-Structure/" itemprop="url" rel="index"><span itemprop="name">Data Structure</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/代码之美/" itemprop="url" rel="index"><span itemprop="name">代码之美</span></a></span>
 
                 
                 
@@ -300,21 +300,24 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>红黑树，是二叉搜索树的一种。跟 AVL树 都属于平衡二叉树。我们将一棵树定义为红黑树当且仅当其满足下面的性质：</p><ol>
+        <p>《算法导论》中的红黑树</p>
+<a id="more"></a>
+
+<p>红黑树，是二叉搜索树的一种。跟 AVL树 都属于平衡二叉树。我们将一棵树定义为红黑树当且仅当其满足下面的性质：</p>
+<ol>
 <li>树的节点要么是黑的，要么是红的</li>
 <li>树的根节点是黑的</li>
 <li>树的叶节点是黑的</li>
 <li>如果一个节点的颜色是红的，那么它的两个儿子的颜色都是黑的</li>
 <li>对于每一个节点，从该节点（不包含该节点本身）到其所有后代叶节点的简单路径，均包含相同数目的黑色节点。该数目称为 <code>黑高</code>。</li>
-</ol><a id="more"></a>
-
+</ol>
 <p>需要注意一点的是，与普通的树不同，红黑树的叶节点不是出度为零的节点，而是空节点的另一个说法。或者说，如果一个节点的某一个子节点为空，那么该子节点就是一个叶节点。</p>
 <p>在上面的 5 个性质中，第 5 点是保证红黑树的平衡性的关键。这里涉及到一些数学上的证明，《算法导论》里面有，我会在别的文章中进行适当的说明，这里先跳过。</p>
 <p>然后是红黑树的一系列操作，查询的我就不说了，跟二叉搜索树是一模一样的，这里重点说一下更新操作 – 插入和删除</p>
 <h3 id="插入"><a href="#插入" class="headerlink" title="插入"></a>插入</h3><p>首先，插入的第一步是找到要插入的位置，这一点跟二叉搜索树是一样的。但是接下来就有问题了，红黑树的节点都是有颜色的，那么新的节点的颜色应该是什么呢？然后，插入新节点之后，上面的 5 个性质还能保持吗？</p>
 <p>首先，新节点的颜色我们选择红色，因为从性质 5 我们知道，每一个节点的所有黑高都必须一样，而红节点并不影响黑高，所以选择红色将不会改变性质 5 。更重要的是，一旦某个节点的性质 5 被改变，那么所有包含该节点的性质 5 都将不符合，这样到来的代价将是巨大的。</p>
 <p>但是，选择红色也会出现问题，那就是新节点的父节点如果是红色的，那么将违反性质 4 ，怎么办呢？所以，插入之后，我们必须进行调整，而插入的重点也就在这了。我们来看一下 《算法导论》 的伪代码(这是我自己写的，形式采用了类 C 的写法，不过思想是一样的)：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">RB-Insert-FIX(T, x)</span><br><span class="line"></span><br><span class="line">while x.p.color == RED</span><br><span class="line">	if x.p.p.left == x.p		</span><br><span class="line">		y = x.p.p.right</span><br><span class="line">		if y.color == RED							//case 1</span><br><span class="line">			x.p.color = y.color = BLACK	</span><br><span class="line">			x.p.p.color = RED</span><br><span class="line">			x = x.p.p</span><br><span class="line">		else </span><br><span class="line">			if x = x.p.right						//case 2</span><br><span class="line">				x = x.p</span><br><span class="line">				LEFT_ROTATE(T, x)</span><br><span class="line">			x.p.color = BLACK						//case 3</span><br><span class="line">			x.p.p.color = RED</span><br><span class="line">			RIGHT_ROTATE(T, x.p)</span><br><span class="line">	else //(将上面的 left 和 right 互换即可)</span><br><span class="line"></span><br><span class="line">	T.root.color = BLACK</span><br></pre></td></tr></table></figure>
+<figure class="highlight stylus"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="title">RB-Insert-FIX</span><span class="params">(T, x)</span></span></span><br><span class="line"></span><br><span class="line">while x<span class="selector-class">.p</span><span class="selector-class">.color</span> == RED</span><br><span class="line">	<span class="keyword">if</span> x<span class="selector-class">.p</span><span class="selector-class">.p</span><span class="selector-class">.left</span> == x<span class="selector-class">.p</span>		</span><br><span class="line">		y = x<span class="selector-class">.p</span><span class="selector-class">.p</span>.<span class="attribute">right</span></span><br><span class="line">		<span class="keyword">if</span> y<span class="selector-class">.color</span> == RED							<span class="comment">//case 1</span></span><br><span class="line">			x<span class="selector-class">.p</span><span class="selector-class">.color</span> = y<span class="selector-class">.color</span> = BLACK	</span><br><span class="line">			x<span class="selector-class">.p</span><span class="selector-class">.p</span><span class="selector-class">.color</span> = RED</span><br><span class="line">			x = x<span class="selector-class">.p</span>.p</span><br><span class="line">		<span class="keyword">else</span> </span><br><span class="line">			<span class="keyword">if</span> x = x<span class="selector-class">.p</span><span class="selector-class">.right</span>						<span class="comment">//case 2</span></span><br><span class="line">				x = x.p</span><br><span class="line">				LEFT_ROTATE(T, x)</span><br><span class="line">			x<span class="selector-class">.p</span><span class="selector-class">.color</span> = BLACK						<span class="comment">//case 3</span></span><br><span class="line">			x<span class="selector-class">.p</span><span class="selector-class">.p</span><span class="selector-class">.color</span> = RED</span><br><span class="line">			RIGHT_ROTATE(T, x.p)</span><br><span class="line">	<span class="keyword">else</span> <span class="comment">//(将上面的 left 和 right 互换即可)</span></span><br><span class="line"></span><br><span class="line">	T<span class="selector-class">.root</span><span class="selector-class">.color</span> = BLACK</span><br></pre></td></tr></table></figure>
 
 <p>从上面的伪代码我们可以看到，插入分为三种情形，这里我们将 y 称为 x 的叔节点，所以这三种情况可以这样分：</p>
 <ol>
@@ -334,7 +337,7 @@
 <p>红黑树的删除跟二叉搜索树的删除是差不多的，都是先找到该点所在的位置，然后根据其儿子的个数进行相应的变换。只不过多了一个恢复红黑性质的操作。</p>
 <p>接下来，我想根据我看《算法导论》是遇到的问题以及我是如何解决这些问题的来说明删除这一操作。</p>
 <p>首先，我们来看一下删除的伪代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">RB-Delete(T, z)</span><br><span class="line"></span><br><span class="line">y = z</span><br><span class="line">y-initial-color = y.color</span><br><span class="line">if z.left == T.nil</span><br><span class="line">	x = z.right</span><br><span class="line">	RB-TRANSPLANT(T, z, z.right)</span><br><span class="line">else if z.right == T.nil</span><br><span class="line">	x = z.left</span><br><span class="line">	RB-TRANSPLANT(T, z, z.left)</span><br><span class="line">else</span><br><span class="line">	y = TREE-MINIMUN(z.right)</span><br><span class="line">	y-initial-color = y.color</span><br><span class="line">	x = y.right</span><br><span class="line">	if y.p = z</span><br><span class="line">		x.p = y</span><br><span class="line">	else</span><br><span class="line">		RB-TRANSPLANT(T, y, y.right)</span><br><span class="line">		y.right = z.right</span><br><span class="line">		y.right.p = y</span><br><span class="line">	RB-TRANSPLANT(T, z, y)</span><br><span class="line">	y.left = z.left</span><br><span class="line">	y.left.p = y</span><br><span class="line">	y.color = z.color</span><br><span class="line"></span><br><span class="line">	if y-initial-color == BLACK</span><br><span class="line">		RB-DELETE-FIX(T, x)</span><br></pre></td></tr></table></figure>
+<figure class="highlight n1ql"><table><tr><td class="code"><pre><span class="line">RB-<span class="keyword">Delete</span>(T, z)</span><br><span class="line"></span><br><span class="line">y = z</span><br><span class="line">y-initial-color = y.color</span><br><span class="line"><span class="keyword">if</span> z.<span class="keyword">left</span> == T.nil</span><br><span class="line">	x = z.<span class="keyword">right</span></span><br><span class="line">	RB-TRANSPLANT(T, z, z.<span class="keyword">right</span>)</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> z.<span class="keyword">right</span> == T.nil</span><br><span class="line">	x = z.<span class="keyword">left</span></span><br><span class="line">	RB-TRANSPLANT(T, z, z.<span class="keyword">left</span>)</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">	y = TREE-MINIMUN(z.<span class="keyword">right</span>)</span><br><span class="line">	y-initial-color = y.color</span><br><span class="line">	x = y.<span class="keyword">right</span></span><br><span class="line">	<span class="keyword">if</span> y.p = z</span><br><span class="line">		x.p = y</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		RB-TRANSPLANT(T, y, y.<span class="keyword">right</span>)</span><br><span class="line">		y.<span class="keyword">right</span> = z.<span class="keyword">right</span></span><br><span class="line">		y.<span class="keyword">right</span>.p = y</span><br><span class="line">	RB-TRANSPLANT(T, z, y)</span><br><span class="line">	y.<span class="keyword">left</span> = z.<span class="keyword">left</span></span><br><span class="line">	y.<span class="keyword">left</span>.p = y</span><br><span class="line">	y.color = z.color</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> y-initial-color == BLACK</span><br><span class="line">		RB-<span class="keyword">DELETE</span>-FIX(T, x)</span><br></pre></td></tr></table></figure>
 
 <p>这里要注意的是，x 这个变量的含义是：</p>
 <blockquote>
@@ -350,7 +353,7 @@
 </li>
 </ol>
 <p>接下来，就是删除的重点——RB-DELETE-FIX 了，我们先来看一下伪代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">RB-DELETE-FIX(T, x)</span><br><span class="line"></span><br><span class="line">while x != T.root &amp;&amp; x.color == BLACK</span><br><span class="line">	if x == x.p.left</span><br><span class="line">		w = x.p.right</span><br><span class="line">		if w.color == RED											//case 1</span><br><span class="line">			w.color = BLACK</span><br><span class="line">			x.p.color = RED</span><br><span class="line">			LEFT-ROTATE(T, x.p)</span><br><span class="line">			w = x.p.right</span><br><span class="line">		else if w.left.color == BLACK &amp;&amp; w.right.color == BLACK     // case 2</span><br><span class="line">			w.color = RED</span><br><span class="line">			x = x.p</span><br><span class="line">		else if w.right == BLACK									// case 3</span><br><span class="line">			w.left.color = BLACK</span><br><span class="line">			w.color = RED</span><br><span class="line">			RIGHT_ROTATE(T, w)</span><br><span class="line">			w = x.p.right</span><br><span class="line">		w.color = x.p.color											// case 4</span><br><span class="line">		x.p.color = x.right.color = BLACK</span><br><span class="line">		LEFT_ROTATE(T, x.p)</span><br><span class="line">		x = T.root</span><br><span class="line">	else //（将上面的 left 和 right 调换即可）</span><br><span class="line"></span><br><span class="line">x.color = BLACK</span><br></pre></td></tr></table></figure>
+<figure class="highlight stylus"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="title">RB-DELETE-FIX</span><span class="params">(T, x)</span></span></span><br><span class="line"></span><br><span class="line">while x != T<span class="selector-class">.root</span> &amp;&amp; x<span class="selector-class">.color</span> == BLACK</span><br><span class="line">	<span class="keyword">if</span> x == x<span class="selector-class">.p</span>.<span class="attribute">left</span></span><br><span class="line">		w = x<span class="selector-class">.p</span>.<span class="attribute">right</span></span><br><span class="line">		<span class="keyword">if</span> w<span class="selector-class">.color</span> == RED											<span class="comment">//case 1</span></span><br><span class="line">			w<span class="selector-class">.color</span> = BLACK</span><br><span class="line">			x<span class="selector-class">.p</span><span class="selector-class">.color</span> = RED</span><br><span class="line">			LEFT-ROTATE(T, x.p)</span><br><span class="line">			w = x<span class="selector-class">.p</span>.<span class="attribute">right</span></span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span> w<span class="selector-class">.left</span><span class="selector-class">.color</span> == BLACK &amp;&amp; w<span class="selector-class">.right</span><span class="selector-class">.color</span> == BLACK     <span class="comment">// case 2</span></span><br><span class="line">			w<span class="selector-class">.color</span> = RED</span><br><span class="line">			x = x.p</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span> w<span class="selector-class">.right</span> == BLACK									<span class="comment">// case 3</span></span><br><span class="line">			w<span class="selector-class">.left</span><span class="selector-class">.color</span> = BLACK</span><br><span class="line">			w<span class="selector-class">.color</span> = RED</span><br><span class="line">			RIGHT_ROTATE(T, w)</span><br><span class="line">			w = x<span class="selector-class">.p</span>.<span class="attribute">right</span></span><br><span class="line">		w<span class="selector-class">.color</span> = x<span class="selector-class">.p</span><span class="selector-class">.color</span>											<span class="comment">// case 4</span></span><br><span class="line">		x<span class="selector-class">.p</span><span class="selector-class">.color</span> = x<span class="selector-class">.right</span><span class="selector-class">.color</span> = BLACK</span><br><span class="line">		LEFT_ROTATE(T, x.p)</span><br><span class="line">		x = T.root</span><br><span class="line">	<span class="keyword">else</span> <span class="comment">//（将上面的 left 和 right 调换即可）</span></span><br><span class="line"></span><br><span class="line">x<span class="selector-class">.color</span> = BLACK</span><br></pre></td></tr></table></figure>
 
 <p>在这个过程中，有几个点要注意一下：</p>
 <ol>
@@ -380,7 +383,7 @@
         
       
         <div id="reward-container">
-  <div>您的支持是我更新的第二大动力，谢谢！</div>
+  <div>您的支持是我更新的最大动力</div>
   <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
     打赏
   </button>
@@ -425,7 +428,7 @@
           
           <div class="post-tags">
             
-              <a href="/tags/红黑树/" rel="tag"># 红黑树</a>
+              <a href="/tags/数据结构/" rel="tag"># 数据结构</a>
             
           </div>
         
@@ -464,9 +467,6 @@
 
           </div>
           
-    
-    <div class="comments" id="gitalk-container"></div>
-  
 
         </div>
           
@@ -512,7 +512,7 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -525,7 +525,7 @@
             <a href="/categories/">
           
         
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span>
         </a>
       </div>
@@ -635,25 +635,6 @@
   
 
   
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID: '64dccd465ffcc827c9ed',
-      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
-      repo: 'simowce.github.io',
-      owner: 'simowce',
-      admin: ['simowce'],
-      id: '699d217ff5d969e0d593cd143a5a7e36',
-        language: 'zh-CN',
-      
-      distractionFreeMode: 'true'
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-</script>
 
 </body>
 </html>

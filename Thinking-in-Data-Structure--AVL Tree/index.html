@@ -57,20 +57,20 @@
   };
 </script>
 
-  <meta name="description" content="AVL 树， 是在二叉搜索树的基础上，在插入操作上加入了旋转的操作，从而避免了一棵树退化成一个链表或者树的深度过长导致搜索的时候效率太低的坏处，而旋转也是 AVL 树 中最重要的操作，也是本博文的重点内容。AVL 树 在普通二叉搜索树节点的基础上加入了一个 buf 值，意思是左孩子的高度减去右孩子的高度，而 buf 值的合法范围是 -1， 0， 1，如果不是这几个值，那么说明树不平衡，就要进行旋转">
-<meta name="keywords" content="数据结构,AVL Tree">
+  <meta name="description" content="十分优美的旋转操作">
+<meta name="keywords" content="数据结构">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Thinking in Data Structure -- AVL Tree">
 <meta property="og:url" content="https://simowce.github.io/Thinking-in-Data-Structure--AVL Tree/index.html">
 <meta property="og:site_name" content="Silence.Slow.Simple">
-<meta property="og:description" content="AVL 树， 是在二叉搜索树的基础上，在插入操作上加入了旋转的操作，从而避免了一棵树退化成一个链表或者树的深度过长导致搜索的时候效率太低的坏处，而旋转也是 AVL 树 中最重要的操作，也是本博文的重点内容。AVL 树 在普通二叉搜索树节点的基础上加入了一个 buf 值，意思是左孩子的高度减去右孩子的高度，而 buf 值的合法范围是 -1， 0， 1，如果不是这几个值，那么说明树不平衡，就要进行旋转">
+<meta property="og:description" content="十分优美的旋转操作">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://simowce.github.io/assets/ll.jpg">
 <meta property="og:image" content="https://simowce.github.io/assets/lr.jpg">
-<meta property="og:updated_time" content="2020-04-06T06:27:00.688Z">
+<meta property="og:updated_time" content="2020-06-02T13:42:23.078Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Thinking in Data Structure -- AVL Tree">
-<meta name="twitter:description" content="AVL 树， 是在二叉搜索树的基础上，在插入操作上加入了旋转的操作，从而避免了一棵树退化成一个链表或者树的深度过长导致搜索的时候效率太低的坏处，而旋转也是 AVL 树 中最重要的操作，也是本博文的重点内容。AVL 树 在普通二叉搜索树节点的基础上加入了一个 buf 值，意思是左孩子的高度减去右孩子的高度，而 buf 值的合法范围是 -1， 0， 1，如果不是这几个值，那么说明树不平衡，就要进行旋转">
+<meta name="twitter:description" content="十分优美的旋转操作">
 <meta name="twitter:image" content="https://simowce.github.io/assets/ll.jpg">
   <link rel="canonical" href="https://simowce.github.io/Thinking-in-Data-Structure--AVL Tree/">
 
@@ -147,7 +147,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <p class="site-subtitle">a simowce's blog</p>
+        <h1 class="site-subtitle" itemprop="description">a simowce's blog</h1>
       
   </div>
 
@@ -247,10 +247,10 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">Thinking in Data Structure -- AVL Tree
+        <h2 class="post-title" itemprop="name headline">Thinking in Data Structure -- AVL Tree
 
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -274,7 +274,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:42:23" itemprop="dateModified" datetime="2020-06-02T21:42:23+08:00">2020-06-02</time>
               </span>
             
           
@@ -284,7 +284,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Data-Structure/" itemprop="url" rel="index"><span itemprop="name">Data Structure</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/代码之美/" itemprop="url" rel="index"><span itemprop="name">代码之美</span></a></span>
 
                 
                 
@@ -303,8 +303,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p><code>AVL 树</code>， 是在二叉搜索树的基础上，在插入操作上加入了<strong>旋转</strong>的操作，从而避免了一棵树退化成一个链表或者树的深度过长导致搜索的时候效率太低的坏处，而旋转也是 <code>AVL 树</code> 中最重要的操作，也是本博文的重点内容。</p><p><code>AVL 树</code> 在普通二叉搜索树节点的基础上加入了一个 <code>buf</code> 值，意思是左孩子的高度减去右孩子的高度，而 <code>buf</code> 值的合法范围是 -1， 0， 1，如果不是这几个值，那么说明树不平衡，就要进行旋转。</p><a id="more"></a>
+        <p>十分优美的旋转操作</p>
+<a id="more"></a>
 
+<p><code>AVL 树</code>， 是在二叉搜索树的基础上，在插入操作上加入了<strong>旋转</strong>的操作，从而避免了一棵树退化成一个链表或者树的深度过长导致搜索的时候效率太低的坏处，而旋转也是 <code>AVL 树</code> 中最重要的操作，也是本博文的重点内容。</p>
+<p><code>AVL 树</code> 在普通二叉搜索树节点的基础上加入了一个 <code>buf</code> 值，意思是左孩子的高度减去右孩子的高度，而 <code>buf</code> 值的合法范围是 -1， 0， 1，如果不是这几个值，那么说明树不平衡，就要进行旋转。</p>
 <p>接下来我们重点说说旋转操作。</p>
 <p>首先，要注意的是，在实现中并不是等到节点的 bf 值变为 +2 或者 -2 的时候才进行旋转。相反，当父节点的 bf 为 +1 或者 -1 时，就认为下一次插入的是必将导致不平衡，所以就进行旋转了。</p>
 <p>以左失衡为例，分为 LL 和 LR，即在父节点的左子树的左节点插入或者是父节点的左子树的右节点插入。究竟在插入的时候是如何判断这两种情况的，我们来看一张图</p>
@@ -332,7 +335,7 @@
         
       
         <div id="reward-container">
-  <div>您的支持是我更新的第二大动力，谢谢！</div>
+  <div>您的支持是我更新的最大动力</div>
   <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
     打赏
   </button>
@@ -379,8 +382,6 @@
             
               <a href="/tags/数据结构/" rel="tag"># 数据结构</a>
             
-              <a href="/tags/AVL-Tree/" rel="tag"># AVL Tree</a>
-            
           </div>
         
 
@@ -389,8 +390,8 @@
           <div class="post-nav">
             <div class="post-nav-next post-nav-item">
               
-                <a href="/i-dont-know-c/" rel="next" title="其实我根本不懂 C ">
-                  <i class="fa fa-chevron-left"></i> 其实我根本不懂 C 
+                <a href="/LCD-display/" rel="next" title="POJ 1102 -- LC-Display">
+                  <i class="fa fa-chevron-left"></i> POJ 1102 -- LC-Display
                 </a>
               
             </div>
@@ -418,9 +419,6 @@
 
           </div>
           
-    
-    <div class="comments" id="gitalk-container"></div>
-  
 
         </div>
           
@@ -464,7 +462,7 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -477,7 +475,7 @@
             <a href="/categories/">
           
         
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span>
         </a>
       </div>
@@ -587,25 +585,6 @@
   
 
   
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID: '64dccd465ffcc827c9ed',
-      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
-      repo: 'simowce.github.io',
-      owner: 'simowce',
-      admin: ['simowce'],
-      id: '8c06d604b669c71c3a38d7cadbb1481d',
-        language: 'zh-CN',
-      
-      distractionFreeMode: 'true'
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-</script>
 
 </body>
 </html>

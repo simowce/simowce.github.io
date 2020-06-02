@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.4.1">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"right","display":"hide","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="keywords" content="Graphic">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android fps 的计算，原理及正确性分析">
+<meta property="og:url" content="https://simowce.github.io/all-about-fps/index.html">
+<meta property="og:site_name" content="Silence.Slow.Simple">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://simowce.github.io/assets/fps.png">
+<meta property="og:image" content="https://simowce.github.io/assets/bufferqueue.png">
+<meta property="og:image" content="https://simowce.github.io/assets/Screenshot%20from%202020-04-26%2021-31-51.png">
+<meta property="og:updated_time" content="2020-06-02T14:14:29.360Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android fps 的计算，原理及正确性分析">
+<meta name="twitter:image" content="https://simowce.github.io/assets/fps.png">
+  <link rel="canonical" href="https://simowce.github.io/all-about-fps/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Android fps 的计算，原理及正确性分析 | Silence.Slow.Simple</title>
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-56242445-1"></script>
+  <script>
+    var host = window.location.hostname;
+    if (host !== "localhost" || !true) {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-56242445-1');
+    }
+  </script>
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Silence.Slow.Simple</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">a simowce's blog</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section">首页</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section">标签</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section">分类</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section">归档</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section">关于</a>
+
+  </li>
+  </ul>
+
+    
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/all-about-fps/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">Android fps 的计算，原理及正确性分析
+
+          
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2020-06-02 22:00:18 / 修改时间：22:14:29" itemprop="dateCreated datePublished" datetime="2020-06-02T22:00:18+08:00">2020-06-02</time>
+            </span>
+          
+            
+
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/知其所以然/" itemprop="url" rel="index"><span itemprop="name">知其所以然</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="/assets/fps.png" alt></p>
+<a id="more"></a>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>fps，是 frames per second 的简称，也就是我们常说的“帧率”。在游戏领域中，fps 作为衡量游戏性能的基础指标，对于游戏开发这和手机 vendor 厂商都是非常重要的数据，而计算游戏的 fps 也成为日常测试的基本需求。目前市面上使用得比较多的 Android 第三方工具有 XXTest，X否和 XXXXBench 等，那么这些工具计算 fps 的方法是什么，原理是什么呢？本文将针对这些问题，深入源码进行分析，力求找到一个详尽的答案（源码分析基于 Android Q）</p>
+<h2 id="计算方法"><a href="#计算方法" class="headerlink" title="计算方法"></a>计算方法</h2><p>目前绝大部分帧率统计软件，在网上能找到的各种统计 fps 的脚本，使用的信息来源有两种：一种是基于 <code>dumpsys SurfaceFlinger --latency Layer-name</code>（注意是 Layer 名字，不是包名，不是 Activity 名字，至于为什么，下面会解答）；另一种是基于 <code>dumpsys gfxinfo</code>。其实这两种深究到原理基本上是一致的，本篇文章专注于分析第一种，市面上大部分帧率统计软件用的也是第一种，只不过部分软件为了避免被人反编译看到，将这个计算逻辑封装成 so 库，增加反编译的难度。然而经过验证，这些软件最后都是通过调用上面的命令来计算的 fps 的。</p>
+<p>但是这个命令为什么能够计算 fps 呢？先来看这个命令的输出，以王者荣耀为例（王者荣耀这种游戏类的都是以 SurfaceView 作为控件，因此其 Layer 名字都以 <code>SurfaceView -</code> 打头）:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt; adb shell dumpsys SurfaceFlinger --latency <span class="string">"SurfaceView - com.tencent.tmgp.sgame/com.tencent.tmgp.sgame.SGameActivity#0"</span></span><br><span class="line">16666666</span><br><span class="line">59069638658663  59069678041684  59069654158298</span><br><span class="line">59069653090955  59069695022100  59069670894236</span><br><span class="line">59069671034444  59069711403455  59069687949861</span><br><span class="line">59069688421840  59069728057361  59069704415121</span><br><span class="line">59069705420850  59069744773350  59069720767830</span><br><span class="line">59069719818975  59069761378975  59069737416007</span><br><span class="line">59069736702673  59069778060955  59069754568663</span><br><span class="line">59069753361528  59069794716007  59069770761632</span><br><span class="line">59069768766371  59069811380486  59069787649600</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<p>输出的这一堆数字究竟是什么意思？首先，第一行的数字是当前的 VSYNC 间隔，单位是纳秒。例如现在的屏幕是 60Hz 的，因此就是 16.6ms，然后下面的一堆数字，总共有 127 行（为什么是 127 行，下面也会说明），每一行有 3 个数字，每个数字都是时间戳，单位是纳秒，具体的意义后文会说明。而在计算 fps 的时候，使用的是第二个时间戳。原因同样会在后文进行解答。</p>
+<h2 id="fence-简析"><a href="#fence-简析" class="headerlink" title="fence 简析"></a>fence 简析</h2><p>后面的原理分析涉及到 fence，但是 fence 囊括的内容众多，因此这里只是对 fence 做一个简单地描述。如果大家感兴趣，后面我会专门给 fence 写一篇详细的说明文章。</p>
+<h3 id="fence-是什么"><a href="#fence-是什么" class="headerlink" title="fence 是什么"></a>fence 是什么</h3><p>首先得先说明一下 App 绘制的内容是怎么显示到屏幕的：</p>
+<p>App 侧需要显示的内容要要绘制在 Buffer 里，而这个 Buffer 是从 BufferQueue 通过 <code>dequeueBuffer()</code> 申请的。申请到 Buffer 以后，App 将内容填充到 Buffer 以后，需要通过 <code>queueBuffer()</code> 将 Buffer 还回去交给 SurfaceFlinger 去进行合成和显示。然后，SurfaceFlinger 要开始合成的时候，需要调用 <code>acquireBuffer()</code> 从 BufferQueue 里面拿一个 Buffer 去合成，合成完以后通过 <code>releaseBuffer()</code> 将 Buffer 还给 BufferQueue，如下图：</p>
+<p><img src="/assets/bufferqueue.png" alt="BufferQueue"></p>
+<p>在上面的流程中，其实有一个问题，就是在 App 绘制完通过 <code>queueBuffer()</code> 将 Buffer 还回去的时候，<strong>此时仅仅只是 CPU 侧的完成，GPU 侧实际上并没有真正完成。</strong>因此如果此时拿这个 Buffer 去进行合成/显示的话，就会有问题（Buffer 可能还没有完全地绘制完）。</p>
+<p>事实上，由于 CPU 和 GPU 之前是<strong>异步</strong>的，因此我们在代码里面执行一系列的 OpenGL 函数调用的时候，看上去函数已经返回了，实际上，只是把这个命令放在本地的 command buffer 里。具体什么时候这条 GL command 被真正执行完毕 CPU 是不知道的，除非使用 <code>glFinish()</code> 等待这些命令完全执行完，但是这样会带来很严重的性能问题，因为这样会使得 CPU 和 GPU 的并行性完全丧失，CPU 会在 GPU 完成之前一直处于空等的状态。因此，如果能够有一种机制，在不需要对 Buffer 进行读写 的时候，大家各干各的；当需要对 Buffer 进行读写的时候，可以知道此时 Buffer 在 GPU 的状态，必要的时候等一下，就不会有上面的问题了。</p>
+<p>fence 就是这样的同步机制，如它直译过来的意思一样——“栅栏”，用来把东西拦住。那么 fence 是要拦住什么东西呢？就是前面提到的 Buffer 了。Buffer 在整个绘制、合成、显示的过程中，一直在 CPU，GPU 和 HWC 之前传递，某一方要使用 Buffer 之前，需要检查之前的使用者是否已经移交了 Buffer 的“使用权”。而这里的“使用权”，就是 fence。当 fence 释放（即 <strong>signal</strong>）的时候，说明 Buffer 的上一个使用者已经交出了使用权，对于 Buffer 进行操作是安全的。</p>
+<h3 id="fence-in-Code"><a href="#fence-in-Code" class="headerlink" title="fence in Code"></a>fence in Code</h3><p>在 Android 源码里面，fence 的实现总共分为四部分：</p>
+<ul>
+<li>fence driver<br>同步的核心实现</li>
+<li>libsync<br>位于 <code>system/core/libsync</code>，<code>libsync</code> 的主要作用是对 driver 接口的封装</li>
+<li>Fence 类<br>这个 <code>Fence</code> 类位于 <code>frameworks/native/libs/ui/Fence.cpp</code>，主要是对 libsync 进行 C++ 封装，方便 framework 调用</li>
+<li>FenceTime 类<br>这个 <code>FenceTime</code> 是一个工具类，是对 <code>Fence</code> 的进一步封装，提供两个主要的接口——<code>isValid()</code> 和 <code>getSignalTime()</code>，主要作用是针对需要多次查询 fence 的释放时间的场景（通过调用 <code>Fence::getSignalTime()</code> 来查询 fence 的释放时间）。通过对 <code>Fence</code> 进行包裹，当第一次调用 <code>FenceTime::getSignalTime()</code> 的时候，如果 fence 已经释放，那么会将这个 fence 的释放时间缓存起来，然后下次再调用 <code>FenceTime::getSignal()</code> 的时间，就能将缓存起来的释放时间直接返回，从而减少对 <code>Fence::getSignalTime()</code> 不必要的调用（因为 fence 释放的时间不会改变）。</li>
+</ul>
+<h3 id="fence-in-Android"><a href="#fence-in-Android" class="headerlink" title="fence in Android"></a>fence in Android</h3><p>在 Android 里面，总共有三类 fence —— acquire fence，release fence 和 present fence。其中，acquire fence 和 release fence 隶属于 Layer，present fence 隶属于帧（即 Layers）：</p>
+<ul>
+<li>acquire fence<br>前面提到， App 将 Buffer 通过 <code>queueBuffer()</code> 还给 BufferQueue 的时候，此时该 Buffer 的 GPU 侧其实是还没有完成的，此时会带上一个 fence，这个 fence 就是 <strong>acquire fence</strong>。当 SurfaceFlinger/ HWC 要读取 Buffer 以进行合成操作的时候，需要等 <strong>acquire fence</strong> 释放之后才行。</li>
+<li>release fence<br>当 App 通过 <code>dequeueBuffer()</code> 从 BufferQueue 申请 Buffer，要对 Buffer 进行绘制的时候，需要保证 HWC 已经不再需要这个 Buffer 了，即需要等 release fence signal 才能对 Buffer 进行写操作。</li>
+<li>present fence<br>present fence 在 HWC1 的时候称为 retire fence，在 HWC2 中改名为 present fence。当前帧成功显示到屏幕的时候，present fence 就会 signal。</li>
+</ul>
+<h2 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h2><h3 id="简单版"><a href="#简单版" class="headerlink" title="简单版"></a>简单版</h3><p>现在来看一下通过 <code>dumpsys SurfaceFlinger --latency Layer-name</code> 计算 Layer fps 的原理。dumpsys 的调用流程就不赘述了，最终会走到 <code>SurfaceFlinger::doDump()</code>:</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">status_t</span> <span class="title">SurfaceFlinger::doDump</span><span class="params">(<span class="keyword">int</span> fd, <span class="keyword">const</span> DumpArgs&amp; args,</span></span></span><br><span class="line"><span class="function"><span class="params">                                <span class="keyword">bool</span> asProto)</span> NO_THREAD_SAFETY_ANALYSIS </span>&#123;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">        <span class="keyword">static</span> <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">unordered_map</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>, Dumper&gt; dumpers = &#123;</span><br><span class="line">                ......</span><br><span class="line">                &#123;<span class="string">"--latency"</span>s, argsDumper(&amp;SurfaceFlinger::dumpStatsLocked)&#125;,</span><br><span class="line">                ......</span><br><span class="line">        &#125;;</span><br></pre></td></tr></table></figure>
+
+<p>从这里可以看到，我们在执行 <code>dumpsys SurfaceFlinger</code> 后面加的那些 <code>--xxx</code> 参数最终都会在这里被解析，这里咱们是 <code>--latency</code>，因此看 <code>SurfaceFlinger::dumpStatsLocked</code>：</p>
+<figure class="highlight nimrod"><table><tr><td class="code"><pre><span class="line"><span class="built_in">void</span> <span class="type">SurfaceFlinger</span>::dumpStatsLocked(<span class="keyword">const</span> <span class="type">DumpArgs</span>&amp; args, std::<span class="built_in">string</span>&amp; <span class="literal">result</span>) <span class="keyword">const</span> &#123;</span><br><span class="line">    <span class="type">StringAppendF</span>(&amp;<span class="literal">result</span>, <span class="string">"%"</span> <span class="type">PRId64</span> <span class="string">"\n"</span>, getVsyncPeriod());</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (args.size() &gt; <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">const</span> <span class="built_in">auto</span> name = <span class="type">String8</span>(args[<span class="number">1</span>]);</span><br><span class="line">        mCurrentState.traverseInZOrder([&amp;](<span class="type">Layer</span>* layer) &#123;</span><br><span class="line">            <span class="keyword">if</span> (name == layer-&gt;getName()) &#123;</span><br><span class="line">                layer-&gt;dumpFrameStats(<span class="literal">result</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        mAnimFrameTracker.dumpStats(<span class="literal">result</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从这里就能够看到，这里先会打印当前的 VSYNC 间隔，然后遍历当前的 Layer，然后逐个比较 Layer 的名字，如果跟传进来的参数一致的话，那么就会开始 dump layer 的信息；否则命令就结束了。因此，很多人会遇到这个问题：</p>
+<blockquote>
+<p>❔  <strong>为什么执行了这个命令却只打印出一个数字？</strong><br>✔ 其实这个时候你应该去检查你的 Layer 参数是否正确。</p>
+</blockquote>
+<p>接下来 <code>layer-&gt;dumpFrameStats()</code> 会去调 <code>FrameTrack::dumpStats()</code>：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">FrameTracker::dumpStats</span><span class="params">(<span class="built_in">std</span>::<span class="built_in">string</span>&amp; result)</span> <span class="keyword">const</span> </span>&#123;</span><br><span class="line">    <span class="function">Mutex::Autolock <span class="title">lock</span><span class="params">(mMutex)</span></span>;</span><br><span class="line">    processFencesLocked();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">size_t</span> o = mOffset;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">1</span>; i &lt; NUM_FRAME_RECORDS; i++) &#123;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">size_t</span> index = (o+i) % NUM_FRAME_RECORDS;</span><br><span class="line">        base::StringAppendF(&amp;result, <span class="string">"%"</span> PRId64 <span class="string">"\t%"</span> PRId64 <span class="string">"\t%"</span> PRId64 <span class="string">"\n"</span>,</span><br><span class="line">                            mFrameRecords[index].desiredPresentTime,</span><br><span class="line">                            mFrameRecords[index].actualPresentTime,</span><br><span class="line">                            mFrameRecords[index].frameReadyTime);</span><br><span class="line">    &#125;</span><br><span class="line">    result.append(<span class="string">"\n"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>NUM_FRAME_RECORDS</code> 被定义为 128，因此输出的数组有 127 个。每组分别有三个数字—— <code>desiredPresentTime</code>，<code>actualPresentTime</code>，<code>frameReadyTime</code>，每个数字的意义分别是：</p>
+<ul>
+<li><code>desiredPresentTime</code><br> 下一个 HW-VSYNC 的时间</li>
+<li><code>actualPresentTime</code><br> retire fence signal 的时间戳</li>
+<li><code>frameReadyTime</code><br> acquire fence signal 的时间戳</li>
+</ul>
+<p>结合前面对 present fence 的描述就可以看出 <code>dumpsys SurfaceFlinger --latency</code> 计算 fps 的原理：</p>
+<blockquote>
+<p>从 <code>dumpsys SurfaceFlinger --latency</code> 获取到最新 127 帧的 present fence 的 signal time，结合前面对于 present fence 的说明，当某帧 present fence 被 signal 的时候，说明这一帧已经被显示到屏幕上了。因此，<strong>我们可以通过判断一秒内有多少个 present fence 被 signal，来反推出一秒内有多少帧被刷到屏幕上</strong>，而这，就是 fps 计算的原理。</p>
+</blockquote>
+<h3 id="复杂版"><a href="#复杂版" class="headerlink" title="复杂版"></a>复杂版</h3><p>我们已经知道了 fps 计算的原理了，但是呢，小朋友，你是否有很多问号？</p>
+<ul>
+<li>这个 <code>actualPresentTime</code> 是从哪来的？</li>
+<li>假设要统计 fps 的 Layer 没有更新，但是别的 Layer 更新了，这种情况下 present fence 也会正常 signal，那这样计算出来的 fps 是不是不准啊？</li>
+</ul>
+<p>为了解答这些问题，我们还得接着看。</p>
+<p>前面已经提到计算 fps 的时候使用的是第二个数值，因此后面的文章着重分析这个 <code>actualPresentTime</code>。<br>那么 <code>actualPresentTime</code> 是在哪里赋值的呢？实际赋值的位置是在 <code>FrameTracker::dumpStats()</code> 调用的一个子函数——<code>processFencesLocked()</code>：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">FrameTracker::processFencesLocked</span><span class="params">()</span> <span class="keyword">const</span> </span>&#123;</span><br><span class="line">    FrameRecord* records = <span class="keyword">const_cast</span>&lt;FrameRecord*&gt;(mFrameRecords);</span><br><span class="line">    <span class="keyword">int</span>&amp; numFences = <span class="keyword">const_cast</span>&lt;<span class="keyword">int</span>&amp;&gt;(mNumFences);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; NUM_FRAME_RECORDS &amp;&amp; numFences &gt; <span class="number">0</span>; i++) &#123;</span><br><span class="line">        <span class="keyword">size_t</span> idx = (mOffset+NUM_FRAME_RECORDS-i) % NUM_FRAME_RECORDS;</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;FenceTime&gt;&amp; pfence =</span><br><span class="line">                records[idx].actualPresentFence;</span><br><span class="line">        <span class="keyword">if</span> (pfence != <span class="literal">nullptr</span>) &#123;</span><br><span class="line">            <span class="comment">// actualPresentTime 是在这里赋值的</span></span><br><span class="line">            records[idx].actualPresentTime = pfence-&gt;getSignalTime();</span><br><span class="line">            <span class="keyword">if</span> (records[idx].actualPresentTime &lt; INT64_MAX) &#123;</span><br><span class="line">                records[idx].actualPresentFence = <span class="literal">nullptr</span>;</span><br><span class="line">                numFences--;</span><br><span class="line">                updated = <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        ......</span><br></pre></td></tr></table></figure>
+
+<p>其中，<code>FrameRecord</code> 的完整定义如下：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">FrameRecord</span> &#123;</span></span><br><span class="line">     FrameRecord() :</span><br><span class="line">         desiredPresentTime(<span class="number">0</span>),</span><br><span class="line">         frameReadyTime(<span class="number">0</span>),</span><br><span class="line">         actualPresentTime(<span class="number">0</span>) &#123;&#125;</span><br><span class="line">     <span class="keyword">nsecs_t</span> desiredPresentTime;</span><br><span class="line">     <span class="keyword">nsecs_t</span> frameReadyTime;</span><br><span class="line">     <span class="keyword">nsecs_t</span> actualPresentTime;</span><br><span class="line">     <span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;FenceTime&gt; frameReadyFence;</span><br><span class="line">     <span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;FenceTime&gt; actualPresentFence;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>从上面的代码可以看出，<code>actualPresentTime</code> 是调用 <code>actualPresentFence</code> 的 <code>getSignalTime()</code> 赋值的。 而 <code>actualPresentFence</code> 是通过 <code>setActualPresentFence()</code> 赋值的：</p>
+<figure class="highlight arduino"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">FrameTracker::setActualPresentFence</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;FenceTime&gt;&amp;&amp; readyFence)</span> </span>&#123;</span><br><span class="line">    <span class="function">Mutex::Autolock <span class="title">lock</span><span class="params">(mMutex)</span></span>;</span><br><span class="line">    mFrameRecords[mOffset].actualPresentFence = <span class="built_in">std</span>::<span class="built_in">move</span>(readyFence);</span><br><span class="line">    mNumFences++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>setActualPresentFence()</code> 又是经过下面的调用流程最终被调用的：</p>
+<figure class="highlight autohotkey"><table><tr><td class="code"><pre><span class="line"><span class="title">SurfaceFlinger::</span>postComposition()</span><br><span class="line"><span class="title">  \_ BufferLayer::</span>onPostCompostion()</span><br></pre></td></tr></table></figure>
+
+<p>这里重点看一下 <code>SurfaceFlinger::postComposition()</code>：</p>
+<figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">void SurfaceFlinger::postComposition()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">..</span><span class="built_in">..</span><span class="built_in">..</span></span><br><span class="line">    mDrawingState.traverseInZOrder([&amp;](Layer* layer) &#123;</span><br><span class="line">        bool frameLatched =</span><br><span class="line">                layer-&gt;onPostComposition(displayDevice-&gt;getId(), glCompositionDoneFenceTime,</span><br><span class="line">                                         presentFenceTime, compositorTiming);</span><br><span class="line">    <span class="built_in">..</span><span class="built_in">..</span><span class="built_in">..</span></span><br></pre></td></tr></table></figure>
+
+<p>回忆一下我们前面的问题：</p>
+<blockquote>
+<p>❔ <strong>假设要统计 fps 的 Layer 没有更新，但是别的 Layer 更新了，这种情况下 present fence 也会正常 signal，那这样计算出来的 fps 是不是不准啊？</strong></p>
+</blockquote>
+<p>  答案就在  <code>mDrawingState</code>，在 Surfacelinger 中有两个用来记录当前系统中 Layers 状态的全局变量：</p>
+<ul>
+<li><p>mDrawingState<br>mDrawingState 代表的是上次 “drawing” 时候的状态</p>
+</li>
+<li><p>mCurrentState<br>mCurrentState 代表的是当前的状态</p>
+<p>因此，<strong>如果当前 Layer 没有更新，那么是不会被记录到 mDrawingState 里的，因此这一次的 present fence 也就不会被记录到该 Layer 的 <code>FrameTracker</code> 里的 <code>actualPresentTime</code> 了。</strong></p>
+</li>
+</ul>
+<p>再说回来， <code>SurfaceFlinger::postComposition()</code> 是 SurfaceFlinger 合成的最后阶段。<code>presentFenceTime</code> 就是前面的 <code>readyFence</code> 参数了，它是在这里被赋值的：</p>
+<figure class="highlight dts"><table><tr><td class="code"><pre><span class="line">mPreviousPresentFences[<span class="number">0</span>] = mActiveVsyncSource</span><br><span class="line">        ? getHwComposer().getPresentFence(*mActiveVsyncSource-&gt;getId())</span><br><span class="line">        : Fence::NO_FENCE;</span><br><span class="line">auto presentFenceTime = std::make_shared<span class="params">&lt;FenceTime&gt;</span>(mPreviousPresentFences[<span class="number">0</span>]);</span><br></pre></td></tr></table></figure>
+
+<p>而 <code>getPresentFence()</code> 这个函数，就把这个流程转移到了 HWC 了：</p>
+<figure class="highlight mipsasm"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sp</span>&lt;Fence&gt; HWComposer::getPresentFence(<span class="keyword">DisplayId </span><span class="keyword">displayId) </span>const &#123;</span><br><span class="line">    RETURN_IF_INVALID_DISPLAY(<span class="keyword">displayId, </span>Fence::NO_FENCE);</span><br><span class="line">    return mDisplayData.at(<span class="keyword">displayId).lastPresentFence;</span></span><br><span class="line"><span class="keyword">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>至此，我们一路辗转，终于找到了这个 present fence 的真身，只不过这里它还蒙着一层面纱，我们需要在看一下这个 <code>lastPresentFence</code> 是在哪里赋值的，这里按照不同的合成方式位置有所不同：</p>
+<h4 id="DEVICE-合成"><a href="#DEVICE-合成" class="headerlink" title="DEVICE 合成"></a>DEVICE 合成</h4><p>DEVICE 合成的 <code>lastPresentFence</code> 是在 <code>HWComposer::prepare()</code> 里赋值：</p>
+<figure class="highlight pf"><table><tr><td class="code"><pre><span class="line">status_t HWComposer::prepare(DisplayId displayId, const compositionengine::Output&amp; output) &#123;</span><br><span class="line">    ......</span><br><span class="line">    if (!displayData.hasClientComposition) &#123;</span><br><span class="line">        sp<span class="variable">&lt;Fence&gt;</span> <span class="keyword">out</span>PresentFence;</span><br><span class="line">        uint32_t <span class="keyword">state</span> = UINT32_MAX;</span><br><span class="line">        error = hwcDisplay-&gt;presentOrValidate(&amp;numTypes, &amp;numRequests, &amp;<span class="keyword">out</span>PresentFence , &amp;<span class="keyword">state</span>);</span><br><span class="line">        if (error != HWC2::Error::HasChanges) &#123;</span><br><span class="line">            RETURN_IF_HWC_ERROR_FOR(<span class="string">"presentOrValidate"</span>, error, displayId, UNKNOWN_ERROR);</span><br><span class="line">        &#125;</span><br><span class="line">        if (<span class="keyword">state</span> == <span class="number">1</span>) &#123; //Present Succeeded.</span><br><span class="line">            ......</span><br><span class="line">            displayData.lastPresentFence = <span class="keyword">out</span>PresentFence;</span><br></pre></td></tr></table></figure>
+
+<p>经常看 systrace 的同学对这个函数绝对不会陌生，就是 systrace 里面 SurfaceFlinger 的那个 <code>prepare()</code>：</p>
+<p><img src="/assets/Screenshot%20from%202020-04-26%2021-31-51.png" alt="Systrace 中的 prepare"></p>
+<p>这个函数非常重要，它通过一系列的调用：</p>
+<figure class="highlight autohotkey"><table><tr><td class="code"><pre><span class="line"><span class="title">HWComposer::</span>prepare()</span><br><span class="line"><span class="title">  \_ Display::</span>presentOrValidate()</span><br><span class="line"><span class="title">       \_ Composer::</span>presentOrValidateDisplay()</span><br><span class="line"><span class="title">            \_ CommandWriter::</span>presentOrvalidateDisplay()</span><br></pre></td></tr></table></figure>
+
+<p>最终通过 HwBinder 通知 HWC 的 Server 端开始进行 DEVICE 合成，Server 端在收到 Client 端的请求以后，会返回给 Client 端一个 present fence（时刻记住，fence 用于跨环境的同步，例如这里就是 Surfacelinger 和 HWC 之间的同步）。然后当下一个 HW-VSYNC 来的时候，会将合成好的内容显示到屏幕上并且将该 present fence signal，标志着这一帧已经显示在屏幕上了。</p>
+<h4 id="GPU-合成"><a href="#GPU-合成" class="headerlink" title="GPU 合成"></a>GPU 合成</h4><p>GPU 合成的 <code>lastPresentFence</code> 是在 <code>presentAndGetPresentFences()</code> 里赋值：</p>
+<figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">status_t HWComposer::presentAndGetReleaseFences(DisplayId displayId) &#123;</span><br><span class="line">    <span class="built_in">..</span><span class="built_in">..</span><span class="built_in">..</span></span><br><span class="line">    displayData.lastPresentFence = Fence::NO_FENCE;</span><br><span class="line">    auto <span class="builtin-name">error</span> = hwcDisplay-&gt;present(&amp;displayData.lastPresentFence);</span><br></pre></td></tr></table></figure>
+
+<p>后面的流程就跟 DEVICE 合成类似了，<code>Display::present()</code> 最终也会经过一系列的调用，通过 HwBinder 通知 HWC 的 Server 端，调用 <code>presentDisplay()</code> 将合成好的内容显示到屏幕上。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>说了这么多，一句话总结计算一个 App 的 fps 的原理就是：</p>
+<blockquote>
+<p>统计在一秒内该 App 往屏幕刷了多少帧，而在 Android 的世界里，每一帧显示到屏幕的标志是： present fence signal 了，因此计算 App 的 fps 就可以转换为：<strong>一秒内 App 的 Layer 有多少个有效 present fence signal 了（这里有效 present fence 是指，在本次 VSYNC-sf 中该 Layer 有更新的 present fence）</strong></p>
+</blockquote>
+<h2 id="尾巴"><a href="#尾巴" class="headerlink" title="尾巴"></a>尾巴</h2><p>这篇文章在二月份其实就已经完成了一多半了，但是一直拖到了五月才最终写完，因为其中涉及到很多我不知道的知识，例如 HWC。这块领域涉及到硬件，文档其实不多。因此在写的过程会变得异常痛苦，很多东西不懂，我也不知道自己写的东西究竟对不对，就需要花很多时间进行多方求证，找很多大佬提问。很多时候会卡在某一个地方很久，甚至会萌生随便写点糊弄过去算了的想法。而且，写到什么程度也很难拿捏，写浅了我自己过意不去，感觉对不起各位关注的读者；写深了我自己也是写不下去，毕竟这个领域确实之前没有接触过。不过好在这个过程中有很多大佬给我提供了很大的帮助，在此对各位在这几月中给我答疑解惑的各位大佬表示衷心的感谢。</p>
+<p>写作是一个孤独的旅程，感谢各位大佬的指路，感谢各位读者的关注，你们是星星太阳和月亮，陪着我一直写下去，谢谢。</p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/images/wechat-qrcode.jpg" alt="simowce wechat" style="width: 200px; max-width: 100%;">
+  <div>欢迎订阅我的微信公众号</div>
+</div>
+
+      
+        
+      
+        <div id="reward-container">
+  <div>您的支持是我更新的最大动力</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/wechatpay.jpg" alt="simowce 微信支付">
+        <p>微信支付</p>
+      </div>
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/alipay.jpg" alt="simowce 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+      
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>simowce</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://simowce.github.io/all-about-fps/" title="Android fps 的计算，原理及正确性分析">https://simowce.github.io/all-about-fps/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-ND</a> 许可协议。转载请注明出处！</li>
+</ul>
+</div>
+
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/Graphic/" rel="tag"># Graphic</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/all-about-updated-driver/" rel="next" title="GPU 驱动自升级及其原理">
+                  <i class="fa fa-chevron-left"></i> GPU 驱动自升级及其原理
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#计算方法"><span class="nav-number">2.</span> <span class="nav-text">计算方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#fence-简析"><span class="nav-number">3.</span> <span class="nav-text">fence 简析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#fence-是什么"><span class="nav-number">3.1.</span> <span class="nav-text">fence 是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fence-in-Code"><span class="nav-number">3.2.</span> <span class="nav-text">fence in Code</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fence-in-Android"><span class="nav-number">3.3.</span> <span class="nav-text">fence in Android</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原理分析"><span class="nav-number">4.</span> <span class="nav-text">原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简单版"><span class="nav-number">4.1.</span> <span class="nav-text">简单版</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#复杂版"><span class="nav-number">4.2.</span> <span class="nav-text">复杂版</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DEVICE-合成"><span class="nav-number">4.2.1.</span> <span class="nav-text">DEVICE 合成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#GPU-合成"><span class="nav-number">4.2.2.</span> <span class="nav-text">GPU 合成</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#尾巴"><span class="nav-number">6.</span> <span class="nav-text">尾巴</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">simowce</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    
+  
+    <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-nd.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-code"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">simowce</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a></div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/muse.js?v=7.4.1"></script>
+
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

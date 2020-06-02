@@ -57,18 +57,18 @@
   };
 </script>
 
-  <meta name="description" content="比较仔细地看完了这一部分的内容，收获还是蛮大的，知道了很多不知道的知识，理解了很多已经知道的知识，例如：为什么 fork 子进程的时候会有多个输出？ 信号究竟是什么？ 等等。下面我主要说一说几个方面：系统调用 system_call，signal 机制以及其原理，进程调度函数 schedule， 退出函数 exit，等待子进程结束函数 wait_pid ， 增加子进程函数 fork ，这一些在平常">
-<meta name="keywords" content="Linux kernel">
+  <meta name="description" content="Linux Kernel 0.12 的进程与信号">
+<meta name="keywords" content="Linux Kernel">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Linux 0.12 备忘录 -- 第八章">
 <meta property="og:url" content="https://simowce.github.io/linux-kernel-012-reminder-sys/index.html">
 <meta property="og:site_name" content="Silence.Slow.Simple">
-<meta property="og:description" content="比较仔细地看完了这一部分的内容，收获还是蛮大的，知道了很多不知道的知识，理解了很多已经知道的知识，例如：为什么 fork 子进程的时候会有多个输出？ 信号究竟是什么？ 等等。下面我主要说一说几个方面：系统调用 system_call，signal 机制以及其原理，进程调度函数 schedule， 退出函数 exit，等待子进程结束函数 wait_pid ， 增加子进程函数 fork ，这一些在平常">
+<meta property="og:description" content="Linux Kernel 0.12 的进程与信号">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-04-06T06:27:00.692Z">
+<meta property="og:updated_time" content="2020-06-02T13:35:11.667Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux 0.12 备忘录 -- 第八章">
-<meta name="twitter:description" content="比较仔细地看完了这一部分的内容，收获还是蛮大的，知道了很多不知道的知识，理解了很多已经知道的知识，例如：为什么 fork 子进程的时候会有多个输出？ 信号究竟是什么？ 等等。下面我主要说一说几个方面：系统调用 system_call，signal 机制以及其原理，进程调度函数 schedule， 退出函数 exit，等待子进程结束函数 wait_pid ， 增加子进程函数 fork ，这一些在平常">
+<meta name="twitter:description" content="Linux Kernel 0.12 的进程与信号">
   <link rel="canonical" href="https://simowce.github.io/linux-kernel-012-reminder-sys/">
 
 
@@ -144,7 +144,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <p class="site-subtitle">a simowce's blog</p>
+        <h1 class="site-subtitle" itemprop="description">a simowce's blog</h1>
       
   </div>
 
@@ -244,10 +244,10 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">Linux 0.12 备忘录 -- 第八章
+        <h2 class="post-title" itemprop="name headline">Linux 0.12 备忘录 -- 第八章
 
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -271,7 +271,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:35:11" itemprop="dateModified" datetime="2020-06-02T21:35:11+08:00">2020-06-02</time>
               </span>
             
           
@@ -281,7 +281,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux-kernel/" itemprop="url" rel="index"><span itemprop="name">Linux kernel</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Kernel-Magic/" itemprop="url" rel="index"><span itemprop="name">Kernel Magic</span></a></span>
 
                 
                 
@@ -300,7 +300,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>比较仔细地看完了这一部分的内容，收获还是蛮大的，知道了很多不知道的知识，理解了很多已经知道的知识，例如：<strong>为什么 fork 子进程的时候会有多个输出？ 信号究竟是什么？</strong> 等等。下面我主要说一说几个方面：<strong>系统调用 system_call，signal 机制以及其原理，进程调度函数 schedule， 退出函数 exit，等待子进程结束函数 wait_pid ， 增加子进程函数 fork</strong> ，这一些在平常的系统编程里面都是非常常用的东西，理解其实现过程能够更加清楚地明白自己究竟在干什么～</p><a id="more"></a>
+        <p>Linux Kernel 0.12 的进程与信号</p>
+<a id="more"></a>
+
+<p>比较仔细地看完了这一部分的内容，收获还是蛮大的，知道了很多不知道的知识，理解了很多已经知道的知识，例如：<strong>为什么 fork 子进程的时候会有多个输出？ 信号究竟是什么？</strong> 等等。下面我主要说一说几个方面：<strong>系统调用 system_call，signal 机制以及其原理，进程调度函数 schedule， 退出函数 exit，等待子进程结束函数 wait_pid ， 增加子进程函数 fork</strong> ，这一些在平常的系统编程里面都是非常常用的东西，理解其实现过程能够更加清楚地明白自己究竟在干什么～</p>
 <h1 id="system-call"><a href="#system-call" class="headerlink" title="system_call"></a>system_call</h1><p>首先要说明一点，系统调用其实就是通过 int 0x80 中断实现的，eax 存储的是功能号。而且，我们用户进程是以特权级 3 中运行，int 0x80 中断的特权级是 0 ，所以调用会产生特权级转换，堆栈会切换，并且将当前的 <strong>ss esp eflags cs eip</strong> 等寄存器的值依次压入进程的内核栈 （关于内核栈和用户栈的区别我后边会说到 :-) ）。然后就是将所有通用寄存器都压入栈中，设置 ds 和 es 分别指向内核段，fs 指向本地段，然后调用相关的系统调用函数，完成后将返回值 （放在 eax 寄存器）也压入栈。<strong>接下来 line 101 ～ line 106 由于还没有读到相关方面的内容，所以暂时不理解，先留个坑。 ** 接下来主要就是处理进程的信号了。这里处理的是进程信号位图已被标记并且没有被屏蔽的信号。找到第一个符合条件的信号，调用 do_signal 进行 处理。这里要说明一下的是，在获取了信号位图号之后（放在 ecx），之所以要 +1 ，是因为在 Linux 实际的信号值定义都是从 1 开始的，信号位图（就是一个 int 变量）是从 0 开始的。之后，判断是否需要继续处理信号还是结束系统调用。具体我们放到下面具体讲，然后恢复之前保存的寄存器的值，恢复。</strong>注意，最后的一句 iret 实际上不是回到调用系统调用的进程，而是进行了一些有趣的事。** 具体我们下面讲。</p>
 <p>从上面的描述中我们可以了解到一些什么呢？那就是系统是在什么时候处理信号的。答案就是在进行系统调用，或者是在进程切换（_timer_interrupt 最后会跳转到 ret_from_sys_call ）的时候。</p>
 <h1 id="signal"><a href="#signal" class="headerlink" title="signal"></a>signal</h1><p>通过这个部分，我们可以了解到很多原理的东西，以及之前的很多问号：“ ×× 为什么是这样，为什么要这样？” 为了说明这一点，我将通过我们之前在 signal 编程一些说法或者是一些限制要求来进行详细说明：</p>
@@ -357,7 +360,7 @@
         
       
         <div id="reward-container">
-  <div>您的支持是我更新的第二大动力，谢谢！</div>
+  <div>您的支持是我更新的最大动力</div>
   <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
     打赏
   </button>
@@ -402,7 +405,7 @@
           
           <div class="post-tags">
             
-              <a href="/tags/Linux-kernel/" rel="tag"># Linux kernel</a>
+              <a href="/tags/Linux-Kernel/" rel="tag"># Linux Kernel</a>
             
           </div>
         
@@ -441,9 +444,6 @@
 
           </div>
           
-    
-    <div class="comments" id="gitalk-container"></div>
-  
 
         </div>
           
@@ -489,7 +489,7 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -502,7 +502,7 @@
             <a href="/categories/">
           
         
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span>
         </a>
       </div>
@@ -612,25 +612,6 @@
   
 
   
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID: '64dccd465ffcc827c9ed',
-      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
-      repo: 'simowce.github.io',
-      owner: 'simowce',
-      admin: ['simowce'],
-      id: '694953d87688e113e7aec6744eb3e577',
-        language: 'zh-CN',
-      
-      distractionFreeMode: 'true'
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-</script>
 
 </body>
 </html>

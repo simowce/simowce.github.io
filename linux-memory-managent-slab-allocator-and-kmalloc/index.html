@@ -57,19 +57,19 @@
   };
 </script>
 
-  <meta name="description" content="郑重说明，这一篇以及后序的博文我都尽量少贴代码，而是尽我的描述能力之所能把我自己的理解和思考的过程总结表达出来，千万别指望着看完我的某一篇博客就能彻底地理解某一个知识点，至少我是没有这样的表达能力的。想要知其所以然，唯一的途径就是： Read the F**king source code 正如侯捷在某一本书的扉页中写道的那样： 代码面前，没有秘密 以上">
-<meta name="keywords" content="Linux kernel,内存管理">
+  <meta name="description" content="我曾经靠着这篇文章获得我人生的第一份实习">
+<meta name="keywords" content="Linux Kernel,内存管理">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Linux 内存管理 -- Slab 分配器和 kmalloc">
 <meta property="og:url" content="https://simowce.github.io/linux-memory-managent-slab-allocator-and-kmalloc/index.html">
 <meta property="og:site_name" content="Silence.Slow.Simple">
-<meta property="og:description" content="郑重说明，这一篇以及后序的博文我都尽量少贴代码，而是尽我的描述能力之所能把我自己的理解和思考的过程总结表达出来，千万别指望着看完我的某一篇博客就能彻底地理解某一个知识点，至少我是没有这样的表达能力的。想要知其所以然，唯一的途径就是： Read the F**king source code 正如侯捷在某一本书的扉页中写道的那样： 代码面前，没有秘密 以上">
+<meta property="og:description" content="我曾经靠着这篇文章获得我人生的第一份实习">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://simowce.github.io/assets/slab.gif">
-<meta property="og:updated_time" content="2020-04-06T06:27:00.692Z">
+<meta property="og:updated_time" content="2020-06-02T13:25:26.535Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux 内存管理 -- Slab 分配器和 kmalloc">
-<meta name="twitter:description" content="郑重说明，这一篇以及后序的博文我都尽量少贴代码，而是尽我的描述能力之所能把我自己的理解和思考的过程总结表达出来，千万别指望着看完我的某一篇博客就能彻底地理解某一个知识点，至少我是没有这样的表达能力的。想要知其所以然，唯一的途径就是： Read the F**king source code 正如侯捷在某一本书的扉页中写道的那样： 代码面前，没有秘密 以上">
+<meta name="twitter:description" content="我曾经靠着这篇文章获得我人生的第一份实习">
 <meta name="twitter:image" content="https://simowce.github.io/assets/slab.gif">
   <link rel="canonical" href="https://simowce.github.io/linux-memory-managent-slab-allocator-and-kmalloc/">
 
@@ -146,7 +146,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <p class="site-subtitle">a simowce's blog</p>
+        <h1 class="site-subtitle" itemprop="description">a simowce's blog</h1>
       
   </div>
 
@@ -246,10 +246,10 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">Linux 内存管理 -- Slab 分配器和 kmalloc
+        <h2 class="post-title" itemprop="name headline">Linux 内存管理 -- Slab 分配器和 kmalloc
 
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -273,7 +273,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:25:26" itemprop="dateModified" datetime="2020-06-02T21:25:26+08:00">2020-06-02</time>
               </span>
             
           
@@ -283,7 +283,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux-kernel/" itemprop="url" rel="index"><span itemprop="name">Linux kernel</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Kernel-Magic/" itemprop="url" rel="index"><span itemprop="name">Kernel Magic</span></a></span>
 
                 
                 
@@ -302,13 +302,16 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <blockquote>
+        <p>我曾经靠着这篇文章获得我人生的第一份实习</p>
+<a id="more"></a>
+
+<blockquote>
 <p>郑重说明，这一篇以及后序的博文我都尽量少贴代码，而是尽我的描述能力之所能把我自己的理解和思考的过程总结表达出来，千万别指望着看完我的某一篇博客就能彻底地理解某一个知识点，至少我是没有这样的表达能力的。想要知其所以然，唯一的途径就是：</p>
 <p>Read the F**king source code</p>
 <p>正如侯捷在某一本书的扉页中写道的那样：</p>
 <p>代码面前，没有秘密</p>
 <p>以上</p>
-</blockquote><a id="more"></a>
+</blockquote>
 <h2 id="为什么要有-slab"><a href="#为什么要有-slab" class="headerlink" title="为什么要有 slab"></a>为什么要有 slab</h2><p>一般来说，一个新东西的产生总是为了解决某一个现有的问题的。那么，slab 是为了解决什么问题呢？我们知道，在 Linux 内核中的内存管理是使用伙伴系统 (Buddy system)，但是这个系统有一个问题就是，它的最小单位是页，即　PAGE_SIZE ，在 x86 架构中这个常数一般是 4k 。但是很多情况下我们要分配的单元大小是远远小于 4k 的，如果使用伙伴系统的话，必定是会产生很大的浪费的。所以，一个粒度更加小的分配器呼之欲出，slab 就是为了解决这个小粒度内存分配的问题的。</p>
 <h2 id="如何解决以及结构组织"><a href="#如何解决以及结构组织" class="headerlink" title="如何解决以及结构组织"></a>如何解决以及结构组织</h2><p>既然 slab 分配器已经定下了这样的一个目标，那么它的策略是什么呢？ 答曰，slab 分配器是基于所谓“面向对象”的思想，当然，这里的“面向对象”跟 C++ 和 Java 等的“面向对象”是不一样的。这里的“面向对象”更加确切的说法是“面向对象类型”，不同的类型使用不同的 slab ，一个 slab 只分配一种类型。而且，slab 为了提高内核中一些十分频繁进行分配释放的“对象”的分配效率， slab 的做法是：每次释放掉某个对象之后，不是立即将其返回给伙伴系统（slab 分配器是建立在伙伴系统之上的），而是存放在一个叫 array_cache 的结构中，下次要分配的时候就可以直接从这里分配，从而加快了速度。</p>
 <p>这里必须明确几个概念，说明如下：</p>
@@ -409,7 +412,7 @@
         
       
         <div id="reward-container">
-  <div>您的支持是我更新的第二大动力，谢谢！</div>
+  <div>您的支持是我更新的最大动力</div>
   <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
     打赏
   </button>
@@ -454,7 +457,7 @@
           
           <div class="post-tags">
             
-              <a href="/tags/Linux-kernel/" rel="tag"># Linux kernel</a>
+              <a href="/tags/Linux-Kernel/" rel="tag"># Linux Kernel</a>
             
               <a href="/tags/内存管理/" rel="tag"># 内存管理</a>
             
@@ -466,8 +469,8 @@
           <div class="post-nav">
             <div class="post-nav-next post-nav-item">
               
-                <a href="/show-variable-in-the-makefile/" rel="next" title="显示 Makefile 中的变量名">
-                  <i class="fa fa-chevron-left"></i> 显示 Makefile 中的变量名
+                <a href="/linux-kernel-memory-management/" rel="next" title="Linux Kernel 内存管理">
+                  <i class="fa fa-chevron-left"></i> Linux Kernel 内存管理
                 </a>
               
             </div>
@@ -495,9 +498,6 @@
 
           </div>
           
-    
-    <div class="comments" id="gitalk-container"></div>
-  
 
         </div>
           
@@ -543,7 +543,7 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -556,7 +556,7 @@
             <a href="/categories/">
           
         
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span>
         </a>
       </div>
@@ -666,25 +666,6 @@
   
 
   
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID: '64dccd465ffcc827c9ed',
-      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
-      repo: 'simowce.github.io',
-      owner: 'simowce',
-      admin: ['simowce'],
-      id: '6ab35c88b4fc310564fd555e83df9e25',
-        language: 'zh-CN',
-      
-      distractionFreeMode: 'true'
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-</script>
 
 </body>
 </html>

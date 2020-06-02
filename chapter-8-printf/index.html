@@ -57,18 +57,18 @@
   };
 </script>
 
-  <meta name="description" content="关于 vsprintf今天花了很长的时间去理解 vsprintf 这个函数并且自己把它实现了一遍。果然，比对着书打难多了。不过，确实是收获特别多，而且自己实现的话，能够加深理解，而不仅仅是从书上理解那么片面。先说一下 vsprintf() 这个函数的作用。它是 printf() 的一个处理函数，接受 3 个变量：buf 是用来存放处理完的字符串，或者是说，将 printf 的第一个参数里面的 %d">
+  <meta name="description" content="你会写 printf 吗？">
 <meta name="keywords" content="一个操作系统的实现">
 <meta property="og:type" content="article">
 <meta property="og:title" content="一个操作系统的实现 -- printf">
 <meta property="og:url" content="https://simowce.github.io/chapter-8-printf/index.html">
 <meta property="og:site_name" content="Silence.Slow.Simple">
-<meta property="og:description" content="关于 vsprintf今天花了很长的时间去理解 vsprintf 这个函数并且自己把它实现了一遍。果然，比对着书打难多了。不过，确实是收获特别多，而且自己实现的话，能够加深理解，而不仅仅是从书上理解那么片面。先说一下 vsprintf() 这个函数的作用。它是 printf() 的一个处理函数，接受 3 个变量：buf 是用来存放处理完的字符串，或者是说，将 printf 的第一个参数里面的 %d">
+<meta property="og:description" content="你会写 printf 吗？">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-04-06T06:27:00.688Z">
+<meta property="og:updated_time" content="2020-06-02T13:46:22.843Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="一个操作系统的实现 -- printf">
-<meta name="twitter:description" content="关于 vsprintf今天花了很长的时间去理解 vsprintf 这个函数并且自己把它实现了一遍。果然，比对着书打难多了。不过，确实是收获特别多，而且自己实现的话，能够加深理解，而不仅仅是从书上理解那么片面。先说一下 vsprintf() 这个函数的作用。它是 printf() 的一个处理函数，接受 3 个变量：buf 是用来存放处理完的字符串，或者是说，将 printf 的第一个参数里面的 %d">
+<meta name="twitter:description" content="你会写 printf 吗？">
   <link rel="canonical" href="https://simowce.github.io/chapter-8-printf/">
 
 
@@ -144,7 +144,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <p class="site-subtitle">a simowce's blog</p>
+        <h1 class="site-subtitle" itemprop="description">a simowce's blog</h1>
       
   </div>
 
@@ -244,10 +244,10 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">一个操作系统的实现 -- printf
+        <h2 class="post-title" itemprop="name headline">一个操作系统的实现 -- printf
 
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -271,7 +271,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:46:22" itemprop="dateModified" datetime="2020-06-02T21:46:22+08:00">2020-06-02</time>
               </span>
             
           
@@ -300,8 +300,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="关于-vsprintf"><a href="#关于-vsprintf" class="headerlink" title="关于 vsprintf"></a>关于 vsprintf</h3><p>今天花了很长的时间去理解 <code>vsprintf</code> 这个函数并且自己把它实现了一遍。果然，比对着书打难多了。不过，确实是收获特别多，而且自己实现的话，能够加深理解，而不仅仅是从书上理解那么片面。</p><p>先说一下 <code>vsprintf()</code> 这个函数的作用。它是 <code>printf()</code> 的一个处理函数，接受 3 个变量：buf 是用来存放处理完的字符串，或者是说，将 <code>printf</code> 的第一个参数里面的 <code>%d</code> 啊， <code>%s</code> 等用后面对应的参数替换之后的字符串。<code>fmt</code> 很明显，就是 <code>printf()</code> 的第一个参数。<code>arg</code> 这个参数，是指向 <code>printf()</code> 第二个参数以及后面参数的一个指针。理解这一点很重要。</p><a id="more"></a>
+        <p>你会写 printf 吗？</p>
+<a id="more"></a>
 
+<h3 id="关于-vsprintf"><a href="#关于-vsprintf" class="headerlink" title="关于 vsprintf"></a>关于 vsprintf</h3><p>今天花了很长的时间去理解 <code>vsprintf</code> 这个函数并且自己把它实现了一遍。果然，比对着书打难多了。不过，确实是收获特别多，而且自己实现的话，能够加深理解，而不仅仅是从书上理解那么片面。</p>
+<p>先说一下 <code>vsprintf()</code> 这个函数的作用。它是 <code>printf()</code> 的一个处理函数，接受 3 个变量：buf 是用来存放处理完的字符串，或者是说，将 <code>printf</code> 的第一个参数里面的 <code>%d</code> 啊， <code>%s</code> 等用后面对应的参数替换之后的字符串。<code>fmt</code> 很明显，就是 <code>printf()</code> 的第一个参数。<code>arg</code> 这个参数，是指向 <code>printf()</code> 第二个参数以及后面参数的一个指针。理解这一点很重要。</p>
 <p>然后这个函数的流程就是这样的，不断地扫描 <code>fmt</code> ，如果不是 <code>%</code> ，则直接赋给 <code>buf</code> ；如果是 <code>%</code> 的话，那么就看他的下一位是什么，是 <code>%</code> 的话，说明只是 <code>%</code> 的一个转义符，直接赋给 <code>buf</code> 。否知，如果是非零的数字，那么说明是一个 <strong>宽度说明</strong> ，就必须计算宽度的长度。之后肯定就是控制格式符号 <code>c</code>，<code>s</code>，<code>x</code> 等了。在这些控制格式符中，<code>d</code> 和 <code>x</code> 由于存在进制的转换，所以要有相应的函数来处理进制转换，<code>i2a()</code> 就实现了这一个功能。这个函数，不得不说，是一个十分优美的实现，采用了递归。相当于先从低位到高位依次入栈，然后在依次弹栈，并不难理解，不过，我想说一点的是，这个函数的第三个参数：char **ps, 这是一个二级指针。里面的一句</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">*(*ps)++ = remain;</span><br></pre></td></tr></table></figure>
 
@@ -325,7 +328,7 @@
         
       
         <div id="reward-container">
-  <div>您的支持是我更新的第二大动力，谢谢！</div>
+  <div>您的支持是我更新的最大动力</div>
   <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
     打赏
   </button>
@@ -409,9 +412,6 @@
 
           </div>
           
-    
-    <div class="comments" id="gitalk-container"></div>
-  
 
         </div>
           
@@ -457,7 +457,7 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -470,7 +470,7 @@
             <a href="/categories/">
           
         
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span>
         </a>
       </div>
@@ -580,25 +580,6 @@
   
 
   
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID: '64dccd465ffcc827c9ed',
-      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
-      repo: 'simowce.github.io',
-      owner: 'simowce',
-      admin: ['simowce'],
-      id: '2a3361740cb5c081113e794aa9268a83',
-        language: 'zh-CN',
-      
-      distractionFreeMode: 'true'
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-</script>
 
 </body>
 </html>

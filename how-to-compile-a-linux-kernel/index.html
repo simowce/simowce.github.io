@@ -57,18 +57,18 @@
   };
 </script>
 
-  <meta name="description" content="这两天在试着编译一下 Linux 内核，过程十分的刺激，随手记下来： 首先去 官方网站 下载最新版的 Linux 内核，然后解压，进入到内核目录里  下面是整个过程中最复杂的一步了：配置内核。想要让内核依照你的电脑配置发挥出最大的功效，那么就必须为为你的电脑量身定做一套配置。然而，看那配置列表一万多个配置选项真的是会被吓到的。总不能一个一个选吧，而且大部分选项根本就看不懂。所以我使用了最保险的做法">
-<meta name="keywords" content="Linux kernel">
+  <meta name="description" content="曾经我为了编译内核买了一台二手台式机">
+<meta name="keywords" content="Linux Kernel">
 <meta property="og:type" content="article">
 <meta property="og:title" content="初试 Linux 内核编译">
 <meta property="og:url" content="https://simowce.github.io/how-to-compile-a-linux-kernel/index.html">
 <meta property="og:site_name" content="Silence.Slow.Simple">
-<meta property="og:description" content="这两天在试着编译一下 Linux 内核，过程十分的刺激，随手记下来： 首先去 官方网站 下载最新版的 Linux 内核，然后解压，进入到内核目录里  下面是整个过程中最复杂的一步了：配置内核。想要让内核依照你的电脑配置发挥出最大的功效，那么就必须为为你的电脑量身定做一套配置。然而，看那配置列表一万多个配置选项真的是会被吓到的。总不能一个一个选吧，而且大部分选项根本就看不懂。所以我使用了最保险的做法">
+<meta property="og:description" content="曾经我为了编译内核买了一台二手台式机">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-04-06T06:27:00.688Z">
+<meta property="og:updated_time" content="2020-06-02T13:30:52.854Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="初试 Linux 内核编译">
-<meta name="twitter:description" content="这两天在试着编译一下 Linux 内核，过程十分的刺激，随手记下来： 首先去 官方网站 下载最新版的 Linux 内核，然后解压，进入到内核目录里  下面是整个过程中最复杂的一步了：配置内核。想要让内核依照你的电脑配置发挥出最大的功效，那么就必须为为你的电脑量身定做一套配置。然而，看那配置列表一万多个配置选项真的是会被吓到的。总不能一个一个选吧，而且大部分选项根本就看不懂。所以我使用了最保险的做法">
+<meta name="twitter:description" content="曾经我为了编译内核买了一台二手台式机">
   <link rel="canonical" href="https://simowce.github.io/how-to-compile-a-linux-kernel/">
 
 
@@ -144,7 +144,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <p class="site-subtitle">a simowce's blog</p>
+        <h1 class="site-subtitle" itemprop="description">a simowce's blog</h1>
       
   </div>
 
@@ -244,10 +244,10 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">初试 Linux 内核编译
+        <h2 class="post-title" itemprop="name headline">初试 Linux 内核编译
 
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -271,7 +271,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:30:52" itemprop="dateModified" datetime="2020-06-02T21:30:52+08:00">2020-06-02</time>
               </span>
             
           
@@ -281,7 +281,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux-kernel/" itemprop="url" rel="index"><span itemprop="name">Linux kernel</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Kernel-Magic/" itemprop="url" rel="index"><span itemprop="name">Kernel Magic</span></a></span>
 
                 
                 
@@ -300,13 +300,16 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>这两天在试着编译一下 Linux 内核，过程十分的刺激，随手记下来：</p><ol>
+        <p>曾经我为了编译内核买了一台二手台式机</p>
+<a id="more"></a>
+
+<p>这两天在试着编译一下 Linux 内核，过程十分的刺激，随手记下来：</p>
+<ol>
 <li><p>首先去 <a href="http://www.kernel.org" target="_blank" rel="noopener">官方网站</a> 下载最新版的 Linux 内核，然后解压，进入到内核目录里</p>
 </li>
 <li><p>下面是整个过程中最复杂的一步了：配置内核。想要让内核依照你的电脑配置发挥出最大的功效，那么就必须为为你的电脑量身定做一套配置。然而，看那配置列表一万多个配置选项真的是会被吓到的。总不能一个一个选吧，而且大部分选项根本就看不懂。所以我使用了最保险的做法，去 Ubuntu 官网下载一个配置文件，保存在内核顶层目录，重命名为 <code>.config</code> ，然后使用：</p>
 </li>
-</ol><a id="more"></a>
-
+</ol>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">make oldconfig</span><br></pre></td></tr></table></figure>
 
 <p>来选择那些配置文件中没有的选项。这样，一份 “勉强能用” 的配置文件总算是有了。</p>
@@ -339,7 +342,7 @@
         
       
         <div id="reward-container">
-  <div>您的支持是我更新的第二大动力，谢谢！</div>
+  <div>您的支持是我更新的最大动力</div>
   <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
     打赏
   </button>
@@ -384,7 +387,7 @@
           
           <div class="post-tags">
             
-              <a href="/tags/Linux-kernel/" rel="tag"># Linux kernel</a>
+              <a href="/tags/Linux-Kernel/" rel="tag"># Linux Kernel</a>
             
           </div>
         
@@ -404,8 +407,8 @@
 
             <div class="post-nav-prev post-nav-item">
               
-                <a href="/let-nvidia-driver-run-in-kernel-42/" rel="prev" title="让 Nvidia 显卡驱动在 Linux 4.2 不再出错">
-                  让 Nvidia 显卡驱动在 Linux 4.2 不再出错 <i class="fa fa-chevron-right"></i>
+                <a href="/linux-kernel-memory-management/" rel="prev" title="Linux Kernel 内存管理">
+                  Linux Kernel 内存管理 <i class="fa fa-chevron-right"></i>
                 </a>
               
             </div>
@@ -423,9 +426,6 @@
 
           </div>
           
-    
-    <div class="comments" id="gitalk-container"></div>
-  
 
         </div>
           
@@ -469,7 +469,7 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -482,7 +482,7 @@
             <a href="/categories/">
           
         
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span>
         </a>
       </div>
@@ -592,25 +592,6 @@
   
 
   
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID: '64dccd465ffcc827c9ed',
-      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
-      repo: 'simowce.github.io',
-      owner: 'simowce',
-      admin: ['simowce'],
-      id: '321e9b690575bc47463b8dbd29b9a75f',
-        language: 'zh-CN',
-      
-      distractionFreeMode: 'true'
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-</script>
 
 </body>
 </html>

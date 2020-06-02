@@ -57,18 +57,18 @@
   };
 </script>
 
-  <meta name="description" content="一般来说，我们的手机的内存 RAM 的容量是固定的，用多少，就少多少，这是不可逆转的。为了解决这个难题，内存交换的思想应运而生，通过将一些不活动页交换到速度较慢的硬盘，SD 卡等，然后将这些内存腾出来，从而变相地达到了增大内存的效果。（然而这个并不是新东西，我读过 Linux 0.12 的源代码，发现在那个时候就已经有这个东东了）">
-<meta name="keywords" content="Linux kernel,内存管理">
+  <meta name="description" content="页面回收的那些事儿">
+<meta name="keywords" content="内存管理">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Page Fram Reclaim Algorithm">
+<meta property="og:title" content="Page Fram Reclaim 算法详解">
 <meta property="og:url" content="https://simowce.github.io/page-fram-reclaim-algorithm/index.html">
 <meta property="og:site_name" content="Silence.Slow.Simple">
-<meta property="og:description" content="一般来说，我们的手机的内存 RAM 的容量是固定的，用多少，就少多少，这是不可逆转的。为了解决这个难题，内存交换的思想应运而生，通过将一些不活动页交换到速度较慢的硬盘，SD 卡等，然后将这些内存腾出来，从而变相地达到了增大内存的效果。（然而这个并不是新东西，我读过 Linux 0.12 的源代码，发现在那个时候就已经有这个东东了）">
+<meta property="og:description" content="页面回收的那些事儿">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-04-06T06:27:00.692Z">
+<meta property="og:updated_time" content="2020-06-02T13:13:32.254Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Page Fram Reclaim Algorithm">
-<meta name="twitter:description" content="一般来说，我们的手机的内存 RAM 的容量是固定的，用多少，就少多少，这是不可逆转的。为了解决这个难题，内存交换的思想应运而生，通过将一些不活动页交换到速度较慢的硬盘，SD 卡等，然后将这些内存腾出来，从而变相地达到了增大内存的效果。（然而这个并不是新东西，我读过 Linux 0.12 的源代码，发现在那个时候就已经有这个东东了）">
+<meta name="twitter:title" content="Page Fram Reclaim 算法详解">
+<meta name="twitter:description" content="页面回收的那些事儿">
   <link rel="canonical" href="https://simowce.github.io/page-fram-reclaim-algorithm/">
 
 
@@ -83,7 +83,7 @@
   };
 </script>
 
-  <title>Page Fram Reclaim Algorithm | Silence.Slow.Simple</title>
+  <title>Page Fram Reclaim 算法详解 | Silence.Slow.Simple</title>
   
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-56242445-1"></script>
   <script>
@@ -144,7 +144,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <p class="site-subtitle">a simowce's blog</p>
+        <h1 class="site-subtitle" itemprop="description">a simowce's blog</h1>
       
   </div>
 
@@ -244,10 +244,10 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">Page Fram Reclaim Algorithm
+        <h2 class="post-title" itemprop="name headline">Page Fram Reclaim 算法详解
 
           
-        </h1>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -271,7 +271,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-06 14:27:00" itemprop="dateModified" datetime="2020-04-06T14:27:00+08:00">2020-04-06</time>
+                <time title="修改时间：2020-06-02 21:13:32" itemprop="dateModified" datetime="2020-06-02T21:13:32+08:00">2020-06-02</time>
               </span>
             
           
@@ -281,7 +281,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux-kernel/" itemprop="url" rel="index"><span itemprop="name">Linux kernel</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/知其所以然/" itemprop="url" rel="index"><span itemprop="name">知其所以然</span></a></span>
 
                 
                 
@@ -300,7 +300,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>一般来说，我们的手机的内存 RAM 的容量是固定的，用多少，就少多少，这是不可逆转的。为了解决这个难题，<strong>内存交换</strong>的思想应运而生，通过将一些不活动页交换到速度较慢的硬盘，SD 卡等，然后将这些内存腾出来，从而变相地达到了增大内存的效果。（然而这个并不是新东西，我读过 Linux 0.12 的源代码，发现在那个时候就已经有这个东东了）</p><a id="more"></a>
+        <p>页面回收的那些事儿</p>
+<a id="more"></a>
+
+<p>一般来说，我们的手机的内存 RAM 的容量是固定的，用多少，就少多少，这是不可逆转的。为了解决这个难题，<strong>内存交换</strong>的思想应运而生，通过将一些不活动页交换到速度较慢的硬盘，SD 卡等，然后将这些内存腾出来，从而变相地达到了增大内存的效果。（然而这个并不是新东西，我读过 Linux 0.12 的源代码，发现在那个时候就已经有这个东东了）</p>
 <p>整个<strong>内存交换</strong>分为两个部分——页面回收，页面回写。页面回收主要是通过一系列的算法判断筛选出回收页的候选者，页面回写则负责将这些页回写到交换设备中。这里面最重要和最复杂的是页面回收算法，也是这篇东东所要描述的重点。</p>
 <p><strong>注：在学习这一部分内容的时候，我查阅了大量的资料，并且发现而英语术语的重要性，所以对于重要的术语，我会在后面注明它的英文原文。</strong></p>
 <h2 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h2><ol>
@@ -315,7 +318,7 @@
 <li>PG_reclaim: 似乎是表明当前页是脏的，但是还没有进行回写操作。</li>
 </ul>
 <p><strong>注意：内核有专门的函数来检测这些标志位，例如 <code>PG_swapcache</code> 就是用 <code>PageSwapCache()</code>，<code>PG_reclaim</code> 就是用 <code>PageReclaim()</code> 。但是，如果你通过 <code>grep</code> 或者其他工具根据函数名去搜索这些函数的实现的时候，你会很神奇地发现你找不到。其实这是内核使用的一个技巧，因为这些函数大同小异，所以系统使用了宏（macro）来统一表达。所以你就会发现，这么一堆函数在内核的实现中只用了两行（具体在 <code>include/linux/page-flags</code>）:</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">static inline int Page##uname(const struct page *page)			\</span><br><span class="line">		&#123; return test_bit(PG_##lname, &amp;page-&gt;flags); &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">static inline int Page##uname(const struct<span class="built_in"> page </span>*page)			\</span><br><span class="line">		&#123; return test_bit(PG_##lname, &amp;page-&gt;flags); &#125;</span><br></pre></td></tr></table></figure>
 
 <p><strong>所以，这也给了我们一个提示，如果我们在搜索一些变量或者函数的时候找不到它的实现，那么很有可能内核使用了宏来实现，而解决方法页很简单，就是抽取出这些变量或者函数的共同处，然后使用这个共同处去搜索，会有意想不到的收获～</strong></p>
 </li>
@@ -345,7 +348,7 @@
 </li>
 <li><p>struct scan_control</p>
 <p>这是一个很重要的数据结构，扫描的调用者通过这个数据结构向执行回收扫描的函数来控制扫描行为，这里面有几个比较重要的成员变量要说明一下（只挑选了一部分）：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct scan_control &#123;</span><br><span class="line">	/*指明了 shrink_list() 应该回收多少内存页 */</span><br><span class="line">	unsigned long nr_to_reclaim;</span><br><span class="line"></span><br><span class="line">	/* 这个是传给后续页面回收函数的 GFP 标志 */</span><br><span class="line">	gfp_t gfp_mask;</span><br><span class="line"></span><br><span class="line">	/* 系统通过判断这个成员是否为 NULL 来判断 global reclaim 还是 target reclaim */</span><br><span class="line">	struct mem_cgroup *target_mem_cgroup;</span><br><span class="line"></span><br><span class="line">	/* 扫描的数目是整个 LRU 的大小 &gt;&gt; priority （具体在 get_scan_count() 体现）</span><br><span class="line">  * 也就是说，priority 越大，扫描的数目就越少</span><br><span class="line">  */</span><br><span class="line">	int priority;</span><br><span class="line"></span><br><span class="line">// 指定了内核是否允许将页面写出到后备设备上</span><br><span class="line">	unsigned int may_writepage:1;</span><br><span class="line"></span><br><span class="line">	/* 指定了已经映射的页面能否被回收 */</span><br><span class="line">	unsigned int may_unmap:1;</span><br><span class="line"></span><br><span class="line">	/* 指定了页面回收阶段是否允许页交换 */</span><br><span class="line">	unsigned int may_swap:1;</span><br><span class="line"></span><br><span class="line">	/* 到目前为止通过 shrink_zones() 释放掉的页面数目 */</span><br><span class="line">	unsigned long nr_reclaimed;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">scan_control</span> &#123;</span></span><br><span class="line">	<span class="comment">/*指明了 shrink_list() 应该回收多少内存页 */</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> nr_to_reclaim;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 这个是传给后续页面回收函数的 GFP 标志 */</span></span><br><span class="line">	<span class="keyword">gfp_t</span> gfp_mask;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 系统通过判断这个成员是否为 NULL 来判断 global reclaim 还是 target reclaim */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">mem_cgroup</span> *<span class="title">target_mem_cgroup</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 扫描的数目是整个 LRU 的大小 &gt;&gt; priority （具体在 get_scan_count() 体现）</span></span><br><span class="line"><span class="comment">  * 也就是说，priority 越大，扫描的数目就越少</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line">	<span class="keyword">int</span> priority;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 指定了内核是否允许将页面写出到后备设备上</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> may_writepage:<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 指定了已经映射的页面能否被回收 */</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> may_unmap:<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 指定了页面回收阶段是否允许页交换 */</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> may_swap:<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 到目前为止通过 shrink_zones() 释放掉的页面数目 */</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> nr_reclaimed;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>交换缓存（swap cache）</p>
 <p>交换缓存是个很重要的数据结构，不过由于它是属于页面回写部分的，而且，它是属于页缓存的一种。所以，比较详细的实现就暂且留个 TODO ，不过，大体上还是能够说明这个交换缓存的作用的。</p>
@@ -961,7 +964,7 @@ nr[lru] -= min(nr[lru], nr_scanned);</code></pre><p>在这里我想提一点，�
         
       
         <div id="reward-container">
-  <div>您的支持是我更新的第二大动力，谢谢！</div>
+  <div>您的支持是我更新的最大动力</div>
   <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
     打赏
   </button>
@@ -991,7 +994,7 @@ nr[lru] -= min(nr[lru], nr_scanned);</code></pre><p>在这里我想提一点，�
     <strong>本文作者： </strong>simowce</li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://simowce.github.io/page-fram-reclaim-algorithm/" title="Page Fram Reclaim Algorithm">https://simowce.github.io/page-fram-reclaim-algorithm/</a>
+    <a href="https://simowce.github.io/page-fram-reclaim-algorithm/" title="Page Fram Reclaim 算法详解">https://simowce.github.io/page-fram-reclaim-algorithm/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-ND</a> 许可协议。转载请注明出处！</li>
@@ -1005,8 +1008,6 @@ nr[lru] -= min(nr[lru], nr_scanned);</code></pre><p>在这里我想提一点，�
             
           
           <div class="post-tags">
-            
-              <a href="/tags/Linux-kernel/" rel="tag"># Linux kernel</a>
             
               <a href="/tags/内存管理/" rel="tag"># 内存管理</a>
             
@@ -1047,9 +1048,6 @@ nr[lru] -= min(nr[lru], nr_scanned);</code></pre><p>在这里我想提一点，�
 
           </div>
           
-    
-    <div class="comments" id="gitalk-container"></div>
-  
 
         </div>
           
@@ -1095,7 +1093,7 @@ nr[lru] -= min(nr[lru], nr_scanned);</code></pre><p>在这里我想提一点，�
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1108,7 +1106,7 @@ nr[lru] -= min(nr[lru], nr_scanned);</code></pre><p>在这里我想提一点，�
             <a href="/categories/">
           
         
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span>
         </a>
       </div>
@@ -1218,25 +1216,6 @@ nr[lru] -= min(nr[lru], nr_scanned);</code></pre><p>在这里我想提一点，�
   
 
   
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID: '64dccd465ffcc827c9ed',
-      clientSecret: 'c013c267fa98f435d2d6f94c1d0d8ec734c49b05',
-      repo: 'simowce.github.io',
-      owner: 'simowce',
-      admin: ['simowce'],
-      id: '4a89192d95fe1361abeb54e46b8a907d',
-        language: 'zh-CN',
-      
-      distractionFreeMode: 'true'
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-</script>
 
 </body>
 </html>
