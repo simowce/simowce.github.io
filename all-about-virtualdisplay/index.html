@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=7.4.1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=7.4.1">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css?v=7.4.1">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.4.1',
+    exturl: false,
+    sidebar: {"position":"right","display":"hide","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="keywords" content="Graphic">
+<meta property="og:type" content="article">
+<meta property="og:title" content="你有没有想过，录屏软件是怎么获取到屏幕内容的？">
+<meta property="og:url" content="https://simowce.github.io/all-about-virtualdisplay/index.html">
+<meta property="og:site_name" content="Silence.Slow.Simple">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://simowce.github.io/assets/VirtualDisplay-cover.png">
+<meta property="og:image" content="https://simowce.github.io/assets/virtualdisplay.png">
+<meta property="og:image" content="https://simowce.github.io/assets/debug-virtualdisplay.png">
+<meta property="og:image" content="https://simowce.github.io/assets/debuglog-virtualdisplay.png">
+<meta property="og:updated_time" content="2020-07-05T13:10:25.199Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="你有没有想过，录屏软件是怎么获取到屏幕内容的？">
+<meta name="twitter:image" content="https://simowce.github.io/assets/VirtualDisplay-cover.png">
+  <link rel="canonical" href="https://simowce.github.io/all-about-virtualdisplay/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>你有没有想过，录屏软件是怎么获取到屏幕内容的？ | Silence.Slow.Simple</title>
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-56242445-1"></script>
+  <script>
+    var host = window.location.hostname;
+    if (host !== "localhost" || !true) {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-56242445-1');
+    }
+  </script>
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Silence.Slow.Simple</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">a simowce's blog</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section">首页</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section">分类</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section">归档</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-thinking">
+
+    <a href="/Thinking/" rel="section">Thinking</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section">关于</a>
+
+  </li>
+  </ul>
+
+    
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/all-about-virtualdisplay/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="simowce">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Silence.Slow.Simple">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">你有没有想过，录屏软件是怎么获取到屏幕内容的？
+
+          
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2020-07-05 20:53:03 / 修改时间：21:10:25" itemprop="dateCreated datePublished" datetime="2020-07-05T20:53:03+08:00">2020-07-05</time>
+            </span>
+          
+            
+
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/知其所以然/" itemprop="url" rel="index"><span itemprop="name">知其所以然</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="/assets/VirtualDisplay-cover.png" alt></p>
+<a id="more"></a>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间 Android R 发布了 Beta 版本，同时带来原生用户心心念念的功能——录屏，虽然这个功能在别的 Android 定制 ROM，像 MIUI，在好几年前已经就有了。是录屏这个功能是很难实现吗？为什么谷歌迟迟不肯在 Android 上这个功能呢？</p>
+<p>再者，目前十分火爆的手机直播，大概可以分为两种形式：一种是让观众看到手机摄像头拍到的内容；另一种是让观众看到手机屏幕的内容。而后者，其实可以理解为另外一种形式的“录屏”。</p>
+<p>可见，“录屏”在我们日常生活中已经是一个十分常见的功能。而你是否思考过，录屏背后的原理是什么？录屏软件又是怎么获取到屏幕的画面内容的呢？</p>
+<p>阅读完本文，你可以了解到：</p>
+<blockquote>
+<ol>
+<li>在 App 渲染合成中的状态与事务（State and Transaction）</li>
+<li>录屏背后的功臣——Virtual Display 的核心接口以及 SurfaceFlinger 是如何发现，处理 VirtualDisplay</li>
+<li>录屏的原理以及完整的数据流传输</li>
+</ol>
+</blockquote>
+<p>如果你对这些内容感兴趣，那就接着看下去吧。如果对这些冗长的分析感到头疼，想要直接看到结论，可以直接放到最后面的总结。</p>
+<p>让我们开始吧。</p>
+<h2 id="VirtualDisplay-简介"><a href="#VirtualDisplay-简介" class="headerlink" title="VirtualDisplay 简介"></a>VirtualDisplay 简介</h2><p>在目前的 Android 中，支持多种屏幕（Display，后文提到的 Display 都是指如下的各种屏幕）类型：</p>
+<ul>
+<li>内置的主屏幕</li>
+<li>通过 HDMI 连接的外接屏幕</li>
+<li>虚拟屏幕（Virtual Display）</li>
+</ul>
+<p>前两种都是有具体的物理屏幕设备的，而与之相反的 Virtual Display 则没有，是由 SurfaceFlinger 模拟出来的，一大作用就是给前面反复提到的“录屏”提供基础设施。</p>
+<h2 id="核心接口"><a href="#核心接口" class="headerlink" title="核心接口"></a>核心接口</h2><p>前面提到录屏背后用到的都是 VirtualDisplay，这里分别点一下 C++ 和 Java 中与 VirtualDisplay 相关的核心接口：</p>
+<h3 id="C"><a href="#C" class="headerlink" title="C++"></a>C++</h3><p>在 Android 中有一个 <code>screenrecord</code> 的命令，这个命令是用纯 C++ 写的，源码路径在：<code>frameworks/av/cmds/screenrecord/</code>，通过这份谷歌官方的源码我们可以一窥 native 层实现录屏的原理（其实 Android 很早之前就支持录屏了哈哈）。其中的核心代码：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">status_t</span> <span class="title">prepareVirtualDisplay</span><span class="params">(<span class="keyword">const</span> DisplayInfo&amp; mainDpyInfo,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">const</span> sp&lt;IGraphicBufferProducer&gt;&amp; bufferProducer,</span></span></span><br><span class="line"><span class="function"><span class="params">        sp&lt;IBinder&gt;* pDisplayHandle)</span> </span>&#123;</span><br><span class="line">    sp&lt;IBinder&gt; dpy = SurfaceComposerClient::createDisplay(</span><br><span class="line">            String8(<span class="string">"ScreenRecorder"</span>), <span class="literal">false</span> <span class="comment">/*secure*/</span>);</span><br><span class="line"></span><br><span class="line">    SurfaceComposerClient::Transaction t;</span><br><span class="line">    t.setDisplaySurface(dpy, bufferProducer);</span><br><span class="line">    ......</span><br><span class="line">    t.apply();</span><br></pre></td></tr></table></figure>
+
+<p>这里面涉及到三个最为核心的接口：</p>
+<ul>
+<li><p><code>SurfaceComposerClient::createDisplay()</code></p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">sp&lt;IBinder&gt; SurfaceComposerClient::createDisplay(<span class="keyword">const</span> String8&amp; displayName, <span class="built_in">bool</span> secure) &#123;</span><br><span class="line">    <span class="keyword">return</span> ComposerService::getComposerService()-&gt;createDisplay(displayName,</span><br><span class="line">            secure);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>实现非常简单，通过 Binder 调用 SurfaceFlinger 端的 <code>createDisplay()</code> 来创建 VirtualDisplay。而至于 SurfaceFlinger 是如何创建 VirtualDisplay 的，后面会详细分析。</p>
+</li>
+<li><p><code>SurfaceComposerClient::Transaction::setDisplaySurface()</code></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">status_t</span> SurfaceComposerClient::Transaction::setDisplaySurface(<span class="keyword">const</span> sp&lt;IBinder&gt;&amp; token,</span><br><span class="line">      <span class="keyword">const</span> sp&lt;IGraphicBufferProducer&gt;&amp; bufferProducer) &#123;</span><br><span class="line">      </span><br><span class="line">    ......</span><br><span class="line">    <span class="function">DisplayState&amp; <span class="title">s</span><span class="params">(getDisplayState(token))</span></span>;</span><br><span class="line">    s.surface = bufferProducer;</span><br><span class="line">    s.what |= DisplayState::eSurfaceChanged;</span><br><span class="line">    <span class="keyword">return</span> NO_ERROR;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>将上面创建的 VirtualDisplay 和本地的 <code>IGraphicBufferProducer</code> （Client 端通过 <code>createBufferQueue()</code> 可以获得 BufferQueue 的 <code>IGraphicBufferProducer</code> 和 <code>IGraphicBufferConsumer</code>）关联起来。<strong>注意这里的 <code>DisplayState::eSurfaceChanged</code>，会是后面一系列流程重要的标志位。</strong></p>
+</li>
+<li><p><code>SurfaceComposerClient::Transaction::apply()</code></p>
+<p>这个函数也非常重要，App 侧的改变都需要这个函数通知给 SurfaceFlinger 侧。</p>
+</li>
+</ul>
+<p>在后文会对三个接口做深入的分析。</p>
+<h3 id="Java"><a href="#Java" class="headerlink" title="Java"></a>Java</h3><p>在 Android Framework 中有一个类 <code>OverlayDisplayAdapter</code>，这个类是方便 Framework 开发者创建模拟辅助显示设备，同样也有 C++ 提到的三个核心接口。事实上，Java 端的这些接口其实都是对做了一些封装，最终通过 JNI 调用到 native 层，最终的实现都是在 SurfaceFlinger，这里就不过多描述，详细可以参考 @夕月风 大佬在简书上的博客：<a href="https://www.jianshu.com/p/c4ea60bc73d2" target="_blank" rel="noopener">《Android P 图形显示系统（四） Android VirtualDisplay解析》</a></p>
+<h2 id="状态与事务"><a href="#状态与事务" class="headerlink" title="状态与事务"></a>状态与事务</h2><h3 id="状态"><a href="#状态" class="headerlink" title="状态"></a>状态</h3><h4 id="DisplayState"><a href="#DisplayState" class="headerlink" title="DisplayState"></a>DisplayState</h4><p>在 <code>frameworks/native/libs/gui/include/gui/LayerState.h</code> 里定义：</p>
+<figure class="highlight crystal"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">DisplayState</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">enum</span> &#123;</span></span><br><span class="line">        eOrientationDefault = <span class="number">0</span>,</span><br><span class="line">        eOrientation90 = <span class="number">1</span>,</span><br><span class="line">        eOrientation180 = <span class="number">2</span>,</span><br><span class="line">        eOrientation270 = <span class="number">3</span>,</span><br><span class="line">        eOrientationUnchanged = <span class="number">4</span>,</span><br><span class="line">        eOrientationSwapMask = <span class="number">0x01</span></span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">enum</span> &#123;</span></span><br><span class="line">        eSurfaceChanged = <span class="number">0x01</span>,</span><br><span class="line">        eLayerStackChanged = <span class="number">0x02</span>,</span><br><span class="line">        eDisplayProjectionChanged = <span class="number">0x04</span>,</span><br><span class="line">        eDisplaySizeChanged = <span class="number">0x08</span></span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    DisplayState();</span><br><span class="line">    void merge(const DisplayState&amp; other);</span><br><span class="line"></span><br><span class="line">    uint32_t what;</span><br><span class="line">    sp&lt;IBinder&gt; token;</span><br><span class="line">    sp&lt;IGraphicBufferProducer&gt; surface;</span><br><span class="line">    uint32_t layerStack;</span><br><span class="line"></span><br><span class="line">    uint32_t orientation;</span><br><span class="line">    Rect viewport;</span><br><span class="line">    Rect frame;</span><br><span class="line"></span><br><span class="line">    uint32_t width, height;</span><br><span class="line"></span><br><span class="line">    status_t write(Parcel&amp; output) const;</span><br><span class="line">    status_t read(const Parcel&amp; input);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>这个结构体是在 Client 端（即 App 侧）定义的，里面描述了 <strong>Client 端关于 Display 所有状态的集合</strong>，包括了 Display 的方向，Display 里 Surface 改变，LayerStack 改变等（对应了上面的 enum 变量），<code>what</code> 是状态的集合，所有的状态可以通过 “与” 操作合并到一起（仔细看上面上面的 enum 变量的值，每一个状态都占用了十六进制的一位）。</p>
+<h4 id="DisplayDeviceState"><a href="#DisplayDeviceState" class="headerlink" title="DisplayDeviceState"></a>DisplayDeviceState</h4><p><code>frameworks/native/services/surfaceflinger/DisplayDevice.h</code></p>
+<figure class="highlight arduino"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">DisplayDeviceState</span> &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">isVirtual</span><span class="params">()</span> <span class="keyword">const</span> </span>&#123; <span class="keyword">return</span> !displayId.has_value(); &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int32_t</span> sequenceId = sNextSequenceId++;</span><br><span class="line">    <span class="built_in">std</span>::optional&lt;DisplayId&gt; displayId;</span><br><span class="line">    sp&lt;IGraphicBufferProducer&gt; surface;</span><br><span class="line">    <span class="keyword">uint32_t</span> layerStack = DisplayDevice::NO_LAYER_STACK;</span><br><span class="line">    Rect viewport;</span><br><span class="line">    Rect frame;</span><br><span class="line">    <span class="keyword">uint8_t</span> orientation = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">uint32_t</span> <span class="built_in">width</span> = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">uint32_t</span> <span class="built_in">height</span> = <span class="number">0</span>;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">string</span> displayName;</span><br><span class="line">    <span class="keyword">bool</span> isSecure = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">std</span>::atomic&lt;<span class="keyword">int32_t</span>&gt; sNextSequenceId;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><code>DisplayDeviceState</code> 是在 Server 端（即 SurfaceFlinger 侧）定义的， 不光名字跟前面的 <code>DisplayDevice</code> 很像，内部成员也十分地类似。那么这两个类有什么关系呢？</p>
+<p>个人是这么理解的，这两个类其实是 App 侧和 SurfaceFlinger 侧对于 Display <strong>状态</strong> 的不同表示，前面提到的 <code>SurfaceComposerClient::Transaction::apply()</code> 的作用一个就是将 <code>DisplayState</code> 传递给 <code>DisplayDeviceState</code>，后文原理分析中会有详细说明。</p>
+<p>还有一个点非常重要，<strong><code>DisplayDeviceState</code> 是如何区分对应的 Display 是否为 <code>VirtualDisplay</code> 的呢</strong>？答案就在 <code>displayId</code> 的类型中 —— <code>std::optional</code>。<code>std::optional</code> 是 C++ 17 新引入的新特性，作用是方便表示或者处理一个变量“可能为空”的状态，如果在以前，我们会选择使用类似 <code>NULL</code>，<code>null</code> 或者 <code>-1</code> 这种特殊值来标记，但是现在，<code>std::optional</code> 给出了一种更加方便的方案，这里不做过多的语法描述。</p>
+<p>在 <code>DisplayDeviceState</code> 中的 <code>isVirtual()</code> 就是用来判断该 <code>DisplayDeviceState</code> 对应的 Display 是否为 VirtualDisplay，而判断的依据就是 <code>displayId.has_value()</code>， 而对于 Virtual Display 来说，是不会对其 <code>displayId</code> 进行赋值的，而主显和外显则会赋值，因而 <code>!displayId.has_value()</code> 为 true，从而可以判断出 Display 是否为 VirtualDisplay。</p>
+<h4 id="DisplayToken"><a href="#DisplayToken" class="headerlink" title="DisplayToken"></a>DisplayToken</h4><p>上面提到的 <code>DisplayState</code> 和 <code>DisplayDeiveState</code> 都是需要跟具体 Display 设备（不管是否是 VirtualDisplay）绑定。而 <code>DisplayToken</code> 就是这些 state 类型跟具体 Display 设置连接的桥梁。 <code>DisplayToken</code> 其实只是一个 <code>IBinder</code> 类型的变量，并且其值本身是没有意义的，只是用来做索引罢了。</p>
+<h3 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h3><p>每一个 VSYNC 之间， Display 或者是各个 Layer 可能都会发生很多变化，这些变化被 SurfaceFlinger 打包在一起统一处理，统称为 <strong>Transaction——事务</strong>，在目前的 Android Q 中，上面涉及到各种 state，在 SurfaceFlinger 端被打包成如下的事务，用枚举变量描述：</p>
+<figure class="highlight crystal"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> &#123;</span></span><br><span class="line">    eTransactionNeeded = <span class="number">0x01</span>,</span><br><span class="line">    eTraversalNeeded = <span class="number">0x02</span>,</span><br><span class="line">    eDisplayTransactionNeeded = <span class="number">0x04</span>,</span><br><span class="line">    eDisplayLayerStackChanged = <span class="number">0x08</span>,</span><br><span class="line">    eTransactionFlushNeeded = <span class="number">0x10</span>,</span><br><span class="line">    eTransactionMask = <span class="number">0x1f</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>这些事务在 <code>SurfaceFlinger::handleTransaction()</code> 中被处理，而这个函数在每次 VSYNC-sf 触发 SurfaceFlinger 合成的时候都会调用一次。这就很像古代皇帝每天上早朝一般，<code>handleTransaction()</code> 就像皇上身边的那个太监喊了一声，</p>
+<p>“有事启奏，无事退朝”</p>
+<p>如果上个 VSYNC 内 Client 端有 State 的变化，那么就会被 SurfaceFlinger 通过 <code>handleTransaction()</code> 知晓并且被处理，如同有大臣在底下说，</p>
+<p>“臣有事启奏”</p>
+<p>然后皇帝一天忙碌的工作就开始了。</p>
+<p>而这些事务会被统一记录在 <code>mTransactionFlags</code> 这个变量中，通过 <code>setTransactionFlags()</code> ，<code>peekTransactionFlags()</code> 和 <code>getTransactionFlags</code> 来更新/获取当前的 <code>mTransactionFlags</code> 的值：</p>
+<figure class="highlight arduino"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">uint32_t</span> <span class="title">SurfaceFlinger::peekTransactionFlags</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> mTransactionFlags;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 注意：</span></span><br><span class="line"><span class="comment">// 这里的 fetch_and() 和下面的 fetch_or()，这两个的函数值都是修改前的 mTransactionFlags，这一点非常重要</span></span><br><span class="line"><span class="function"><span class="keyword">uint32_t</span> <span class="title">SurfaceFlinger::getTransactionFlags</span><span class="params">(<span class="keyword">uint32_t</span> flags)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> mTransactionFlags.fetch_and(~flags) &amp; flags;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">uint32_t</span> <span class="title">SurfaceFlinger::setTransactionFlags</span><span class="params">(<span class="keyword">uint32_t</span> flags)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> setTransactionFlags(flags, <span class="built_in">Scheduler</span>::TransactionStart::NORMAL);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">uint32_t</span> <span class="title">SurfaceFlinger::setTransactionFlags</span><span class="params">(<span class="keyword">uint32_t</span> flags,</span></span></span><br><span class="line"><span class="function"><span class="params">                                             <span class="built_in">Scheduler</span>::TransactionStart transactionStart)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">uint32_t</span> old = mTransactionFlags.fetch_or(flags);</span><br><span class="line">    mVsyncModulator.setTransactionStart(transactionStart);</span><br><span class="line">    <span class="keyword">if</span> ((old &amp; flags)==<span class="number">0</span>) &#123; <span class="comment">// wake the server up</span></span><br><span class="line">        signalTransaction();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> old;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>peekTransactionFlags()</code> 跟 <code>getTransactionFlags()</code> 从函数名看都是获取 <code>mTransactionFlags</code> 的值，但是其实有很大的区别。<br><code>peekTransactionFlags()</code> 只是简单地将当前的 <code>mTransactionFlags</code> 直接返回。<br>而 <code>getTransactionFlags()</code> 则不然，它表面的作用是判断并返回当前的 <code>mTransactionFlags</code> 是否包含指定的 TransactionFlag（通过原来的 <code>mTransactionFlags</code> 跟传进来的 flag 做<strong>“与”</strong>操作）。 但是 <code>getTransactionFlags()</code> 会将原来 <code>mTransactionFlags</code> 的值，修改为只包含传进来的 TransactionFlags 的位，其余位都会置为 0。<br>说句题外话，从上面的说明其实可以看到， <code>peekTransactionFlags()</code> 和 <code>getTransactionFlags()</code> 这两个函数的命名非常具有迷惑性，很容易带来认知上的误区。如果让我来命名的话，那么 <code>peekTransactionFlags()</code> 应该命名为 <code>getTransactionFlags()</code>，而 <code>getTransactionFlags()</code> 更加应该命名为 <code>checkTransactionFlags()</code>。</p>
+<h3 id="State"><a href="#State" class="headerlink" title="State"></a>State</h3><p>看到这你可能会很奇怪，状态前面不是已经说了吗？为什么又蹦出了一个 <code>State</code>？其实这里的 <code>State</code> 是一个新的类，而之前在 <a href="https://simowce.github.io/all-about-fps">讲解 fps 计算原理</a> 提到了的 <code>mCurrentState</code> 和 <code>mDrawingState</code>，类型就是 <code>State</code>。</p>
+<p><code>State</code> 是 <code>SurfaceFlinger</code> 这个类里面的一个内部类：</p>
+<figure class="highlight zephir"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">State</span> </span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    explicit State(LayerVector::StateSet set) : stateSet(set), layersSortedByZ(set) &#123;&#125;</span><br><span class="line">    ......</span><br><span class="line">    <span class="keyword">const</span> LayerVector::StateSet stateSet = LayerVector::StateSet::Invalid;</span><br><span class="line">    LayerVector layersSortedByZ;</span><br><span class="line">    DefaultKeyedVector&lt; wp&lt;IBinder&gt;, DisplayDeviceState&gt; displays;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">bool</span> colorMatrixChanged = <span class="keyword">true</span>;</span><br><span class="line">    mat4 colorMatrix;</span><br><span class="line"></span><br><span class="line">    void traverseInZOrder(<span class="keyword">const</span> LayerVector::Visitor&amp; visitor) <span class="keyword">const</span>;</span><br><span class="line">    void traverseInReverseZOrder(<span class="keyword">const</span> LayerVector::Visitor&amp; visitor) <span class="keyword">const</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>这个 <code>State</code> 类其实非常有说头，只不过他们我们本文的核心相关的就是里面的 <code>displays</code> 成员，他是一个 <code>&lt;DefaultKeyedVector&gt;</code> 类型（Android 自定义的一个类型，与 <code>std::map</code> 类似），key-value 就是我们前面都有提到的 <code>DisplayToken</code> 和 <code>DisplayDeviceState</code>。</p>
+<p><code>mCurrentState</code> 和 <code>mDrawingState</code> 侧重点不一样：</p>
+<ul>
+<li><code>mCurrentState</code> 侧重于<strong>“变”</strong>，<strong><code>mCurrentState</code> 代表的是当前系统最新的状态</strong>， 任何时刻发生的各种改变都会被记录在 <code>mCurrentState</code> 中</li>
+<li><code>mDrawingState</code> 侧重于<strong>“定”</strong>，<strong><code>mDrawingState</code> 代表的是本次合成时的状态</strong>， SurfaceFlinger 在开始合成之前需要确定本次合成的状态，因此每次开始合成之前，SurfaceFlinger 都会通过 <code>SurfaceFlinger::commitTransaction()</code> 将记录了当前最新的状态的 <code>mCurrentState</code> 与 <code>mDrawingState</code> 做同步。</li>
+</ul>
+<h2 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h2><p>前面铺垫了这么长，终于来到了本文的中心内容了：</p>
+<h3 id="创建-VirtualDisplay"><a href="#创建-VirtualDisplay" class="headerlink" title="创建 VirtualDisplay"></a>创建 VirtualDisplay</h3><p>不管是 Java 代码的 <code>SurfaceControl.createVirtualDisplay()</code> 还是 C++ 代码的 <code>SurfaceComposerClient::createDisplay()</code>，创建 VirtualDisplay 最终都会走到 SurfaceFlinger 的 <code>createDisplay()</code>：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">sp&lt;IBinder&gt; <span class="title">SurfaceFlinger::createDisplay</span><span class="params">(<span class="keyword">const</span> String8&amp; displayName,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">bool</span> secure)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    sp&lt;BBinder&gt; token = <span class="keyword">new</span> DisplayToken(<span class="keyword">this</span>);</span><br><span class="line"> </span><br><span class="line">    Mutex::Autolock _l(mStateLock);</span><br><span class="line">    <span class="comment">// Display ID is assigned when virtual display is allocated by HWC.</span></span><br><span class="line">    DisplayDeviceState state;</span><br><span class="line">    state.isSecure = secure;</span><br><span class="line">    state.displayName = displayName;</span><br><span class="line">    mCurrentState.displays.add(token, state);</span><br><span class="line">    mInterceptor-&gt;saveDisplayCreation(state);</span><br><span class="line">    <span class="keyword">return</span> token;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个函数最重要的就是生成一个该 VirtualDisplay 的 <code>DisplayDeviceState</code> 和一个 <code>DisplayToken</code>，并且将这个 <code>DisplayDeviceState</code> 增加到 <code>mCurrentState</code>。</p>
+<p><strong>需要注意的是，此时 Virtual Display 其实还没有被真正地创建，这里只是通过修改 <code>mCurrentState</code> 记录一下状态的改变，真正的创建流程在后面。</strong></p>
+<h3 id="state-to-transaction"><a href="#state-to-transaction" class="headerlink" title="state to transaction"></a>state to transaction</h3><p>回过头看一下前面<strong>核心接口</strong>部分提到的 <code>SurfaceComposerClient::Transaction::apply()</code>：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">status_t</span> SurfaceComposerClient::Transaction::apply(<span class="keyword">bool</span> synchronous) &#123;</span><br><span class="line">    ......</span><br><span class="line">    sf-&gt;setTransactionState(composerStates, displayStates, flags, applyToken, mInputWindowCommands,</span><br><span class="line">                            mDesiredPresentTime,</span><br><span class="line">                            &#123;&#125; <span class="comment">/*uncacheBuffer - only set in doUncacheBufferTransaction*/</span>,</span><br><span class="line">                            listenerCallbacks);</span><br></pre></td></tr></table></figure>
+
+<p>这个函数最终会将 <code>DisplayState</code> 里面的 <code>DisplayToken</code> 和 <code>DisplayState</code> 等内容发通过 <code>SurfaceFlinger::setTransactionState()</code> 传递给 SurfaceFlinger 端，然后经过如下调用以后：</p>
+<figure class="highlight autohotkey"><table><tr><td class="code"><pre><span class="line"><span class="title">SurfaceFlinger::</span>setTransactionState()</span><br><span class="line"><span class="title">  \_ SurfaceFlinger::</span>applyTransactionState()</span><br><span class="line"><span class="title">       \_  SurfaceFlinger::</span>setDisplayStateLocked()</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>SurfaceFlinger::setDisplayStateLocked</code> 中：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">uint32_t</span> <span class="title">SurfaceFlinger::setDisplayStateLocked</span><span class="params">(<span class="keyword">const</span> DisplayState&amp; s)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">ssize_t</span> index = mCurrentState.displays.indexOfKey(s.token);</span><br><span class="line">    <span class="keyword">if</span> (index &lt; <span class="number">0</span>) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">uint32_t</span> flags = <span class="number">0</span>;</span><br><span class="line">    DisplayDeviceState&amp; state = mCurrentState.displays.editValueAt(index);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">uint32_t</span> what = s.what;</span><br><span class="line">    <span class="keyword">if</span> (what &amp; DisplayState::eSurfaceChanged) &#123;</span><br><span class="line">        <span class="keyword">if</span> (IInterface::asBinder(state.surface) != IInterface::asBinder(s.surface)) &#123;</span><br><span class="line">            state.surface = s.surface;</span><br><span class="line">            flags |= eDisplayTransactionNeeded;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>将 <code>DisplayState</code> 中的 Surface （即 App 端创建的 BufferProducer） 传递给 <code>DisplayDeviceState</code>，同时将 <code>eSurfaceChanged</code>（回想一下前面的内容，<code>surface</code> 和 <code>what</code> 都是在 <code>SurfaceComposerClient::Transaction::setDisplaySurface()</code> 设置的） 转换为 <code>eDisplayTransactionNeeded</code>。<strong>这一下，不仅完成了 <code>DisplayState</code> 的内容传递到 <code>DisplayDeviceState</code>，还完成了 state 转为 Transaction 这一伟大壮举，SurfaceFlinger 终于了解到了 App 侧状态的变动</strong>。</p>
+<p>然后回到 <code>SurfaceFlinger::applyTransactionState()</code> 将前面的 <code>eDisplayTransactionNeeded</code> 这个事务通过 <code>SurfaceFlinger::setTransactionFlags()</code> 保存起来，等待被处理。</p>
+<h3 id="SurfaceFlinger-处理事务"><a href="#SurfaceFlinger-处理事务" class="headerlink" title="SurfaceFlinger 处理事务"></a>SurfaceFlinger 处理事务</h3><p>前面的 <code>eDisplayTransactionNeeded</code> 这个事务将会在下一个 SurfaceFlinger 的合成流程中，经过如下的函数调用：</p>
+<figure class="highlight autohotkey"><table><tr><td class="code"><pre><span class="line"><span class="title">SurfaceFlinger::</span>handleMessageTransaction()</span><br><span class="line"><span class="title"> \_ SurfaceFlinger::</span>handleTransacion()</span><br><span class="line"><span class="title">     \_ SurfaceFlinger::</span>handleTransactionLocked()</span><br></pre></td></tr></table></figure>
+
+<p>最终在 <code>processDisplayChangesLocked()</code> 中被处理。</p>
+<p>首先大家思考一个问题：</p>
+<blockquote>
+<p>❔ SurfaceFlinger 怎么知道在上个 VSYNC 中新增或者移除了 Display 呢？</p>
+</blockquote>
+<p>TODO: 这里要做成可隐藏的：<br>答案就是前面提到的 <code>mDrawingState</code> 和 <code>mCurrentState</code>。<code>mCurrentState</code> 代表的是最新的状态，<code>mDrawingState</code> 代表的是上一次合成的状态（相对本次合成来说，在未 <code>commitTransaction()</code> 之前），因此假设：</p>
+<ol>
+<li>在 <code>mCurrentState</code> 中的 <code>DisplayDeviceState</code> 中有但是在 <code>mDrawingState</code> 中没有，那么就说明在上一个 VSYNC 中新增了 Display</li>
+<li>在 <code>mDrawingState</code> 中的 <code>DisplayDeviceState</code> 中有但是在 <code>mCurrentState</code> 中没有，那么就说明在上一个 VSYNC 中有 Display 被移除了</li>
+</ol>
+<p>了解了这个以后我们就可以很简单地判断 Display 的变动了，本文的分析侧重于新增 Display：</p>
+<figure class="highlight pf"><table><tr><td class="code"><pre><span class="line">void SurfaceFlinger::processDisplayChangesLocked() &#123;</span><br><span class="line">    ......</span><br><span class="line">    // find displays that were added</span><br><span class="line">    // (ie: <span class="keyword">in</span> current <span class="keyword">state</span> but not <span class="keyword">in</span> drawing <span class="keyword">state</span>)</span><br><span class="line">    <span class="keyword">for</span> (size_t i = <span class="number">0</span>; i <span class="variable">&lt; cc; i++) &#123;</span></span><br><span class="line"><span class="variable">        if (draw.indexOfKey(curr.keyAt(i)) &lt; 0) &#123;</span></span><br><span class="line"><span class="variable">            const DisplayDeviceState&amp; state(curr[i]);</span></span><br><span class="line"><span class="variable"></span></span><br><span class="line"><span class="variable">            sp&lt;compositionengine::DisplaySurface&gt;</span> dispSurface;</span><br><span class="line">            sp<span class="variable">&lt;IGraphicBufferProducer&gt;</span> producer;</span><br><span class="line">            sp<span class="variable">&lt;IGraphicBufferProducer&gt;</span> bqProducer;</span><br><span class="line">            sp<span class="variable">&lt;IGraphicBufferConsumer&gt;</span> bqConsumer;</span><br><span class="line">            getFactory().createBufferQueue(&amp;bqProducer, &amp;bqConsumer, false);</span><br><span class="line"></span><br><span class="line">            std::optional<span class="variable">&lt;DisplayId&gt;</span> displayId;</span><br><span class="line">            if (<span class="keyword">state</span>.isVirtual()) &#123;</span><br><span class="line">                if (<span class="keyword">state</span>.surface != nullptr) &#123;</span><br><span class="line">                    ......</span><br><span class="line">                    // 给 VirtualDisplay 创建其 DisplaySurface —— VirtualDisplaySurface</span><br><span class="line">                    sp<span class="variable">&lt;VirtualDisplaySurface&gt;</span> vds =</span><br><span class="line">                            new VirtualDisplaySurface(getHwComposer(),</span><br><span class="line">                                                      displayId, <span class="keyword">state</span>.surface,</span><br><span class="line">                                                      bqProducer, bqConsumer,</span><br><span class="line">                                                      <span class="keyword">state</span>.displayName);</span><br><span class="line">                    dispSurface = vds;</span><br><span class="line">                    producer = vds;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                displayId = <span class="keyword">state</span>.displayId;</span><br><span class="line">                LOG_ALWAYS_FATAL_IF(!displayId);</span><br><span class="line">                // 给 主显/外显 创建其 DisplaySurface —— FrameBufferSurface</span><br><span class="line">                dispSurface =</span><br><span class="line">                    new FramebufferSurface(getHwComposer(), *displayId, bqConsumer);</span><br><span class="line">                producer = bqProducer;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            const wp<span class="variable">&lt;IBinder&gt;</span>&amp; displayToken = curr.keyAt(i);</span><br><span class="line">            if (dispSurface != nullptr) &#123;</span><br><span class="line">                // 真正创建 DisplayDevice 的地方，并且加入到 mDisplays</span><br><span class="line">                mDisplays.emplace(displayToken,</span><br><span class="line">                                  setupNewDisplayDeviceInternal(displayToken,</span><br><span class="line">                                                                displayId, <span class="keyword">state</span>,</span><br><span class="line">                                                                dispSurface, producer));</span><br><span class="line">                if (!<span class="keyword">state</span>.isVirtual()) &#123;</span><br><span class="line">                    LOG_ALWAYS_FATAL_IF(!displayId);</span><br><span class="line">                    dispatchDisplayHotplugEvent(displayId-&gt;value, true);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>新增 Display 内容这部分内容比较多，分为两部分说明（<strong>说明：剩下的内容会着重于代码流程以及数据流转，涉及的众多类以及其子类会新开一篇文章详细说明。同时下面的内容也会涉及到 CompositionEngine 这一部分的内容，也会先粗略带过，会单开新的文章单独说明</strong>）：</p>
+<h4 id="创建-DisplaySurface"><a href="#创建-DisplaySurface" class="headerlink" title="创建 DisplaySurface"></a>创建 DisplaySurface</h4><p>前面提到，Android 支持多种 Display 类型，而每一个 Display 都会有一个关联的 Buffer，这个 Buffer 使用 <code>DisplaySurface</code> 这个类进行描述。不同类型的 Display 采用的 <code>DisplaySurface</code> 也不尽相同：主显和外显采用的是 <code>FrameBufferSurface</code>，而虚显采用的是 <code>VirtualDisplaySurface</code>：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">VirtualDisplaySurface::VirtualDisplaySurface(HWComposer&amp; hwc,</span><br><span class="line">                                             <span class="keyword">const</span> <span class="built_in">std</span>::optional&lt;DisplayId&gt;&amp; displayId,</span><br><span class="line">                                             <span class="keyword">const</span> sp&lt;IGraphicBufferProducer&gt;&amp; sink,</span><br><span class="line">                                             <span class="keyword">const</span> sp&lt;IGraphicBufferProducer&gt;&amp; bqProducer,</span><br><span class="line">                                             <span class="keyword">const</span> sp&lt;IGraphicBufferConsumer&gt;&amp; bqConsumer,</span><br><span class="line">                                             <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; name)</span><br><span class="line">         ......</span><br><span class="line">&#123;</span><br><span class="line">    mSource[SOURCE_SINK] = sink;</span><br><span class="line">    mSource[SOURCE_SCRATCH] = bqProducer;</span><br></pre></td></tr></table></figure>
+
+<p>App 侧传过来的 BufferProducer 被保存为 <code>VirtualDisplaySurface</code> 里面的 <code>mSource[SOURCE_SINK]</code>，这一点很重要，后文会用到。</p>
+<h4 id="创建-DisplayDevice"><a href="#创建-DisplayDevice" class="headerlink" title="创建 DisplayDevice"></a>创建 DisplayDevice</h4><p>然后利用前面创建的 <code>VirtualDisplaySurface</code>，调用 <code>setupNewDisplayDeviceInternal()</code>：</p>
+<figure class="highlight mipsasm"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sp</span>&lt;<span class="keyword">DisplayDevice&gt; </span>SurfaceFlinger::setupNewDisplayDeviceInternal(</span><br><span class="line">        const wp&lt;IBinder&gt;&amp; <span class="keyword">displayToken, </span>const std::optional&lt;<span class="keyword">DisplayId&gt;&amp; </span><span class="keyword">displayId,</span></span><br><span class="line"><span class="keyword"> </span>       const <span class="keyword">DisplayDeviceState&amp; </span>state, const <span class="built_in">sp</span>&lt;compositionengine::<span class="keyword">DisplaySurface&gt;&amp; </span><span class="keyword">dispSurface,</span></span><br><span class="line"><span class="keyword"> </span>       const <span class="built_in">sp</span>&lt;IGraphicBufferProducer&gt;&amp; producer) &#123;</span><br><span class="line">    ......</span><br><span class="line"></span><br><span class="line">    auto nativeWindowSurface = getFactory().createNativeWindowSurface(producer);</span><br><span class="line">    auto nativeWindow = nativeWindowSurface-&gt;getNativeWindow();</span><br><span class="line">    creationArgs.nativeWindow = nativeWindow;</span><br><span class="line">    </span><br><span class="line">    ......</span><br><span class="line"></span><br><span class="line">    <span class="built_in">sp</span>&lt;<span class="keyword">DisplayDevice&gt; </span><span class="keyword">display </span>= getFactory().createDisplayDevice(std::<span class="keyword">move(creationArgs));</span></span><br><span class="line"><span class="keyword"></span></span><br><span class="line"><span class="keyword"> </span>   .......</span><br><span class="line"></span><br><span class="line">    return <span class="keyword">display;</span></span><br><span class="line"><span class="keyword">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>首先 <code>setupNewDisplayDeviceInternal()</code> 这个函数的 <code>displaySurface</code> 和 <code>producer</code> 这两个参数都是前面创建的 <code>VirtualDisplaySurface</code>。</p>
+<p>接着利用前面创建的 <code>VirtualDisplaySurface</code>，使用 <code>createNativeWindowSurface()</code> 创建一个 native window。这里简单说明一下 native window 这个概念：</p>
+<blockquote>
+<p>我们知道，OpenGL ES 是一个跨平台的图形 API，但是即便是跨平台，最终也是需要在具体的平台上落地的，落地就需要在特定的平台系统上“本地化”——把跨平台的 OpenGL ES 跟具体平台中的窗口系统建立起关联，这样才能保证正常工作，而为 OenGL ES 提供本地窗口（即 native window）的就是 EGL，具体到 Android 里，native window 其实就是指 <code>Surface</code> 这个类，在 <code>frameworks/native/libs/gui/Surface.cpp</code> 中定义。</p>
+</blockquote>
+<p>然后看一下 native window 是怎么创建的：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;surfaceflinger::NativeWindowSurface&gt; <span class="title">createNativeWindowSurface</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">const</span> sp&lt;IGraphicBufferProducer&gt;&amp; producer)</span> </span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">NativeWindowSurface</span> <span class="title">final</span> :</span> <span class="keyword">public</span> surfaceflinger::NativeWindowSurface &#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        <span class="function"><span class="keyword">explicit</span> <span class="title">NativeWindowSurface</span><span class="params">(<span class="keyword">const</span> sp&lt;IGraphicBufferProducer&gt;&amp; producer)</span></span></span><br><span class="line"><span class="function">              : <span class="title">mSurface</span><span class="params">(<span class="keyword">new</span> Surface(producer, <span class="comment">/* controlledByApp */</span> <span class="literal">false</span>))</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">        ~NativeWindowSurface() <span class="keyword">override</span> = <span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line">        <span class="function">sp&lt;ANativeWindow&gt; <span class="title">getNativeWindow</span><span class="params">()</span> <span class="keyword">const</span> <span class="keyword">override</span> </span>&#123; <span class="keyword">return</span> mSurface; &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">preallocateBuffers</span><span class="params">()</span> <span class="keyword">override</span> </span>&#123; mSurface-&gt;allocateBuffers(); &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">        sp&lt;Surface&gt; mSurface;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">std</span>::make_unique&lt;NativeWindowSurface&gt;(producer);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>再看一下 <code>Surface</code> 的构造函数：</p>
+<figure class="highlight armasm"><table><tr><td class="code"><pre><span class="line"><span class="symbol">Surface</span>::Surface(const <span class="built_in">sp</span>&lt;IGraphicBufferProducer&gt;&amp; <span class="keyword">bufferProducer, </span><span class="keyword">bool </span>controlledByApp)</span><br><span class="line">      : mGraphicBufferProducer(<span class="keyword">bufferProducer),</span></span><br><span class="line"><span class="keyword"> </span>   ......</span><br></pre></td></tr></table></figure>
+
+<p>从这个构造函数可以很清楚地看到，<strong>创建出来的 native window，即 <code>Surface</code>，是将前面创建的 <code>VirtualDisplaySurface</code> 给 <code>mGraphicBufferProducer</code> 赋值的</strong>。请记住这一点，后面的数据流传输会用到。</p>
+<p>然后就使用 <code>createDisplayDevice()</code> 创建一个 <code>DisplayDeivce</code> 并且添加到 <code>mDisplays</code> 中，VirtualDisplay 才算真正创建完毕。</p>
+<h3 id="数据流传输"><a href="#数据流传输" class="headerlink" title="数据流传输"></a>数据流传输</h3><p>然后一切准备就绪以后，我们终于来到最终的数据流传输。</p>
+<p>每次合成的时候，<strong>SurfaceFlinger 对每个 <code>DisplayDevice</code> 依次调用 <code>doDisplayComposition()</code></strong>。在 VirtualDisplay 的 <code>doDisplayComposition()</code> 中，会调用 <code>dequeueBuffer()</code> 给接下来的合成（目前看 VirtualDisplay 都是 GPU 合成）申请 Buffer，这个 <code>dequeueBuffer()</code> 的调用流程十分值得说道说道：</p>
+<p>回想一下前文我们提到，<code>setupNewDeviceInternal()</code> 中的 <code>createNativeWindow()</code>，将 <code>VirtualDisplaySurface</code> 为其成员 <code>mGraphicBufferProducer</code> 赋值，而在 <code>SurfaceFlinger::dequeueBuffer()</code> 中：</p>
+<figure class="highlight lisp"><table><tr><td class="code"><pre><span class="line">status_t result = mGraphicBufferProducer-&gt;dequeueBuffer(<span class="name">&amp;buf</span>, <span class="symbol">&amp;fence</span>, reqWidth, reqHeight,</span><br><span class="line">                                                        reqFormat, reqUsage, <span class="symbol">&amp;mBufferAge</span>,</span><br><span class="line">                                                        enableFrameTimestamps ? <span class="symbol">&amp;frameTimestamps</span></span><br><span class="line">                                                                              : nullptr)<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+
+<p>会去调用 <code>mGraphicBufferProducer-&gt;dequeueBuffer()</code>， 因而会转而 <code>VirtualDisplaySurface::dequeueBuffer()</code>：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">status_t</span> <span class="title">VirtualDisplaySurface::dequeueBuffer</span><span class="params">(<span class="keyword">int</span>* pslot, sp&lt;Fence&gt;* fence, <span class="keyword">uint32_t</span> w, <span class="keyword">uint32_t</span> h,</span></span></span><br><span class="line"><span class="function"><span class="params">                                              PixelFormat format, <span class="keyword">uint64_t</span> usage,</span></span></span><br><span class="line"><span class="function"><span class="params">                                              <span class="keyword">uint64_t</span>* outBufferAge,</span></span></span><br><span class="line"><span class="function"><span class="params">                                              FrameEventHistoryDelta* outTimestamps)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!mDisplayId) &#123;</span><br><span class="line">        <span class="keyword">return</span> mSource[SOURCE_SINK]-&gt;dequeueBuffer(pslot,fence, w, h, format, usage,</span><br><span class="line">                                                   outBufferAge, outTimestamps);</span><br><span class="line">    &#125;</span><br><span class="line">    ......</span><br></pre></td></tr></table></figure>
+
+<p>回想一下前面的内容，对于 VirtualDisplay 来说，displayId 为空，因而会直接调用 <code>mSource[SOURCE_SINK]</code> 的 <code>dequeueBuffer()</code>，而我们前面提到，<code>mSource[SOURCE_SINK]</code>，就是 App 端传来的 BufferProducer。</p>
+<p>因此，最终整个 <code>dequeueBuffer()</code> 的调用流程如下：</p>
+<figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">RenderSurface::dequeueBuffer()</span><br><span class="line"> \_ Surface::hook_dequeueBuffer()</span><br><span class="line">     \_ Surface::dequeueBuffer()</span><br><span class="line">         \_ VirtualDisplaySurface::dequeueBuffer()</span><br><span class="line">             \_ 在这里调用了<span class="built_in"> Client </span>端的 BufferProducer 的 dequeueBuffer()</span><br></pre></td></tr></table></figure>
+
+<p>经过一系列的 <code>dequeueBuffer()</code> 调用，<strong>SurfaceFlinger 最终拿到了 App 侧的 BufferQueue 申请到的 Buffer，给录屏 App 进行一次独立的合成，并将合成的内容渲染到从 App 侧拿到的 Buffer</strong>。是的，你没有看错，在这个场景里，<strong>SurfaceFlinger 是内容的生产者，录屏 App 才是内容的消费者</strong>。最后，SurfaceFlinger 合成再通过 <code>queueBuffer()</code> 将渲染完的 Buffer 还给录屏 App：</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">void SurfaceFlinger::doDisplayComposition(<span class="keyword">const</span> sp&lt;DisplayDevice&gt;&amp; displayDevice,</span><br><span class="line">                                          <span class="keyword">const</span> Region&amp; inDirtyRegion) &#123;</span><br><span class="line">    ......</span><br><span class="line">    <span class="keyword">if</span> (!doComposeSurfaces(displayDevice, Region::INVALID_REGION, &amp;readyFence)) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// swap buffers (presentation)</span></span><br><span class="line">    display-&gt;getRenderSurface()-&gt;queueBuffer(std::<span class="keyword">move</span>(readyFence));</span><br></pre></td></tr></table></figure>
+
+<p>完整的调用流程跟 <code>dequeueBuffer()</code> 是完全一致，不再赘述。</p>
+<p>最后，App 通过 <code>onFrameAvailable()</code> 得到新 Buffer 的通知，通过 <code>acquireBuffer(()</code>，在这里拿到合成完的 Buffer（即当前屏幕的内容），就可以对该 Buffer 然后就可以开始进行各种处理（例如编解码等）了。至此，整个数据传输的完整流程就说明完毕了。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>一句话总结录屏的原理就是：</p>
+<blockquote>
+<p>录屏软件通过创建一个 VirtualDisplay，然后每次 SurfaceFlinger 在做合成的时候，会对 VirtualDisplay 做一次独立的合成，并将合成完的结果渲染到录屏软件传递过来的 Buffer。而录屏软件在拿到装有当前画面的 Buffer 以后，就可以对 Buffer 进行进一步的处理如去做编解码等，从而达到录屏的目的。</p>
+</blockquote>
+<p>而：</p>
+<ol>
+<li>App 侧的改动，如新建的 VirtualDisplay 如何被 SurfaceFlinger 知晓</li>
+<li>屏幕的内容是如何从 SurfaceFlinger 传递到录屏 App</li>
+</ol>
+<p>而这两点，都可以用下面的这张图来总结：</p>
+<p><img src="/assets/virtualdisplay.png" alt></p>
+<h2 id="小插曲"><a href="#小插曲" class="headerlink" title="小插曲"></a>小插曲</h2><p>之前在分析 <code>DisplayState</code> 的内容是怎么传递给 <code>DisplayDeviceState</code> 的时候卡了很久，原因是我固执地认为 <code>SurfaceFlinger::setTransactionState()</code> 只有 Display 在初始化的时候才会调用，并且自信地加上了如下的 debug log：</p>
+<p><img src="/assets/debug-virtualdisplay.png" alt></p>
+<p>结果我就被满屏的 <strong>simowce: I don;t believe this’ll print twice or more</strong> 啪啪打脸了：</p>
+<p><img src="/assets/debuglog-virtualdisplay.png" alt></p>
+<h2 id="尾巴"><a href="#尾巴" class="headerlink" title="尾巴"></a>尾巴</h2><p>有读者问过我为什么你写东西写得那么慢？其实答案非常简单，因为我写的东西都是我不会且感兴趣的，因此我都是边学边写，并且因为个人有一种小小的偏执，就是一个东西如果没弄懂就必须弄懂，因而就写得很慢很慢。但是请大家放心，大家能够看到的内容都是我再三确认没问题才会发表的，质量绝对是有保证的。希望有一天，我能够在某个领域，自豪地说出那四个字：</p>
+<blockquote>
+<p>以我为准。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/images/wechat-qrcode.jpg" alt="simowce wechat" style="width: 200px; max-width: 100%;">
+  <div>欢迎订阅我的微信公众号</div>
+</div>
+
+      
+        
+      
+        <div id="reward-container">
+  <div>您的支持是我更新的最大动力</div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/wechatpay.jpg" alt="simowce 微信支付">
+        <p>微信支付</p>
+      </div>
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/alipay.jpg" alt="simowce 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+      
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>simowce</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://simowce.github.io/all-about-virtualdisplay/" title="你有没有想过，录屏软件是怎么获取到屏幕内容的？">https://simowce.github.io/all-about-virtualdisplay/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-ND</a> 许可协议。转载请注明出处！</li>
+</ul>
+</div>
+
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/Graphic/" rel="tag"># Graphic</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/all-about-fps/" rel="next" title="Android fps 的计算，原理及正确性分析">
+                  <i class="fa fa-chevron-left"></i> Android fps 的计算，原理及正确性分析
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VirtualDisplay-简介"><span class="nav-number">2.</span> <span class="nav-text">VirtualDisplay 简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#核心接口"><span class="nav-number">3.</span> <span class="nav-text">核心接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#C"><span class="nav-number">3.1.</span> <span class="nav-text">C++</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Java"><span class="nav-number">3.2.</span> <span class="nav-text">Java</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#状态与事务"><span class="nav-number">4.</span> <span class="nav-text">状态与事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#状态"><span class="nav-number">4.1.</span> <span class="nav-text">状态</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DisplayState"><span class="nav-number">4.1.1.</span> <span class="nav-text">DisplayState</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DisplayDeviceState"><span class="nav-number">4.1.2.</span> <span class="nav-text">DisplayDeviceState</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DisplayToken"><span class="nav-number">4.1.3.</span> <span class="nav-text">DisplayToken</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事务"><span class="nav-number">4.2.</span> <span class="nav-text">事务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#State"><span class="nav-number">4.3.</span> <span class="nav-text">State</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原理分析"><span class="nav-number">5.</span> <span class="nav-text">原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建-VirtualDisplay"><span class="nav-number">5.1.</span> <span class="nav-text">创建 VirtualDisplay</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#state-to-transaction"><span class="nav-number">5.2.</span> <span class="nav-text">state to transaction</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SurfaceFlinger-处理事务"><span class="nav-number">5.3.</span> <span class="nav-text">SurfaceFlinger 处理事务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建-DisplaySurface"><span class="nav-number">5.3.1.</span> <span class="nav-text">创建 DisplaySurface</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建-DisplayDevice"><span class="nav-number">5.3.2.</span> <span class="nav-text">创建 DisplayDevice</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据流传输"><span class="nav-number">5.4.</span> <span class="nav-text">数据流传输</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">5.5.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小插曲"><span class="nav-number">6.</span> <span class="nav-text">小插曲</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#尾巴"><span class="nav-number">7.</span> <span class="nav-text">尾巴</span></a></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">simowce</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    
+  
+    <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-nd.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 – <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-code"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">simowce</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a></div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.4.1"></script><script src="/js/motion.js?v=7.4.1"></script>
+<script src="/js/schemes/muse.js?v=7.4.1"></script>
+
+<script src="/js/next-boot.js?v=7.4.1"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
