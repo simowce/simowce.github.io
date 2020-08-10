@@ -57,18 +57,21 @@
   };
 </script>
 
-  <meta name="keywords" content="一个操作系统的实现">
+  <meta name="description" content="学习一下 Google 的工程师是怎么写代码的 :-)">
+<meta name="keywords" content="C++">
 <meta property="og:type" content="article">
-<meta property="og:title" content="一个操作系统的实现 -- 单进程">
-<meta property="og:url" content="https://simowce.github.io/chapter-6-single-process/index.html">
+<meta property="og:title" content="析构函数的妙用">
+<meta property="og:url" content="https://simowce.github.io/destrcutor/index.html">
 <meta property="og:site_name" content="Silence.Slow.Simple">
+<meta property="og:description" content="学习一下 Google 的工程师是怎么写代码的 :-)">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://simowce.github.io/assets/process1.png">
-<meta property="og:updated_time" content="2020-06-02T13:50:56.000Z">
+<meta property="og:image" content="https://simowce.github.io/assets/systrace.png">
+<meta property="og:updated_time" content="2020-08-10T11:58:06.699Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="一个操作系统的实现 -- 单进程">
-<meta name="twitter:image" content="https://simowce.github.io/assets/process1.png">
-  <link rel="canonical" href="https://simowce.github.io/chapter-6-single-process/">
+<meta name="twitter:title" content="析构函数的妙用">
+<meta name="twitter:description" content="学习一下 Google 的工程师是怎么写代码的 :-)">
+<meta name="twitter:image" content="https://simowce.github.io/assets/systrace.png">
+  <link rel="canonical" href="https://simowce.github.io/destrcutor/">
 
 
 <script id="page-configurations">
@@ -82,7 +85,7 @@
   };
 </script>
 
-  <title>一个操作系统的实现 -- 单进程 | Silence.Slow.Simple</title>
+  <title>析构函数的妙用 | Silence.Slow.Simple</title>
   
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-56242445-1"></script>
   <script>
@@ -231,7 +234,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/chapter-6-single-process/">
+    <link itemprop="mainEntityOfPage" href="https://simowce.github.io/destrcutor/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="simowce">
@@ -243,7 +246,7 @@
       <meta itemprop="name" content="Silence.Slow.Simple">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">一个操作系统的实现 -- 单进程
+        <h2 class="post-title" itemprop="name headline">析构函数的妙用
 
           
         </h2>
@@ -259,19 +262,11 @@
                 
               
 
-              <time title="创建时间：2014-11-24 00:00:00" itemprop="dateCreated datePublished" datetime="2014-11-24T00:00:00+08:00">2014-11-24</time>
+              <time title="创建时间：2020-08-10 19:47:00 / 修改时间：19:58:06" itemprop="dateCreated datePublished" datetime="2020-08-10T19:47:00+08:00">2020-08-10</time>
             </span>
           
             
 
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-06-02 21:50:56" itemprop="dateModified" datetime="2020-06-02T21:50:56+08:00">2020-06-02</time>
-              </span>
             
           
             <span class="post-meta-item">
@@ -280,7 +275,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/一个操作系统的实现/" itemprop="url" rel="index"><span itemprop="name">一个操作系统的实现</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/代码之美/" itemprop="url" rel="index"><span itemprop="name">代码之美</span></a></span>
 
                 
                 
@@ -299,48 +294,35 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p><img src="/assets/process1.png" alt></p>
+        <p>学习一下 Google 的工程师是怎么写代码的 :-)</p>
 <a id="more"></a>
-<p>经过了一天的努力，在刚才，总算出现了上面激动人心的画面了：</p>
-<p>真的很高兴，趁着还热乎，赶快记下来：</p>
-<h3 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h3><p>第六章是 <code>进程</code> 。不过现在这一章的 <code>进程</code> 其实是有点取巧的，它是事先将一个进程需要的寄存器，栈，LDT，代码等准备好，弄成一个进程表，一切都准备完了之后，将 <code>esp</code> 指向进程表的顶部，然后一个一个地 <code>pop</code> ，然后一个跳转，我们的第一个进程就开始运行了。</p>
-<p>由于涉及到特权级的转换，所以需要 <code>tss</code> 来记录每个特权级的 <code>ss</code> 和 <code>esp</code>，以便当低特权级到高特权级的切换时，堆栈也能够切换。</p>
-<p>由于现在我还没有实现中断，所以，这个进程是一直都在运行的，没有被打断的。不过这种情况将会改变，不过得明天吧。</p>
-<h3 id="代码解读"><a href="#代码解读" class="headerlink" title="代码解读"></a>代码解读</h3><p>一开始的这些代码没有什么难的，主要提一点：</p>
-<p>在 <code>/kernel/main.c</code> 的 line 27 和 line 29 这两行代码中，有一个我之前一直无法理解的，就是 <code>&gt;&gt; 3</code> 。现解释如下：</p>
-<blockquote>
-<p>每个描述符的大小是 8 字节，<code>&gt;&gt; 3</code> 就相当于 <code>除以8</code> ，这样就能够得到相应的描述符在 <code>gdt数组</code> 的具体位置了。</p>
-</blockquote>
-<h3 id="犯过的错误以及总结"><a href="#犯过的错误以及总结" class="headerlink" title="犯过的错误以及总结"></a>犯过的错误以及总结</h3><ol>
-<li><p><code>typedef</code> 之后忘记了一个最重要的 <code>;</code> . 导致出现了很多匪夷所思的错误，例如提示说 <code>#define EXTERN extern</code> 这一句有错等等。</p>
-</li>
-<li><p>每增加一个新的函数就要在 <code>inlcude/proto.h</code> 里面添加相应的声明。</p>
-</li>
-<li><p>有关字符串的函数声明在 <code>include/string.h</code> 里面</p>
-</li>
-<li><p>用汇编实现的函数如果要被其他文件调用，*<em>千万记得要用 <code>global</code> *</em>。不然肯定是会报 <code>undefined reference to xxx</code> 的！</p>
-</li>
-<li><p>一开始出现了 <code>#GP</code> 的错误，提示说在 <code>cs:0x8 eip:0x3059E</code> 这里出现了错误，反汇编了一下，发现这个位置对应的代码是：</p>
-<pre><code>lldt     [esp + P_LDT_SEL]</code></pre><p> 根据 <code>p_proc-&gt;regs.eflags = 0x1202</code> ，找到了 <code>restart()</code> 的位置：<code>0x30598</code> .</p>
-<p> 不过后来发现了，又是一个粗心导致的错误，<strong>我忘记填充 GDT 中的 LDT 的描述符了</strong>。不过，发生 <code>#GP</code> 的结果跟我查文档的结果是一样的。</p>
-</li>
-</ol>
-<h3 id="收获"><a href="#收获" class="headerlink" title="收获"></a>收获</h3><p>又是花了很多时间在 <code>Debugging</code> 上，不过这一次总算有所收获。</p>
-<ol>
-<li><code>bochs</code> 的 <code>sreg</code> 指令能够查看 <code>LDTR</code> 。</li>
-<li><code>print-stack</code> 后面加个数字能够控制输出的栈的长度</li>
-</ol>
-<p>最后，如果你们也想要体验一下 <code>Debug</code> 的话，我把我的 <code>Debug</code> 的过程公开出来：</p>
-<blockquote>
-<p>b 0x7d12 （找到 loader 之后的跳转）<br>c<br>b 0x9027e （跳入保护模式）<br>c<br>b 0x9039b （跳入内核）<br>c<br>b 0x310c9 （restart()）</p>
-</blockquote>
-<p><strong>声明，上面的地址只对于我的代码有效，你自己实现的代码与我的可能有出入</strong></p>
-<p>下面是原书代码的 <code>Debug</code> 过程：</p>
-<blockquote>
-<p>b 0x7d0a （找到 loader 之后的跳转）<br>c<br>b 0x9027f （跳入保护模式）<br>c<br>b 0x90393 （跳入内核）<br>c<br>b 0x3071c （这一句是根据 kernel/main.c 中很明显的 0x1202 找到的，下面几行就是 restart() 了）</p>
-</blockquote>
-<p>大概就是这些了。明天继续～</p>
-<p>EOF</p>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 C++ 中，当一个对象被销毁的时候，会自动调用这个对象的析构函数，无需显示调用。利用这一特性，可以有很多的妙用，本文将介绍在 Android framework 中两个常用的例子。</p>
+<h2 id="systrace-中的函数运行时间"><a href="#systrace-中的函数运行时间" class="headerlink" title="systrace 中的函数运行时间"></a>systrace 中的函数运行时间</h2><p>我们在看 systrace 的时候，经常能够看到这样的画面：</p>
+<p><img src="/assets/systrace.png" alt="systrace"></p>
+<p>图中每个矩形的宽度代表的是这个函数运行的时间，那么这是这么做到的呢？</p>
+<p>在源码中可以看到，图中 <code>onMessageReceived()</code>，<code>handleMessageRefresh()</code> 等，这些函数的第一行，都调用了 <code>ATRACE_CALL()</code>：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">SurfaceFlinger::onMessageReceived</span><span class="params">(<span class="keyword">int32_t</span> what)</span> NO_THREAD_SAFETY_ANALYSIS </span>&#123;</span><br><span class="line">    ATRACE_CALL();</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">SurfaceFlinger::handleMessageRefresh</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    ATRACE_CALL();</span><br></pre></td></tr></table></figure>
+
+<p>这个函数应该就是答案了，看一下实现：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ATRACE_NAME traces from its location until the end of its enclosing scope.</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _PASTE(x, y) x ## y</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PASTE(x, y) _PASTE(x,y)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> ATRACE_NAME(name) android::ScopedTrace PASTE(___tracer, __LINE__) (ATRACE_TAG, name)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ATRACE_CALL is an ATRACE_NAME that uses the current function name.</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> ATRACE_CALL() ATRACE_NAME(__FUNCTION__)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> android &#123;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ScopedTrace</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">inline</span> <span class="title">ScopedTrace</span><span class="params">(<span class="keyword">uint64_t</span> tag, <span class="keyword">const</span> <span class="keyword">char</span>* name)</span> : <span class="title">mTag</span><span class="params">(tag)</span> </span>&#123;</span><br><span class="line">        atrace_begin(mTag, name);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">inline</span> ~ScopedTrace() &#123;</span><br><span class="line">        atrace_end(mTag);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="keyword">uint64_t</span> mTag;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">&#125;  <span class="comment">// namespace android</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到，当调用 <code>ATRACE_CALL()</code> 时，相当于定义了一个类型为 <code>ScopedTrace</code> 的变量，这个变量本身没有什么特别的，重要的是这个 <code>ScopedTrace</code> 这个类，其构造函数会去调用 <code>atrace_begin()</code>，析构函数会去调用 <code>atrace_end()</code>。也就是说，在函数开头，定义一个 <code>ScopedTrace</code> 类型的变量，经由构造函数去调用 <code>atrace_begin()</code>；然后等函数结束，前面定义的 <code>ScopedTrace</code> 会被销毁，会经由析构函数调用 <code>atrace_end()</code>，从而达到了统计一个函数的运行时间的效果。</p>
+<p>这里稍微补充一下，在 Android 里，总能听到各种各样的 trace：如 atrace, ftrace, systrace 等，那么这些 trace 究竟有什么区别呢？</p>
+<ul>
+<li>ftrace<br>ftrace 是 Linux Kernel 自带的调试框架，它在内核态工作，用户可以通过 debugfs 接口来控制和使用 ftrace。目前 debugfs 一般挂载在 <code>/sys/kernel/debug/tracing/</code>。</li>
+<li>atrace<br>这个是 Android 针对 ftrace 的一个封装，它将 ftrace 的各种 Event 抽象为 tag，一个 atrace tag 对应多个 ftrace Event，例如 <code>sched</code> 这个 tag 分别包括了 <code>sched/sched_switch</code>，<code>sched/sched_wakeup</code>，<code>sched/sched_waking</code>，<code>sched/sched_blocked_reason</code>，<code>sched/sched_cpu_hotplug</code> 等这些 Event。</li>
+<li>systrace<br>systrace 其实是 Android SDK 里的一个工具，是对 atrace 的主机端封装，利用 atrace 来使能 ftrace，然后读取 ftrace 的缓冲区并将其全部封装到一个独立的 HTML 文件。</li>
+</ul>
+<p>具体的可以看一下内核工匠的<a href="https://mp.weixin.qq.com/s/GGUGDeAn-gGNW0GiSV2IGw" target="_blank" rel="noopener">这篇文章</a>，写得很详细。</p>
+<p>而我们在 framework 中，Java 代码常用的 <code>Trace.traceBegin()</code> 和 <code>Trace.traceEnd()</code>；C++ 有 <code>atrace_begin()</code> 和 <code>atrace_end()</code> 以及一系列 <code>ATRACE_</code> 打头的宏，其实都是利用 atrace 来实现 trace 的抓取。</p>
+<h2 id="Mutex-锁自动释放"><a href="#Mutex-锁自动释放" class="headerlink" title="Mutex 锁自动释放"></a>Mutex 锁自动释放</h2><p>在 framework 还有另外一处也有类似的用法，那就是锁。framework 经常能够看到类似下面的代码：</p>
+<figure class="highlight pf"><table><tr><td class="code"><pre><span class="line">sp<span class="variable">&lt;IBinder&gt;</span> SurfaceFlinger::createDisplay(const String8&amp; displayName,</span><br><span class="line">        bool secure)</span><br><span class="line">&#123;</span><br><span class="line">    sp<span class="variable">&lt;BBinder&gt;</span> token = new DisplayToken(this);</span><br><span class="line"></span><br><span class="line">    // Mutex 是在哪里释放的呢?</span><br><span class="line">    Mutex::Autolock _l(mStateLock);</span><br><span class="line">    // Display ID is assigned when virtual display is allocated by HWC.</span><br><span class="line">    DisplayDeviceState <span class="keyword">state</span>;</span><br><span class="line">    <span class="keyword">state</span>.isSecure = secure;</span><br><span class="line">    <span class="keyword">state</span>.displayName = displayName;</span><br><span class="line">    mCurrentState.displays.add(token, <span class="keyword">state</span>);</span><br><span class="line">    mInterceptor-&gt;saveDisplayCreation(<span class="keyword">state</span>);</span><br><span class="line">    return token;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个 Mutex 是在哪里释放的呢？原理其实跟前面的 <code>ATRACE_CALL()</code> 是一样的，在析构函数里面去释放锁，就不赘述了。</p>
+<h2 id="尾巴"><a href="#尾巴" class="headerlink" title="尾巴"></a>尾巴</h2><p>距离上次更新已经一个多月了，本来计划月初更新一篇我觉得很棒的文章，但是当写到 80% 的时候我突然意识到，新文章是基于 Android R 的，而目前 R 处于保密的状态，不能外发具体的代码。这就很尴尬了呀。想着 Android R 目前只到 Beta 3，具体正式发布可能还遥遥无期，如果等到 R 发布了那估计大家都取关了。所以临时写了一篇小文当做饭前的甜点，正式的大餐等到 Android R 正式发布以后将会正式跟大家见面，敬请期待。</p>
+<p>如果大家觉得这篇文章对您有帮助的话，求赞求收藏求转发，最重要的是点一个大大的关注，各位的支持就是我更新的最大动力。</p>
+<p>我们下篇文章见。</p>
 
     </div>
 
@@ -386,7 +368,7 @@
     <strong>本文作者： </strong>simowce</li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://simowce.github.io/chapter-6-single-process/" title="一个操作系统的实现 -- 单进程">https://simowce.github.io/chapter-6-single-process/</a>
+    <a href="https://simowce.github.io/destrcutor/" title="析构函数的妙用">https://simowce.github.io/destrcutor/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-ND</a> 许可协议。转载请注明出处！</li>
@@ -401,7 +383,7 @@
           
           <div class="post-tags">
             
-              <a href="/tags/一个操作系统的实现/" rel="tag"># 一个操作系统的实现</a>
+              <a href="/tags/C/" rel="tag"># C++</a>
             
           </div>
         
@@ -411,8 +393,8 @@
           <div class="post-nav">
             <div class="post-nav-next post-nav-item">
               
-                <a href="/i-have-finished-reading-the-oranges/" rel="next" title="四个月整，我总算是看完了《一个操作系统的实现》">
-                  <i class="fa fa-chevron-left"></i> 四个月整，我总算是看完了《一个操作系统的实现》
+                <a href="/all-about-virtualdisplay/" rel="next" title="你有没有想过，录屏软件是怎么获取到屏幕内容的？">
+                  <i class="fa fa-chevron-left"></i> 你有没有想过，录屏软件是怎么获取到屏幕内容的？
                 </a>
               
             </div>
@@ -420,10 +402,6 @@
             <span class="post-nav-divider"></span>
 
             <div class="post-nav-prev post-nav-item">
-              
-                <a href="/muti-process/" rel="prev" title="一个操作系统的实现 -- 多进程">
-                  一个操作系统的实现 -- 多进程 <i class="fa fa-chevron-right"></i>
-                </a>
               
             </div>
           </div>
@@ -469,7 +447,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#综述"><span class="nav-number">1.</span> <span class="nav-text">综述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码解读"><span class="nav-number">2.</span> <span class="nav-text">代码解读</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#犯过的错误以及总结"><span class="nav-number">3.</span> <span class="nav-text">犯过的错误以及总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#收获"><span class="nav-number">4.</span> <span class="nav-text">收获</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#systrace-中的函数运行时间"><span class="nav-number">2.</span> <span class="nav-text">systrace 中的函数运行时间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mutex-锁自动释放"><span class="nav-number">3.</span> <span class="nav-text">Mutex 锁自动释放</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#尾巴"><span class="nav-number">4.</span> <span class="nav-text">尾巴</span></a></li></ol></div>
         
       </div>
       <!--/noindex-->
